@@ -81,6 +81,47 @@ class PrimaryButton extends StatelessWidget {
   }
 }
 
+/// Lesson Buttons
+class LessonButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+  final Color? textColor;
+  final double? width;
+
+  const LessonButton({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.color,
+    this.textColor,
+    this.width,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        width: 100.0,
+        height: 100.0,
+        decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.primary,
+    ),
+      child: Center(
+        child: Text(label,
+          style: TextStyle(
+            color: AppColors.surface, // Text color
+            fontWeight: FontWeight.bold, // Text weight
+          ),
+          textAlign: TextAlign.center,
+        ),
+      )
+    );
+  }
+}
+
+
+
 /// Google Sign-In button matching mockup style
 class GoogleSignInButton extends StatelessWidget {
   final VoidCallback onTap;
