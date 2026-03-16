@@ -1,10 +1,19 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../models/lessons.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
 // import 'package:flutter/material.dart';
 // import '../../../models/user_profile.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/common_widgets.dart';
+
+// For content
+import 'lessonPage.dart';
+import '../../services/lessonService.dart';
+
 
 /// ProfileSetupPage — linear multi-step onboarding flow matching Scenario Two.
 /// Steps: Username → Language → Learning Goals → Account Settings → Home
@@ -27,10 +36,14 @@ class _HomeScreenSate extends State<HomeScreen> {
   }
 
   // TODO: go to lesson
-  void _startLesson() {
+  void _startLesson(int lessonNumber) async {
+
+    // Grab the corresponding json file for the lesson
+    Lesson lesson = await loadLesson('lesson$lessonNumber.json');
+
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const NextPage()),
+      MaterialPageRoute(builder: (context) => LessonPage(lesson: lesson)),
     );
   }
 
@@ -77,7 +90,10 @@ class _HomeScreenSate extends State<HomeScreen> {
               // Lesson button
               LessonButton(
                   label: 'Lesson1',
-                  onTap: () {}
+                  onTap: (){
+                    print('tapped');
+                    _startLesson(1);
+                  },
               ),
               const SizedBox(height: 16),
 

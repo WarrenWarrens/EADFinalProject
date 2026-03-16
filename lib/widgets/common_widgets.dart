@@ -100,22 +100,26 @@ class LessonButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    // Wrapped in a gesture detector to activate onTap gesture
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
         width: 100.0,
         height: 100.0,
         decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.primary,
-    ),
-      child: Center(
-        child: Text(label,
-          style: TextStyle(
-            color: AppColors.surface, // Text color
-            fontWeight: FontWeight.bold, // Text weight
-          ),
-          textAlign: TextAlign.center,
+          shape: BoxShape.circle,
+          color: AppColors.primary,
         ),
-      )
+        child: Center(
+          child: Text(label,
+            style: TextStyle(
+              color: AppColors.surface, // Text color
+              fontWeight: FontWeight.bold, // Text weight
+            ),
+            textAlign: TextAlign.center,
+          ),
+        )
+    ),
     );
   }
 }
