@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:testing/screens/content/page_types.dart';
 import '../../models/lessons.dart';
 import '../../theme/app_theme.dart';
 
@@ -13,13 +14,39 @@ class LessonPage extends StatefulWidget {
 
 class _LessonPageState extends State<LessonPage> {
 
-  int currentContentIndex = -1; // -1 means intro page
+  // Keep track of current content
+  int currentContentIndex = 0; // 0 means intro page
+  late final List<Content> content = widget.lesson.content;
+
+
 
   void nextSlide() {
-    if (currentContentIndex < widget.lesson.content.length - 1) {
+    if (currentContentIndex < widget.lesson.content.length) {
       setState(() {
         currentContentIndex++;
       });
+    }
+  }
+
+  Widget buildContentPage() {
+    // Gets the proper content page look based on content type
+    final contentObject = content.firstWhere((c) => c.id == currentContentIndex);
+
+    // Map pertaining to the type of content (each content type will have its own
+    // set of attributes
+    Map<String, dynamic> dataAttrs = contentObject.data;
+
+    // NOTE: key: ValueKey(contentObject.id) makes it so flutter creates a whole new
+    // widget with a fresh state (refreshes the state).
+    switch (contentObject.type) {
+      case 'text':
+        return TextPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide,);
+      case 'character':
+        return CharacterPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+      case 'exercise':
+        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+      default:
+        return const Placeholder();
     }
   }
 
@@ -29,14 +56,19 @@ class _LessonPageState extends State<LessonPage> {
     Widget body;
 
     // Intro page
-    if (currentContentIndex == -1) {
+    if (currentContentIndex == 0) {
       body = LessonIntroPage(
         lesson: widget.lesson,
         onStart: nextSlide,
       );
     }
+
     else{
-      body = Text("hi");
+      // If it is not the intro of the lesson. Get the content page based on the
+      // content type
+
+      // Get the correct content page
+      body = buildContentPage();
     }
 
     return Scaffold(
@@ -46,7 +78,7 @@ class _LessonPageState extends State<LessonPage> {
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
       ),
-      body: body,
+      body: body
     );
   }
 }
@@ -116,7 +148,7 @@ class LessonIntroPage extends StatelessWidget {
 
           // Start Button
           ElevatedButton(
-            onPressed: null,
+            onPressed: onStart,
             child: const Text("Start Lesson"),
           ),
 

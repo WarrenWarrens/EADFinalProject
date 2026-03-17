@@ -1,3 +1,6 @@
+// =====================
+// LESSON
+// =====================
 class Lesson {
   final int id;
   final int languageId;
@@ -36,6 +39,9 @@ class Lesson {
   }
 }
 
+// ===================
+// CONTENT
+// ===================
 class Content {
   final int id;
   final String type;
@@ -57,6 +63,9 @@ class Content {
   }
 }
 
+// ====================
+// EXERCISE
+// ====================
 class Exercise {
   final String exerciseType;
   final String question;
