@@ -100,22 +100,27 @@ class LessonButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return InkWell(
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: Container(
         width: 100.0,
         height: 100.0,
         decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.primary,
-    ),
-      child: Center(
-        child: Text(label,
-          style: TextStyle(
-            color: AppColors.surface, // Text color
-            fontWeight: FontWeight.bold, // Text weight
-          ),
-          textAlign: TextAlign.center,
+          shape: BoxShape.circle,
+          color: color ?? AppColors.primary,
         ),
-      )
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: textColor ?? AppColors.surface,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
     );
   }
 }

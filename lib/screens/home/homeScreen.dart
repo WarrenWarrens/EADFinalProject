@@ -1,118 +1,95 @@
 import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
-// import 'package:flutter/material.dart';
-// import '../../../models/user_profile.dart';
-import '../../../theme/app_theme.dart';
-import '../../../widgets/common_widgets.dart';
-
+import '../../theme/app_theme.dart';
+import '../../widgets/common_widgets.dart';
+import '../../data/navi_lesson_audio.dart';
+import '../lessons/audio_mimicry_screen.dart';
 /// ProfileSetupPage — linear multi-step onboarding flow matching Scenario Two.
 /// Steps: Username → Language → Learning Goals → Account Settings → Home
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenSate();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenSate extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   UserProfile? _profile;
   final _storage = LocalStorageService();
 
-  //TODO: load exisitng profile content
   @override
   void initState() {
     super.initState();
     // _loadExistingProfile();
   }
 
-  // TODO: go to lesson
-  void _startLesson() {
+  void _goToAudioMimicry() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const NextPage()),
+      MaterialPageRoute(
+        builder: (_) => AudioMimicryScreen(lesson: naviAudioLesson),
+      ),
     );
   }
 
-  // // TODO: need to load content
-  // Future<void> _loadExistingProfile() async {
-  //   final saved = await _storage.loadProfile();
-  //   final step = await _storage.getSavedSetupStep();
-  //   if (mounted) {
-  //     setState(() {
-  //       _profile = saved ?? UserProfile(createdAt: DateTime.now());
-  //       _currentStep = step;
-  //     });
-  //   }
-  // }
-
-
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Center( child:
+      body: Center(child:
       SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
-
             children: [
               const Spacer(flex: 2),
 
-              // Logo / Title
-              Title(
-                child: Text('Welcome!',
-                    style: TextStyle(height: 5, fontSize: 50)
+              Text(
+                _profile?.username != null
+                    ? 'Welcome,\n${_profile!.username}!'
+                    : 'Welcome!',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
                 ),
-                color: AppColors.textPrimary,
               ),
 
               const Spacer(flex: 3),
 
-              // Lesson button
+              // Lesson 1 — Word Match (coming soon)
               LessonButton(
-                  label: 'Lesson1',
-                  onTap: () {}
+                label: 'Lesson 1\nWord Match',
+                onTap: () {
+                  // TODO: navigate to Word Match screen
+                },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
+              // Lesson 2 — Audio Mimicry
               LessonButton(
-                  label: 'Lesson2',
-                  onTap: () {}
+                label: 'Lesson 2\nAudio Mimicry',
+                onTap: _goToAudioMimicry,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
+              // Lesson 3 — Conversation (coming soon)
               LessonButton(
-                  label: 'Lesson3',
-                  onTap: () {}
+                label: 'Lesson 3\nConversation',
+                onTap: () {
+                  // TODO: navigate to Conversational Simulation screen
+                },
               ),
 
               const Spacer(flex: 2),
             ],
           ),
         ),
-      )
-      )
-    );
-    }
-
-}
-
-class NextPage extends StatelessWidget {
-
-  const NextPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Next Page'),),
-      body: Center(
-        child: Text('GeeksForGeeks'),
+      ),
       ),
     );
   }

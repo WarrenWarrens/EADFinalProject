@@ -12,6 +12,7 @@ class AppColors {
   static const Color inputBorder = Color(0xFFDDD8F0);
   static const Color success = Color(0xFF4CAF50);
   static const Color error = Color(0xFFE53935);
+  static const Color warning = Color(0xFFFFC107);
 }
 
 class AppTheme {
