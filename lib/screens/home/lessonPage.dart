@@ -51,6 +51,11 @@ class _LessonPageState extends State<LessonPage> {
     }
   }
 
+  // Gets the progress for the progress bar
+  double get progress{
+    return currentContentIndex / (lessonLength+1);
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -90,8 +95,25 @@ class _LessonPageState extends State<LessonPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
+
+        // Progress bar
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(6), 
+            child: Padding(
+                padding: const EdgeInsetsGeometry.symmetric(horizontal: 16),
+              child: ClipRRect(
+                borderRadius: BorderRadiusGeometry.circular(8),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: AppColors.primaryLight,
+                  valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                ),
+              ),
+            )
+        ),
       ),
-      body: body
+      body: body,
     );
   }
 }
@@ -117,7 +139,6 @@ class LessonIntroPage extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // Lesson Icon
           Center(
             child: Container(
               width: 120,
@@ -136,7 +157,6 @@ class LessonIntroPage extends StatelessWidget {
 
           const SizedBox(height: 40),
 
-          // Lesson Title
           Text(
             lesson.title,
             textAlign: TextAlign.center,
@@ -148,7 +168,6 @@ class LessonIntroPage extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Objective
           Text(
             lesson.objective,
             textAlign: TextAlign.center,
@@ -159,7 +178,6 @@ class LessonIntroPage extends StatelessWidget {
 
           const Spacer(),
 
-          // Start Button
           ElevatedButton(
             onPressed: onStart,
             child: const Text("Start Lesson"),
@@ -189,13 +207,11 @@ class LessonCompletePage extends StatelessWidget {
       child: Column(
         children: [
 
-          // Centered content
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                // Icon
                 Container(
                   width: 120,
                   height: 120,
@@ -212,7 +228,6 @@ class LessonCompletePage extends StatelessWidget {
 
                 const SizedBox(height: 32),
 
-                // Title
                 const Text(
                   "Lesson Complete!",
                   style: TextStyle(
@@ -224,7 +239,6 @@ class LessonCompletePage extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // Subtitle
                 Text(
                   lessonTitle,
                   style: const TextStyle(
@@ -236,7 +250,6 @@ class LessonCompletePage extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // Optional message
                 const Text(
                   "Great job! You're one step closer to mastering the language.",
                   textAlign: TextAlign.center,
@@ -250,7 +263,7 @@ class LessonCompletePage extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: onContinue,
-              child: const Text("Continue"),
+              child: const Text("Back to Home"),
             ),
           ),
 
