@@ -17,11 +17,12 @@ class _LessonPageState extends State<LessonPage> {
   // Keep track of current content
   int currentContentIndex = 0; // 0 means intro page
   late final List<Content> content = widget.lesson.content;
+  late final int lessonLength = widget.lesson.content.length;
 
 
 
   void nextSlide() {
-    if (currentContentIndex < widget.lesson.content.length) {
+    if (currentContentIndex < lessonLength+1) {
       setState(() {
         currentContentIndex++;
       });
@@ -60,6 +61,18 @@ class _LessonPageState extends State<LessonPage> {
       body = LessonIntroPage(
         lesson: widget.lesson,
         onStart: nextSlide,
+      );
+    }
+
+    // End of lesson page
+    else if (currentContentIndex == lessonLength+1){
+      body = LessonCompletePage(
+          lessonTitle: widget.lesson.title,
+          onContinue: (){
+            Navigator.pop(
+              context,
+            );
+          }
       );
     }
 
@@ -150,6 +163,95 @@ class LessonIntroPage extends StatelessWidget {
           ElevatedButton(
             onPressed: onStart,
             child: const Text("Start Lesson"),
+          ),
+
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+}
+
+class LessonCompletePage extends StatelessWidget {
+  final String lessonTitle;
+  final VoidCallback onContinue;
+
+  const LessonCompletePage({
+    super.key,
+    required this.lessonTitle,
+    required this.onContinue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+
+          // Centered content
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+
+                // Icon
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryLight,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.emoji_events_rounded,
+                    size: 60,
+                    color: AppColors.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Title
+                const Text(
+                  "Lesson Complete!",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 12),
+
+                // Subtitle
+                Text(
+                  lessonTitle,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 20),
+
+                // Optional message
+                const Text(
+                  "Great job! You're one step closer to mastering the language.",
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+
+          // Bottom button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onContinue,
+              child: const Text("Continue"),
+            ),
           ),
 
           const SizedBox(height: 12),

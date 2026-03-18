@@ -15,16 +15,27 @@ class TextPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Text(data['text']),
-          const Spacer(),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  data['text'],
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
 
-          // Start Button
-          ElevatedButton(
-            onPressed: onNext,
-            child: const Text("Continue"),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onNext,
+              child: const Text("Continue"),
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -50,23 +61,73 @@ class CharacterPage extends StatelessWidget{
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          // Highlight the character
-          Text(
-            data['letter'],
-            style: TextStyle(
-                fontWeight: FontWeight(20),
-              fontSize: 20
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+
+                // Letter Box
+                GestureDetector(
+                  onTap: () {
+                    // TODO: play sound later
+                  },
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Text(
+                            data['letter'],
+                            style: const TextStyle(
+                              fontSize: 60,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        // Audio Icon (top right)
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: Icon(
+                            Icons.volume_up_rounded,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                Text(
+                  data['description'],
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+
+                  ),
+                ),
+              ],
             ),
           ),
 
-          Text(data['description']),
-
-          const Spacer(),
-
-          // Start Button
-          ElevatedButton(
-            onPressed: onNext,
-            child: const Text("Continue"),
+          // Bottom button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onNext,
+              child: const Text("Continue"),
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -74,6 +135,7 @@ class CharacterPage extends StatelessWidget{
       ),
     );
   }
+
 }
 
 // This page will reroute to the correct widget depending on the exerciseType
