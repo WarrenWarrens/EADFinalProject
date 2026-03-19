@@ -104,6 +104,7 @@ class LessonButton extends StatelessWidget {
         width: 100.0,
         height: 100.0,
         decoration: BoxDecoration(
+<<<<<<< Updated upstream
         shape: BoxShape.circle,
         color: AppColors.primary,
     ),
@@ -116,6 +117,23 @@ class LessonButton extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       )
+=======
+          shape: BoxShape.circle,
+
+          color: color ?? AppColors.primary,
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold, // Text weight
+            ),
+            textAlign: TextAlign.center,
+            )
+
+          ),
+        )
+>>>>>>> Stashed changes
     );
   }
 }

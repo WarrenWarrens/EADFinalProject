@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
+<<<<<<< Updated upstream
 // import 'package:flutter/material.dart';
 // import '../../../models/user_profile.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/common_widgets.dart';
+=======
+import '../../theme/app_theme.dart';
+import '../../widgets/common_widgets.dart';
+import '../../data/navi_lesson_audio.dart';
+import '../lessons/audio_mimicry_screen.dart';// For content
+import '../lessons/simulation.dart';
+import 'lessonPage.dart';
+import '../../services/lessonService.dart';
+
+>>>>>>> Stashed changes
 
 /// ProfileSetupPage — linear multi-step onboarding flow matching Scenario Two.
 /// Steps: Username → Language → Learning Goals → Account Settings → Home
@@ -26,6 +37,28 @@ class _HomeScreenSate extends State<HomeScreen> {
     // _loadExistingProfile();
   }
 
+<<<<<<< Updated upstream
+=======
+  void _goToAudioMimicry() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AudioMimicryScreen(lesson: naviAudioLesson),
+      ),
+    );
+  }
+
+  void _goToSim() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SimScreen(),
+      ),
+    );
+  }
+
+
+>>>>>>> Stashed changes
   // TODO: go to lesson
   void _startLesson() {
     Navigator.push(
@@ -34,6 +67,7 @@ class _HomeScreenSate extends State<HomeScreen> {
     );
   }
 
+<<<<<<< Updated upstream
   // // TODO: need to load content
   // Future<void> _loadExistingProfile() async {
   //   final saved = await _storage.loadProfile();
@@ -47,6 +81,8 @@ class _HomeScreenSate extends State<HomeScreen> {
   // }
 
 
+=======
+>>>>>>> Stashed changes
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +113,13 @@ class _HomeScreenSate extends State<HomeScreen> {
               // Lesson button
               LessonButton(
                   label: 'Lesson1',
+<<<<<<< Updated upstream
                   onTap: () {}
+=======
+                  onTap: (){
+                    _startLesson(1);
+                  },
+>>>>>>> Stashed changes
               ),
               const SizedBox(height: 16),
 
@@ -88,8 +130,13 @@ class _HomeScreenSate extends State<HomeScreen> {
               const SizedBox(height: 16),
 
               LessonButton(
+<<<<<<< Updated upstream
                   label: 'Lesson3',
                   onTap: () {}
+=======
+                label: 'Lesson 3\nConversation',
+                onTap: _goToSim
+>>>>>>> Stashed changes
               ),
 
               const Spacer(flex: 2),
