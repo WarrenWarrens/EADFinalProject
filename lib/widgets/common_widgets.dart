@@ -100,13 +100,24 @@ class LessonButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Wrapped in a gesture detector to activate onTap gesture
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return Container(
         width: 100.0,
         height: 100.0,
         decoration: BoxDecoration(
+<<<<<<< Updated upstream
+        shape: BoxShape.circle,
+        color: AppColors.primary,
+    ),
+      child: Center(
+        child: Text(label,
+          style: TextStyle(
+            color: AppColors.surface, // Text color
+            fontWeight: FontWeight.bold, // Text weight
+          ),
+          textAlign: TextAlign.center,
+        ),
+      )
+=======
           shape: BoxShape.circle,
 
           color: color ?? AppColors.primary,
@@ -114,15 +125,19 @@ class LessonButton extends StatelessWidget {
         child: Center(
           child: Text(
             label,
+            style: TextStyle(
               fontWeight: FontWeight.bold, // Text weight
             ),
             textAlign: TextAlign.center,
+            )
+
           ),
         )
-    ),
+>>>>>>> Stashed changes
     );
   }
 }
+
 
 
 /// Google Sign-In button matching mockup style
