@@ -1,12 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../models/lessons.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common_widgets.dart';
 import '../../data/navi_lesson_audio.dart';
-import '../lessons/audio_mimicry_screen.dart';
-/// ProfileSetupPage — linear multi-step onboarding flow matching Scenario Two.
-/// Steps: Username → Language → Learning Goals → Account Settings → Home
+import '../lessons/audio_mimicry_screen.dart';// For content
+import 'lessonPage.dart';
+import '../../services/lessonService.dart';
+
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -30,6 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (_) => AudioMimicryScreen(lesson: naviAudioLesson),
       ),
+  // TODO: go to lesson
+  void _startLesson(int lessonNumber) async {
+
+    // Grab the corresponding json file for the lesson
+    Lesson lesson = await loadLesson('lesson$lessonNumber.json');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LessonPage(lesson: lesson)),
     );
   }
 
@@ -63,10 +78,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Lesson 1 — Word Match (coming soon)
               LessonButton(
-                label: 'Lesson 1\nWord Match',
-                onTap: () {
-                  // TODO: navigate to Word Match screen
-                },
+                  label: 'Lesson1',
+                  onTap: (){
+                    print('tapped');
+                    _startLesson(1);
+                  },
               ),
               const SizedBox(height: 20),
 

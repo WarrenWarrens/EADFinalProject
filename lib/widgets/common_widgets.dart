@@ -100,31 +100,29 @@ class LessonButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    // Wrapped in a gesture detector to activate onTap gesture
+    return GestureDetector(
       onTap: onTap,
-      customBorder: const CircleBorder(),
       child: Container(
         width: 100.0,
         height: 100.0,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+
           color: color ?? AppColors.primary,
         ),
         child: Center(
           child: Text(
             label,
-            style: TextStyle(
-              color: textColor ?? AppColors.surface,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.bold, // Text weight
             ),
             textAlign: TextAlign.center,
           ),
-        ),
-      ),
+        )
+    ),
     );
   }
 }
-
 
 
 /// Google Sign-In button matching mockup style
