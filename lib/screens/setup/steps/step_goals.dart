@@ -81,7 +81,7 @@ class _StepGoalsState extends State<StepGoals> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 60),
+              const Spacer(flex: 2),
               const Text(
                 'Please select your\nlearning goal!',
                 style: TextStyle(
@@ -94,7 +94,7 @@ class _StepGoalsState extends State<StepGoals> {
               const Text(
                 '(Can be adjusted at any point!)',
                 style:
-                    TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -159,7 +159,7 @@ class _StepGoalsState extends State<StepGoals> {
                 );
               }),
 
-              const Spacer(),
+              const Spacer(flex: 3),
 
               Row(
                 children: [

@@ -61,7 +61,7 @@ class _StepUsernameState extends State<StepUsername> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const AppHeader(),
+              const Spacer(flex: 2),
 
               // Avatar selector
               GestureDetector(
@@ -104,18 +104,18 @@ class _StepUsernameState extends State<StepUsername> {
                           color: AppColors.error, fontSize: 12)),
                 ),
 
-              const Spacer(),
+              const Spacer(flex: 3),
 
               Row(
                 children: [
                   // Back disabled on first step but shown for consistency
                   Opacity(
                     opacity: 0.0,
-                    child: _NavButton(
+                    child: NavButton(
                         icon: Icons.arrow_back, onTap: () {}),
                   ),
                   const Spacer(),
-                  _NavButton(icon: Icons.arrow_forward, onTap: _next),
+                  NavButton(icon: Icons.arrow_forward, onTap: _next),
                 ],
               ),
               const SizedBox(height: 24),
@@ -155,27 +155,6 @@ class _StepUsernameState extends State<StepUsername> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _NavButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _NavButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shape: const CircleBorder(),
-        padding: const EdgeInsets.all(16),
-        minimumSize: Size.zero,
-        backgroundColor: AppColors.primary,
-      ),
-      onPressed: onTap,
-      child: Icon(icon, color: Colors.white),
     );
   }
 }

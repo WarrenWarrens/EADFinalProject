@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/lessonService.dart';
+import '../../services/music_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common_widgets.dart';
 import '../../data/navi_lesson_audio.dart';
@@ -20,11 +21,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   UserProfile? _profile;
   final _storage = LocalStorageService();
+  final _music = MusicService();
 
   @override
   void initState() {
     super.initState();
     _loadExistingProfile();
+    // Crossfade from landing track to home track (no-op if already home).
+    _music.crossfadeTo(MusicTrack.home);
   }
 
   Future<void> _loadExistingProfile() async {
@@ -37,26 +41,30 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _goToLesson1() async {
     final lesson = await loadLesson('lesson1.json');
     if (!mounted) return;
-    Navigator.push(
+    _music.fadeToWhisper();
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
     );
+    _music.fadeBack();
   }
 
   void _goToAudioMimicry() {
+    _music.fadeToWhisper();
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => AudioMimicryScreen(lesson: naviAudioLesson),
       ),
-    );
+    ).then((_) => _music.fadeBack());
   }
 
   void _goToSimulation() {
+    _music.fadeToWhisper();
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const SimScreen()),
-    );
+    ).then((_) => _music.fadeBack());
   }
 
   @override

@@ -55,7 +55,7 @@ class _StepAccountSettingsState extends State<StepAccountSettings> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 60),
+              const Spacer(flex: 2),
               const Text(
                 'Please finalize\nyour account!',
                 style: TextStyle(
@@ -92,7 +92,7 @@ class _StepAccountSettingsState extends State<StepAccountSettings> {
                 onChanged: (v) => setState(() => _shareData = !v),
               ),
 
-              const Spacer(),
+              const Spacer(flex: 3),
 
               Row(
                 children: [
@@ -101,7 +101,7 @@ class _StepAccountSettingsState extends State<StepAccountSettings> {
                   _loading
                       ? const CircularProgressIndicator()
                       : NavButton(
-                          icon: Icons.arrow_forward, onTap: _finish),
+                      icon: Icons.arrow_forward, onTap: _finish),
                 ],
               ),
               const SizedBox(height: 24),
@@ -130,7 +130,7 @@ class _ToggleRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Container(
         padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
           color: value ? AppColors.primaryLight : AppColors.buttonSoft,
           borderRadius: BorderRadius.circular(16),

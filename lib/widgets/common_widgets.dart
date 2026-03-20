@@ -68,14 +68,14 @@ class PrimaryButton extends StatelessWidget {
         onPressed: isLoading ? null : onTap,
         child: isLoading
             ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2),
-              )
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(
+              color: Colors.white, strokeWidth: 2),
+        )
             : Text(label,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            style:
+            const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -148,14 +148,14 @@ class GoogleSignInButton extends StatelessWidget {
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 48),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           elevation: 0,
         ),
         onPressed: onTap,
         icon: const Icon(Icons.g_mobiledata, size: 22),
         label: Text(label,
             style:
-                const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -213,10 +213,10 @@ class AppTextField extends StatelessWidget {
         hintText: hint,
         suffixIcon: showClearButton
             ? IconButton(
-                icon: const Icon(Icons.cancel_outlined,
-                    color: AppColors.textSecondary, size: 18),
-                onPressed: () => controller.clear(),
-              )
+          icon: const Icon(Icons.cancel_outlined,
+              color: AppColors.textSecondary, size: 18),
+          onPressed: () => controller.clear(),
+        )
             : null,
       ),
     );
@@ -255,12 +255,12 @@ class NavButton extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         shape: const CircleBorder(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(22),
         minimumSize: Size.zero,
         backgroundColor: AppColors.primary,
       ),
       onPressed: onTap,
-      child: Icon(icon, color: Colors.white),
+      child: Icon(icon, color: Colors.white, size: 28),
     );
   }
 }

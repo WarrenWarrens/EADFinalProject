@@ -65,7 +65,7 @@ class _StepLanguageState extends State<StepLanguage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 60),
+              const Spacer(flex: 2),
               const Text(
                 'Please select a\nlanguage to start!',
                 style: TextStyle(
@@ -94,7 +94,7 @@ class _StepLanguageState extends State<StepLanguage> {
                 );
               }),
 
-              const Spacer(),
+              const Spacer(flex: 3),
 
               Row(
                 children: [
