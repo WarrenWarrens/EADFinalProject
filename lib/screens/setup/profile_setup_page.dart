@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
+import '../../persistent_bar.dart';
 import 'steps/step_username.dart';
 import 'steps/step_language.dart';
 import 'steps/step_goals.dart';
@@ -53,7 +54,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     await _storage.setOnboardingComplete(true);
     await _storage.saveSetupStep(0);
     if (!mounted) return;
-    // TODO: Navigate to HomeScreen
+    PersistentBarController.instance.show();
     Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
   }
 
@@ -97,7 +98,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           onBack: _goBack,
         );
       default:
-        // Should not reach here; finalize navigates away
+      // Should not reach here; finalize navigates away
         return const SizedBox.shrink();
     }
   }

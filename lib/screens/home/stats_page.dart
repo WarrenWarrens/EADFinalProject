@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_scatter/flutter_scatter.dart';
 import '../../models/vocab_record.dart';
 import '../../services/vocab_tracking_service.dart';
 import '../../theme/app_theme.dart';
@@ -55,8 +56,8 @@ class _StatsPageState extends State<StatsPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _records.isEmpty
-              ? _buildEmptyState()
-              : _buildContent(),
+          ? _buildEmptyState()
+          : _buildContent(),
     );
   }
 
@@ -109,7 +110,7 @@ class _StatsPageState extends State<StatsPage> {
           const SizedBox(height: 16),
 
           // ── Word cloud ─────────────────────────────────────────────────
-          _WordCloud(records: _records),
+          WordCloud(records: _records),
           const SizedBox(height: 28),
 
           // ── Word list breakdown ────────────────────────────────────────
@@ -274,33 +275,33 @@ class _CloudLegend extends StatelessWidget {
 //  Word cloud
 // ═══════════════════════════════════════════════════════════════════════════════
 
-class _WordCloud extends StatelessWidget {
+class WordCloud extends StatelessWidget {
   final List<VocabRecord> records;
-  const _WordCloud({required this.records});
+  const WordCloud({super.key, required this.records});
 
   /// Map rolling average (0.0–1.0) to a colour from deep red → amber → green.
-  static Color _scoreColor(double avg) {
-    // 0.0 = deep red, 0.5 = amber, 1.0 = green
+  static Color scoreColor(double avg) {
     if (avg >= 0.75) {
-      // green range — lerp from amber-green to full green
       final t = ((avg - 0.75) / 0.25).clamp(0.0, 1.0);
       return Color.lerp(const Color(0xFF8BC34A), const Color(0xFF2E7D32), t)!;
     } else if (avg >= 0.45) {
-      // amber range
       final t = ((avg - 0.45) / 0.30).clamp(0.0, 1.0);
       return Color.lerp(const Color(0xFFFF9800), const Color(0xFF8BC34A), t)!;
     } else {
-      // red range
       final t = (avg / 0.45).clamp(0.0, 1.0);
       return Color.lerp(const Color(0xFFB71C1C), const Color(0xFFFF9800), t)!;
     }
   }
 
-  /// Map attempt count to font size. Min 14, max 38.
-  double _fontSize(int attempts, int maxAttempts) {
-    if (maxAttempts <= 1) return 20.0;
-    final t = (attempts / maxAttempts).clamp(0.0, 1.0);
-    return 14.0 + t * 24.0;
+  /// Logarithmic font size scaling.
+  /// Prevents one very high-frequency word from dwarfing everything else.
+  /// Min 14, max 48.
+  static double fontSize(int attempts, int maxAttempts) {
+    if (maxAttempts <= 1) return 22.0;
+    final logAttempts = log(attempts.clamp(1, maxAttempts).toDouble());
+    final logMax = log(maxAttempts.toDouble());
+    final t = (logAttempts / logMax).clamp(0.0, 1.0);
+    return 14.0 + t * 34.0;
   }
 
   @override
@@ -308,16 +309,30 @@ class _WordCloud extends StatelessWidget {
     if (records.isEmpty) return const SizedBox.shrink();
 
     final maxAttempts =
-        records.map((r) => r.totalAttempts).reduce((a, b) => a > b ? a : b);
+    records.map((r) => r.totalAttempts).reduce((a, b) => a > b ? a : b);
 
-    // Shuffle for a more organic cloud feel, but use a fixed seed so it
-    // doesn't jump around on rebuild.
-    final shuffled = List<VocabRecord>.from(records)
-      ..shuffle(Random(records.length));
+    final children = records.map((r) {
+      final size = fontSize(r.totalAttempts, maxAttempts);
+      final color = scoreColor(r.rollingAverage);
+      return Tooltip(
+        message:
+        '${r.displayText}\n${r.totalAttempts} attempts · '
+            '${(r.rollingAverage * 100).round()}% recent avg',
+        child: Text(
+          r.displayText,
+          style: TextStyle(
+            fontSize: size,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      );
+    }).toList();
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      constraints: const BoxConstraints(minHeight: 260),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
@@ -329,28 +344,14 @@ class _WordCloud extends StatelessWidget {
           ),
         ],
       ),
-      child: Wrap(
-        spacing: 10,
-        runSpacing: 8,
-        alignment: WrapAlignment.center,
-        children: shuffled.map((r) {
-          final size = _fontSize(r.totalAttempts, maxAttempts);
-          final color = _scoreColor(r.rollingAverage);
-          return Tooltip(
-            message:
-                '${r.displayText}\n${r.totalAttempts} attempts · '
-                '${(r.rollingAverage * 100).round()}% recent avg',
-            child: Text(
-              r.displayText,
-              style: TextStyle(
-                fontSize: size,
-                fontWeight: FontWeight.w700,
-                color: color,
-                height: 1.3,
-              ),
-            ),
-          );
-        }).toList(),
+      child: Center(
+        child: Scatter(
+          fillGaps: true,
+          delegate: ArchimedeanSpiralScatterDelegate(
+            ratio: 0.6,
+          ),
+          children: children,
+        ),
       ),
     );
   }
@@ -367,7 +368,7 @@ class _WordRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avg = record.rollingAverage;
-    final color = _WordCloud._scoreColor(avg);
+    final color = WordCloud.scoreColor(avg);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),

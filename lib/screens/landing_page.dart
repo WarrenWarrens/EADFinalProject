@@ -53,7 +53,7 @@ class _LandingPageState extends State<LandingPage> {
 
               // ── Tagline ───────────────────────────────────────────
               Text(
-                'Learn fantasy languages\nthrough magic and play',
+                'Learn through magic and play',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -73,7 +73,7 @@ class _LandingPageState extends State<LandingPage> {
                   MaterialPageRoute(builder: (_) => const SignupPage()),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 30),
 
               // ── Resume Your Adventure (Login) — gold-bordered ─────
               _LandingButton(
@@ -83,7 +83,7 @@ class _LandingPageState extends State<LandingPage> {
                   MaterialPageRoute(builder: (_) => const LoginPage()),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 30),
 
               // ── Continue as Guest — parchment fill ────────────────
               _LandingButton(
@@ -92,29 +92,9 @@ class _LandingPageState extends State<LandingPage> {
                 onTap: () => _continueAsGuest(context),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
 
-              // ── Footer flourish ───────────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _flourishLine(true),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      'The ancient languages await\u2026',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.parchmentAccent,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                  _flourishLine(false),
-                ],
-              ),
-
-              const SizedBox(height: 20),
+              const SizedBox(height: 44),
             ],
           ),
         ),

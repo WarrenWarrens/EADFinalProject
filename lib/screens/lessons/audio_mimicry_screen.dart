@@ -217,7 +217,7 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
       // Write an FFmpeg concat list file
       final listPath = '${dir.path}/concat_${itemId}.txt';
       final listContent =
-      paths.map((p) => "file '$p'").join('\n');
+          paths.map((p) => "file '$p'").join('\n');
       await File(listPath).writeAsString(listContent);
 
       final outputPath = '${dir.path}/phrase_${itemId}.mp3';
@@ -654,20 +654,27 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    // Allow start even if preload isn't done — cached items play
-                    // instantly, uncached ones show "Audio not loaded yet".
-                    onPressed: () {
-                      // Set first item's cached paths
-                      if (_items.isNotEmpty) {
-                        final first = _items.first;
-                        _ttsPath = _audioCache[first.id];
-                        _referenceWavPath = _wavCache[first.id];
-                      }
-                      setState(() => _showingIntro = false);
-                    },
+                    onPressed: _preloadDone
+                        ? () {
+                            if (_items.isNotEmpty) {
+                              final first = _items.first;
+                              _ttsPath = _audioCache[first.id];
+                              _referenceWavPath = _wavCache[first.id];
+                            }
+                            setState(() => _showingIntro = false);
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _preloadDone
+                          ? AppColors.primary
+                          : AppColors.inputBorder,
+                      foregroundColor: _preloadDone
+                          ? Colors.white
+                          : AppColors.textSecondary,
+                    ),
                     child: Text(_preloadDone
                         ? 'Start Lesson'
-                        : 'Start (${_audioCache.length}/${_items.length} loaded)'),
+                        : 'Loading audio… (${_preloadedCount}/${_items.length})'),
                   ),
                 ),
                 const SizedBox(height: 12),

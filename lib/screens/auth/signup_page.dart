@@ -152,7 +152,7 @@ class _SignupPageState extends State<SignupPage> {
 
                 const SizedBox(height: 8),
                 PrimaryButton(
-                  label: 'Login',
+                  label: 'Sign Up',
                   onTap: _signUp,
                   isLoading: _loading,
                 ),
@@ -162,7 +162,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 20),
 
                 GoogleSignInButton(
-                  label: 'Login with Google',
+                  label: 'Sign up with Google',
                   onTap: _signUpWithGoogle,
                 ),
                 const SizedBox(height: 24),
