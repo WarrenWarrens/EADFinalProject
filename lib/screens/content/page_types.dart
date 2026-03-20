@@ -269,8 +269,8 @@ class _MultipleChoiceState extends State<MultipleChoice> {
           // Top icon
           Center(
             child: Container(
-              width: 120,
-              height: 120,
+              width: 100,
+              height: 100,
               decoration: const BoxDecoration(
                 color: AppColors.primaryLight,
                 shape: BoxShape.circle,
