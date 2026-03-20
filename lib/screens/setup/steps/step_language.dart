@@ -6,8 +6,8 @@ import '../../../widgets/common_widgets.dart';
 /// Available fictional languages — extend this list as you add content.
 const List<Map<String, String>> kLanguages = [
   {'id': 'navi', 'label': '"Na\'vi" (Avatar)', 'emoji': '🌿'},
-  {'id': 'klingon', 'label': '"Klingon" (Star Trek)', 'emoji': '🖖'},
-  {'id': 'sindarin', 'label': '"Sindarin" (LOTR)', 'emoji': '🌙'},
+  {'id': 'klingon', 'label': '"Klingon" (Star Trek) 🚧', 'emoji': '🖖'},
+  {'id': 'sindarin', 'label': '"Sindarin" (LOTR) 🚧', 'emoji': '🌙'},
 ];
 
 class StepLanguage extends StatefulWidget {
