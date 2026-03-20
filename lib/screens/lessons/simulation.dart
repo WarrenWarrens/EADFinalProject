@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:testing/screens/home/homeScreen.dart';
-import '../../../theme/app_theme.dart';
-import '../../../widgets/common_widgets.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/common_widgets.dart';
 import 'dart:async';
 
 class SimScreen extends StatefulWidget {
@@ -151,10 +150,7 @@ class _SimScreenState extends State<SimScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                      );
+                      Navigator.pop(context);
                     },
                     child: const Text("Finish Conversation"),
                   ),
