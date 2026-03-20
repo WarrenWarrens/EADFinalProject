@@ -25,6 +25,9 @@ class TextPage extends StatelessWidget {
                 Text(
                   data['text'],
                   textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20
+                  ),
                 ),
               ],
             ),
@@ -66,10 +69,15 @@ class CharacterPage extends StatelessWidget{
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                // Letter Box
+                // Box with major content
                 GestureDetector(
                   onTap: () {
-                    // TODO: play sound later
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text("Audio feature will be implemented later!"),
+                        showCloseIcon: true,
+                      )
+                    );
                   },
                   child: Container(
                     width: 120,
@@ -94,7 +102,7 @@ class CharacterPage extends StatelessWidget{
                           ),
                         ),
 
-                        // Audio Icon (top right)
+                        // Audio icon - Audio functionality will be implemented later!
                         Positioned(
                           top: 10,
                           right: 10,
@@ -114,7 +122,7 @@ class CharacterPage extends StatelessWidget{
                   data['description'],
                   textAlign: TextAlign.center,
                   style: TextStyle(
-
+                    fontSize: 20
                   ),
                 ),
               ],
