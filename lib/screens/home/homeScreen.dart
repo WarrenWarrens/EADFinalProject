@@ -1,14 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../models/lessons.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common_widgets.dart';
 import '../../data/navi_lesson_audio.dart';
-import '../lessons/audio_mimicry_screen.dart';// For content
+import '../lessons/audio_mimicry_screen.dart';
 import 'lessonPage.dart';
 import '../../services/lessonService.dart';
 
@@ -27,7 +24,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // _loadExistingProfile();
+    _loadExistingProfile();
+  }
+
+  Future<void> _loadExistingProfile() async {
+    final saved = await _storage.loadProfile();
+    if (mounted) {
+      setState(() => _profile = saved);
+    }
   }
 
   void _goToAudioMimicry() {
@@ -36,9 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (_) => AudioMimicryScreen(lesson: naviAudioLesson),
       ),
-  // TODO: go to lesson
-  void _startLesson(int lessonNumber) async {
+    );
+  }
 
+  // Navigate to a JSON-based lesson
+  void _startLesson(int lessonNumber) async {
     // Grab the corresponding json file for the lesson
     Lesson lesson = await loadLesson('lesson$lessonNumber.json');
 
@@ -78,11 +84,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Lesson 1 — Word Match (coming soon)
               LessonButton(
-                  label: 'Lesson1',
-                  onTap: (){
-                    print('tapped');
-                    _startLesson(1);
-                  },
+                label: 'Lesson1',
+                onTap: (){
+                  print('tapped');
+                  _startLesson(1);
+                },
               ),
               const SizedBox(height: 20),
 

@@ -62,9 +62,8 @@ class _StartupRouterState extends State<_StartupRouter> {
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const ProfileSetupPage()));
     } else {
-      // TODO: Replace with HomeScreen
       Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LandingPage()));
+          MaterialPageRoute(builder: (_) => const HomeScreen()));
     }
   }
 

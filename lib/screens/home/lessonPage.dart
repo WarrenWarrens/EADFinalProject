@@ -98,11 +98,11 @@ class _LessonPageState extends State<LessonPage> {
 
         // Progress bar
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(6), 
+            preferredSize: const Size.fromHeight(6),
             child: Padding(
-                padding: const EdgeInsetsGeometry.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ClipRRect(
-                borderRadius: BorderRadiusGeometry.circular(8),
+                borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
                   value: progress,
                   minHeight: 6,

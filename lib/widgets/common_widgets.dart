@@ -68,14 +68,14 @@ class PrimaryButton extends StatelessWidget {
         onPressed: isLoading ? null : onTap,
         child: isLoading
             ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2),
-              )
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(
+              color: Colors.white, strokeWidth: 2),
+        )
             : Text(label,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            style:
+            const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -101,39 +101,22 @@ class LessonButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: 100.0,
-        height: 100.0,
-        decoration: BoxDecoration(
-<<<<<<< Updated upstream
+      width: 100.0,
+      height: 100.0,
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.primary,
-    ),
+        color: color ?? AppColors.primary,
+      ),
       child: Center(
-        child: Text(label,
+        child: Text(
+          label,
           style: TextStyle(
-            color: AppColors.surface, // Text color
-            fontWeight: FontWeight.bold, // Text weight
+            color: textColor ?? AppColors.surface,
+            fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
         ),
-      )
-=======
-          shape: BoxShape.circle,
-
-          color: color ?? AppColors.primary,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.bold, // Text weight
-            ),
-            textAlign: TextAlign.center,
-            )
-
-          ),
-        )
->>>>>>> Stashed changes
+      ),
     );
   }
 }
@@ -161,14 +144,14 @@ class GoogleSignInButton extends StatelessWidget {
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 48),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           elevation: 0,
         ),
         onPressed: onTap,
         icon: const Icon(Icons.g_mobiledata, size: 22),
         label: Text(label,
             style:
-                const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -226,10 +209,10 @@ class AppTextField extends StatelessWidget {
         hintText: hint,
         suffixIcon: showClearButton
             ? IconButton(
-                icon: const Icon(Icons.cancel_outlined,
-                    color: AppColors.textSecondary, size: 18),
-                onPressed: () => controller.clear(),
-              )
+          icon: const Icon(Icons.cancel_outlined,
+              color: AppColors.textSecondary, size: 18),
+          onPressed: () => controller.clear(),
+        )
             : null,
       ),
     );
