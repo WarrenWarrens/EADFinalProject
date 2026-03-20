@@ -261,112 +261,113 @@ class _MultipleChoiceState extends State<MultipleChoice> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24),
+      // Use LayoutBuilder or simply ensure the Column doesn't fight the Spacer
       child: Column(
         children: [
-
-          const SizedBox(height: 20),
-
-          // Top icon
-          Center(
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryLight,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.quiz_rounded,
-                size: 60,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 40),
-
-          // Question
-          Text(
-            widget.question,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textPrimary,
-              height: 1.5,
-              fontSize: 18,
-            ),
-          ),
-
-          const SizedBox(height: 32),
-
-          // List of options
-          ...List.generate(widget.options.length, (index) {
-            final option = widget.options[index];
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GestureDetector(
-                onTap: hasSubmitted ? null
-                    : () => setState(() => selectedIndex = index),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: _optionColor(index),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: _optionBorderColor(index),
-                      width: 2,
+          // 1. Wrap the main content in Expanded + SingleChildScrollView
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  // Top icon
+                  Center(
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primaryLight,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.quiz_rounded,
+                        size: 60,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
-                  child: Text(
-                    option['text'],
+                  const SizedBox(height: 40),
+                  // Question
+                  Text(
+                    widget.question,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize: 18,
                       color: AppColors.textPrimary,
+                      height: 1.5,
+                      fontSize: 18,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 32),
+                  // List of options
+                  ...List.generate(widget.options.length, (index) {
+                    final option = widget.options[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GestureDetector(
+                        onTap: hasSubmitted
+                            ? null
+                            : () => setState(() => selectedIndex = index),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 20),
+                          decoration: BoxDecoration(
+                            color: _optionColor(index),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _optionBorderColor(index),
+                              width: 2,
+                            ),
+                          ),
+                          child: Text(
+                            option['text'],
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontSize: 18,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                  // Feedback on submission
+                  if (hasSubmitted) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          isCorrect ? Icons.check_circle : Icons.cancel,
+                          color: isCorrect ? Colors.green : Colors.red,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isCorrect ? 'Correct!' : 'Incorrect, try next time!',
+                          style: TextStyle(
+                            color: isCorrect ? Colors.green : Colors.red,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
-            );
-          }),
-
-          // Feedback on submission
-          if (hasSubmitted) ...[
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  isCorrect ? Icons.check_circle : Icons.cancel,
-                  color: isCorrect ? Colors.green : Colors.red,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  isCorrect ? 'Correct!' : 'Incorrect, try next time!',
-                  style: TextStyle(
-                    color: isCorrect ? Colors.green : Colors.red,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
             ),
-          ],
+          ),
 
-          const Spacer(),
-
-          // Continue or check button
+          // 2. Keep the button at the bottom (outside the scroll view)
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: hasSelected ? _onCheck : null,
-              child: Text(hasSubmitted ? 'Continue': 'Check'),
+              child: Text(hasSubmitted ? 'Continue' : 'Check'),
             ),
           ),
-
           const SizedBox(height: 12),
         ],
       ),
