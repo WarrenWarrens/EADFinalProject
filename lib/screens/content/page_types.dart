@@ -26,7 +26,7 @@ class TextPage extends StatelessWidget {
                   data['text'],
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 20
+                      fontSize: 20
                   ),
                 ),
               ],
@@ -73,10 +73,10 @@ class CharacterPage extends StatelessWidget{
                 GestureDetector(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                        SnackBar(
                           content: Text("Audio feature will be implemented later!"),
-                        showCloseIcon: true,
-                      )
+                          showCloseIcon: true,
+                        )
                     );
                   },
                   child: Container(
@@ -122,7 +122,7 @@ class CharacterPage extends StatelessWidget{
                   data['description'],
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 20
+                      fontSize: 20
                   ),
                 ),
               ],
@@ -305,8 +305,8 @@ class _MultipleChoiceState extends State<MultipleChoice> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: GestureDetector(
-                  onTap: hasSubmitted ? null
-                      : () => setState(() => selectedIndex = index),
+                onTap: hasSubmitted ? null
+                    : () => setState(() => selectedIndex = index),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: double.infinity,

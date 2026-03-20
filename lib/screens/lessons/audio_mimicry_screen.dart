@@ -11,6 +11,7 @@ import '../../models/lesson_model.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/tts_service.dart';
 import '../../services/audio_analysis_service.dart';
+import '../../services/vocab_tracking_service.dart';
 import '../../theme/app_theme.dart';
 
 // Maximum recording duration before auto-stop.
@@ -31,6 +32,7 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
   List<VocabItem> _items = [];
   int _currentIndex = 0;
   bool _loadingProfile = true;
+  bool _showingIntro = true;
 
   // ── Per-item state ─────────────────────────────────────────────────────────
   bool _isPlayingTTS = false;
@@ -45,6 +47,7 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
 
   // ── Scores across whole lesson ─────────────────────────────────────────────
   final Map<String, double> _scores = {};
+  final VocabTrackingService _tracker = VocabTrackingService();
 
   // ── Audio ──────────────────────────────────────────────────────────────────
   final AudioPlayer _player = AudioPlayer();
@@ -54,9 +57,16 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
   String? _ttsPath;   // path of the last TTS file played — used for comparison
 
   // ── Reference WAV path ─────────────────────────────────────────────────────
-  // The TTS may produce an mp3. We need a WAV for local analysis.
-  // We'll capture the TTS playback as a WAV, or convert it.
   String? _referenceWavPath;
+
+  // ── Pre-loaded audio cache ─────────────────────────────────────────────────
+  // vocabId → playback mp3/audio path
+  final Map<String, String> _audioCache = {};
+  // vocabId → reference WAV path (for scoring comparison)
+  final Map<String, String> _wavCache = {};
+  int _preloadedCount = 0;
+  bool _preloadDone = false;
+  String _preloadStatus = 'Preparing audio…';
 
   // ── Waveform ───────────────────────────────────────────────────────────────
   final List<double> _waveformSamples = [];
@@ -99,6 +109,168 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
         _items = widget.lesson.itemsForGoal(profile?.learningGoal);
         _loadingProfile = false;
       });
+      // Start pre-loading all audio in background
+      _preloadAllAudio();
+    }
+  }
+
+  // ── Pre-load all audio ─────────────────────────────────────────────────────
+  //
+  // Fetches audio for every vocab item at lesson start.
+  // Single words: standard TTS fetch.
+  // Multi-word phrases: fetch each word separately, concatenate with FFmpeg.
+  // Stores both playback path and converted WAV for comparison.
+
+  Future<void> _preloadAllAudio() async {
+    for (var i = 0; i < _items.length; i++) {
+      final item = _items[i];
+      if (!mounted) return;
+
+      setState(() {
+        _preloadStatus = 'Loading "${item.navi}" (${i + 1}/${_items.length})…';
+      });
+
+      try {
+        final naviWords = item.navi.trim().split(RegExp(r'\s+'));
+
+        String? audioPath;
+
+        if (naviWords.length == 1) {
+          // ── Single word — use standard fetch ──────────────────────────
+          audioPath = await TtsService.getAudioFile(
+            naviWord: item.navi,
+            english: item.english,
+            ttsHint: item.ttsHint,
+          );
+        } else {
+          // ── Multi-word phrase — fetch each word, then concatenate ─────
+          audioPath = await _fetchAndConcatenateWords(item, naviWords);
+        }
+
+        if (audioPath != null && mounted) {
+          _audioCache[item.id] = audioPath;
+
+          // Convert to WAV for comparison
+          final wavPath = await _convertToWav(audioPath, i);
+          if (wavPath != null) {
+            _wavCache[item.id] = wavPath;
+          }
+        }
+      } catch (e) {
+        print('[Preload] Error for "${item.navi}": $e');
+      }
+
+      if (mounted) {
+        setState(() => _preloadedCount = i + 1);
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _preloadDone = true;
+        _preloadStatus = 'All audio ready!';
+      });
+      print('[Preload] Done — cached ${_audioCache.length}/${_items.length} items');
+    }
+  }
+
+  // ── Fetch each word in a phrase and concatenate ────────────────────────────
+  //
+  // Splits the Na'vi phrase and ttsHint by whitespace so each word gets its
+  // own API call. The resulting audio clips are concatenated into a single
+  // file using FFmpeg's concat filter.
+
+  Future<String?> _fetchAndConcatenateWords(
+      VocabItem item, List<String> naviWords) async {
+    final hintWords = item.ttsHint.trim().split(RegExp(r'\s+'));
+    final wordPaths = <String>[];
+
+    for (var w = 0; w < naviWords.length; w++) {
+      final word = naviWords[w];
+      // Use matching ttsHint word if available, otherwise the Na'vi word itself
+      final hint = w < hintWords.length ? hintWords[w] : word;
+
+      final path = await TtsService.getSingleWordAudio(
+        naviWord: word,
+        ttsHint: hint,
+      );
+
+      if (path != null) {
+        wordPaths.add(path);
+      } else {
+        print('[Preload] Could not get audio for word "$word" in "${item.navi}"');
+      }
+    }
+
+    if (wordPaths.isEmpty) return null;
+    if (wordPaths.length == 1) return wordPaths.first;
+
+    // ── Concatenate with FFmpeg ────────────────────────────────────────────
+    return _concatenateAudioFiles(wordPaths, item.id);
+  }
+
+  Future<String?> _concatenateAudioFiles(
+      List<String> paths, String itemId) async {
+    try {
+      final dir = await getTemporaryDirectory();
+
+      // Write an FFmpeg concat list file
+      final listPath = '${dir.path}/concat_${itemId}.txt';
+      final listContent =
+      paths.map((p) => "file '$p'").join('\n');
+      await File(listPath).writeAsString(listContent);
+
+      final outputPath = '${dir.path}/phrase_${itemId}.mp3';
+
+      final session = await FFmpegKit.execute(
+        '-y -f concat -safe 0 -i "$listPath" -c copy "$outputPath"',
+      );
+
+      final returnCode = await session.getReturnCode();
+      if (ReturnCode.isSuccess(returnCode)) {
+        print('[Preload] Concatenated ${paths.length} clips → $outputPath');
+        return outputPath;
+      } else {
+        // If -c copy fails (different codecs), re-encode
+        final session2 = await FFmpegKit.execute(
+          '-y -f concat -safe 0 -i "$listPath" -ar 22050 -ac 1 "$outputPath"',
+        );
+        final rc2 = await session2.getReturnCode();
+        if (ReturnCode.isSuccess(rc2)) {
+          print('[Preload] Concatenated (re-encoded) ${paths.length} clips → $outputPath');
+          return outputPath;
+        }
+        final logs = await session2.getLogsAsString();
+        print('[Preload] FFmpeg concat failed: $logs');
+        return paths.first; // fallback to first word
+      }
+    } catch (e) {
+      print('[Preload] Concat error: $e');
+      return paths.first;
+    }
+  }
+
+  // ── WAV conversion (shared helper) ─────────────────────────────────────────
+
+  Future<String?> _convertToWav(String sourcePath, int index) async {
+    try {
+      if (sourcePath.toLowerCase().endsWith('.wav')) return sourcePath;
+
+      final dir = await getTemporaryDirectory();
+      final wavPath = '${dir.path}/ref_${index}.wav';
+
+      final session = await FFmpegKit.execute(
+        '-y -i "$sourcePath" -ar 16000 -ac 1 -sample_fmt s16 "$wavPath"',
+      );
+
+      final returnCode = await session.getReturnCode();
+      if (ReturnCode.isSuccess(returnCode)) return wavPath;
+
+      print('[Preload] WAV conversion failed for index $index');
+      return sourcePath;
+    } catch (e) {
+      print('[Preload] WAV conversion error: $e');
+      return sourcePath;
     }
   }
 
@@ -116,31 +288,24 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
 
   Future<void> _playTTS(VocabItem item) async {
     if (_isRecording) return;
+
+    // Check cache first
+    final cachedPath = _audioCache[item.id];
+    if (cachedPath == null) {
+      setState(() => _statusMessage = 'Audio not loaded yet — please wait');
+      return;
+    }
+
     setState(() {
       _isPlayingTTS = true;
-      _statusMessage = 'Fetching pronunciation\u2026';
+      _statusMessage = 'Listen carefully…';
     });
 
     try {
-      final path = await TtsService.getAudioFile(
-        naviWord: item.navi,
-        english: item.english,
-        ttsHint: item.ttsHint,
-      );
+      _ttsPath = cachedPath;
+      _referenceWavPath = _wavCache[item.id];
 
-      if (path == null) {
-        setState(() => _statusMessage = 'Could not load audio \u2014 check console');
-        return;
-      }
-
-      _ttsPath = path;
-
-      // Convert the TTS audio to WAV for local analysis comparison.
-      // flutter_sound can convert between formats using its helper.
-      await _convertReferenceToWav(path);
-
-      setState(() => _statusMessage = 'Listen carefully\u2026');
-      await _player.setFilePath(path);
+      await _player.setFilePath(cachedPath);
       await _player.play();
       await _player.processingStateStream
           .firstWhere((s) => s == ProcessingState.completed);
@@ -149,43 +314,6 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
       setState(() => _statusMessage = 'Playback error: $e');
     } finally {
       if (mounted) setState(() => _isPlayingTTS = false);
-    }
-  }
-
-  /// Convert the reference TTS audio (mp3/aac/wav) to a 16-bit mono WAV at
-  /// 16kHz for use with the local MFCC analysis pipeline.
-  ///
-  /// Uses ffmpeg_kit_flutter_min for codec conversion. If the source is
-  /// already WAV, we skip conversion entirely.
-  Future<void> _convertReferenceToWav(String sourcePath) async {
-    try {
-      // If the source is already a WAV file, just use it directly.
-      if (sourcePath.toLowerCase().endsWith('.wav')) {
-        _referenceWavPath = sourcePath;
-        print('[TTS] Reference is already WAV: $sourcePath');
-        return;
-      }
-
-      final dir = await getTemporaryDirectory();
-      _referenceWavPath = '${dir.path}/reference_${_currentIndex}.wav';
-
-      // Use ffmpeg to convert mp3/aac → 16kHz mono 16-bit WAV
-      final session = await FFmpegKit.execute(
-        '-y -i "$sourcePath" -ar 16000 -ac 1 -sample_fmt s16 "$_referenceWavPath"',
-      );
-
-      final returnCode = await session.getReturnCode();
-      if (ReturnCode.isSuccess(returnCode)) {
-        print('[TTS] Converted reference to WAV: $_referenceWavPath');
-      } else {
-        final logs = await session.getLogsAsString();
-        print('[TTS] FFmpeg conversion failed: $logs');
-        // Fall back to using source directly (analysis will try to read it)
-        _referenceWavPath = sourcePath;
-      }
-    } catch (e) {
-      print('[TTS] WAV conversion failed: $e — using source directly');
-      _referenceWavPath = sourcePath;
     }
   }
 
@@ -302,17 +430,29 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
   // ── Navigation ─────────────────────────────────────────────────────────────
 
   void _advance() {
-    if (_score != null) _scores[_items[_currentIndex].id] = _score!;
+    final item = _items[_currentIndex];
+    if (_score != null) {
+      _scores[item.id] = _score!;
+      _tracker.recordAttempt(
+        wordId: item.id,
+        displayText: item.navi,
+        score: _score!,
+        source: 'audio_mimicry',
+      );
+    }
     if (_currentIndex < _items.length - 1) {
+      final nextIndex = _currentIndex + 1;
+      final nextItem = _items[nextIndex];
       setState(() {
-        _currentIndex++;
+        _currentIndex = nextIndex;
         _isPlayingTTS = false;
         _isRecording = false;
         _hasRecorded = false;
         _score = null;
         _feedback = null;
-        _ttsPath = null;
-        _referenceWavPath = null;
+        // Load references from cache for the next item
+        _ttsPath = _audioCache[nextItem.id];
+        _referenceWavPath = _wavCache[nextItem.id];
         _segmentScores = [];
         _waveformSamples.clear();
         _recordingSecondsLeft = kMaxRecordingSeconds;
@@ -399,6 +539,146 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
       );
     }
 
+    // ── Intro screen ─────────────────────────────────────────────────────────
+    if (_showingIntro) {
+      final preloadProgress = _items.isNotEmpty
+          ? _preloadedCount / _items.length
+          : 0.0;
+
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.background,
+          elevation: 0,
+          leading: const BackButton(color: AppColors.textPrimary),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFD4C5F9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.headphones_rounded,
+                    size: 60,
+                    color: Color(0xFF6B4EFF),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                Text(
+                  widget.lesson.title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  widget.lesson.description,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '${_items.length} words',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // ── Preload progress ─────────────────────────────────
+                if (!_preloadDone) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: preloadProgress,
+                            minHeight: 6,
+                            backgroundColor: const Color(0xFFE8DEFF),
+                            color: const Color(0xFF6B4EFF),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _preloadStatus,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check_circle,
+                          color: const Color(0xFF4CAF50), size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Audio ready!',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: const Color(0xFF4CAF50),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+
+                const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    // Allow start even if preload isn't done — cached items play
+                    // instantly, uncached ones show "Audio not loaded yet".
+                    onPressed: () {
+                      // Set first item's cached paths
+                      if (_items.isNotEmpty) {
+                        final first = _items.first;
+                        _ttsPath = _audioCache[first.id];
+                        _referenceWavPath = _wavCache[first.id];
+                      }
+                      setState(() => _showingIntro = false);
+                    },
+                    child: Text(_preloadDone
+                        ? 'Start Lesson'
+                        : 'Start (${_audioCache.length}/${_items.length} loaded)'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ── Main lesson UI ───────────────────────────────────────────────────────
     final item = _items[_currentIndex];
     final progress = (_currentIndex + 1) / _items.length;
 

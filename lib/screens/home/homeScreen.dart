@@ -8,6 +8,7 @@ import '../../data/navi_lesson_audio.dart';
 import '../lessons/audio_mimicry_screen.dart';
 import '../lessons/simulation.dart';
 import 'lessonPage.dart';
+import 'stats_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -71,6 +72,21 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Spacer(flex: 2),
+
+                // Stats button — top right
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const StatsPage()),
+                    ),
+                    icon: const Icon(Icons.bar_chart_rounded),
+                    color: AppColors.primary,
+                    tooltip: 'Your Progress',
+                    iconSize: 28,
+                  ),
+                ),
 
                 Text(
                   _profile?.username != null

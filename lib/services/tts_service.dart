@@ -33,6 +33,82 @@ class TtsService {
     return _fallback(ttsHint);
   }
 
+  // ── Single-word audio (for per-word phrase fetching) ───────────────────────
+  //
+  // Fetches audio for a single Na'vi word. Used when splitting phrases into
+  // individual words. Tries Reykunyu direct Na'vi search first, then TTS hint.
+
+  static Future<String?> getSingleWordAudio({
+    required String naviWord,
+    required String ttsHint,
+  }) async {
+    // Try Reykunyu with direct Na'vi search
+    final reykunyuPath = await _reykunyuDirect(naviWord);
+    if (reykunyuPath != null) return reykunyuPath;
+    print('[TTS] No Reykunyu audio for word "$naviWord" — using TTS hint');
+    return _fallback(ttsHint);
+  }
+
+  // ── Reykunyu direct Na'vi search ───────────────────────────────────────────
+  //
+  // Queries Reykunyu with the Na'vi word itself (no English needed).
+  // Used for individual words extracted from phrases.
+
+  static Future<String?> _reykunyuDirect(String naviWord) async {
+    if (naviWord.trim().contains(' ')) return null; // phrases not supported
+
+    try {
+      final uri = Uri(
+        scheme: 'https',
+        host: 'reykunyu.lu',
+        path: '/api/fwew-search',
+        queryParameters: {
+          'query': naviWord,
+          'language': 'navi',
+        },
+      );
+
+      print('[TTS] Querying Reykunyu (direct): $uri');
+
+      final res = await http
+          .get(uri, headers: {'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 10));
+
+      if (res.statusCode != 200) {
+        print('[TTS] Reykunyu direct HTTP ${res.statusCode}');
+        return null;
+      }
+
+      final data = jsonDecode(res.body);
+      if (data is! Map) return null;
+
+      // Direct Na'vi search results live in "fromNa'vi".
+      final fromNavi = data["fromNa\u2019vi"]
+          ?? data["fromNa'vi"];
+      if (fromNavi is! List || fromNavi.isEmpty) return null;
+
+      // Try each result — take the first one with audio.
+      final naviLower = naviWord.toLowerCase();
+      for (final wordObj in fromNavi) {
+        if (wordObj is! Map) continue;
+
+        final resultNavi = (wordObj["na\u2019vi"] ?? wordObj["na'vi"] ?? '')
+            .toString()
+            .toLowerCase();
+
+        if (resultNavi != naviLower) continue;
+
+        final audioPath = await _extractAudio(wordObj, naviWord);
+        if (audioPath != null) return audioPath;
+      }
+
+      return null;
+    } catch (e) {
+      print('[TTS] Reykunyu direct error for "$naviWord": $e');
+      return null;
+    }
+  }
+
   // ── Reykunyu community audio ───────────────────────────────────────────────
   //
   // Strategy: query the English translation with language=en.

@@ -26,40 +26,89 @@ class LandingPage extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 36),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Spacer(flex: 2),
-
-              // Logo / Title
-              const AppHeader(topPadding: 0),
-
               const Spacer(flex: 3),
 
-              // Login button
-              SoftButton(
-                label: 'Login',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
+              // ── Logo ──────────────────────────────────────────────
+              Image.asset(
+                'assets/Logo/Lingualogo.png',
+                width: 340,
+                fit: BoxFit.contain,
+              ),
+
+              const Spacer(flex: 4),
+
+              // ── Get Started (Sign Up) — filled primary ────────────
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SignupPage()),
+                  ),
+                  child: const Text(
+                    'Get Started',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
-              // Sign Up button
-              SoftButton(
-                label: 'Sign Up',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SignupPage()),
+              // ── I have an account (Login) — outlined ──────────────
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    minimumSize: const Size(double.infinity, 52),
+                    side: const BorderSide(color: AppColors.primary, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                  ),
+                  child: const Text(
+                    'I have an account',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
-              // Guest Login button
-              SoftButton(
-                label: 'Guest Login',
-                onTap: () => _continueAsGuest(context),
+              // ── Continue as Guest — soft fill ─────────────────────
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonSoft,
+                    foregroundColor: AppColors.primary,
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () => _continueAsGuest(context),
+                  child: const Text(
+                    'Continue as Guest',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
               ),
 
               const Spacer(flex: 2),

@@ -4,10 +4,10 @@ import '../../../theme/app_theme.dart';
 import '../../../widgets/common_widgets.dart';
 
 /// Available fictional languages — extend this list as you add content.
-const List<Map<String, String>> kLanguages = [
-  {'id': 'navi', 'label': '"Na\'vi" (Avatar)', 'emoji': '🌿'},
-  {'id': 'klingon', 'label': '"Klingon" (Star Trek) 🚧', 'emoji': '🖖'},
-  {'id': 'sindarin', 'label': '"Sindarin" (LOTR) 🚧', 'emoji': '🌙'},
+const List<Map<String, dynamic>> kLanguages = [
+  {'id': 'navi', 'label': '"Na\'vi" (Avatar)', 'emoji': '🌿', 'enabled': true},
+  {'id': 'klingon', 'label': '"Klingon" (Star Trek) 🚧', 'emoji': '🖖', 'enabled': false},
+  {'id': 'sindarin', 'label': '"Sindarin" (LOTR) 🚧', 'emoji': '🌙', 'enabled': false},
 ];
 
 class StepLanguage extends StatefulWidget {
@@ -78,17 +78,21 @@ class _StepLanguageState extends State<StepLanguage> {
               const Text(
                 '(More can be selected later!)',
                 style:
-                    TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
 
-              ...kLanguages.map((lang) => _LanguageChip(
-                    label: lang['label']!,
-                    emoji: lang['emoji']!,
-                    selected: _selected.contains(lang['id']),
-                    onTap: () => _toggle(lang['id']!),
-                  )),
+              ...kLanguages.map((lang) {
+                final enabled = lang['enabled'] as bool;
+                return _LanguageChip(
+                  label: lang['label'] as String,
+                  emoji: lang['emoji'] as String,
+                  selected: _selected.contains(lang['id']),
+                  enabled: enabled,
+                  onTap: enabled ? () => _toggle(lang['id'] as String) : null,
+                );
+              }),
 
               const Spacer(),
 
@@ -112,13 +116,15 @@ class _LanguageChip extends StatelessWidget {
   final String label;
   final String emoji;
   final bool selected;
-  final VoidCallback onTap;
+  final bool enabled;
+  final VoidCallback? onTap;
 
   const _LanguageChip({
     required this.label,
     required this.emoji,
     required this.selected,
-    required this.onTap,
+    this.enabled = true,
+    this.onTap,
   });
 
   @override
@@ -131,28 +137,56 @@ class _LanguageChip extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           width: double.infinity,
           padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primary : AppColors.buttonSoft,
+            color: !enabled
+                ? Colors.grey.shade200
+                : selected
+                ? AppColors.primary
+                : AppColors.buttonSoft,
             borderRadius: BorderRadius.circular(24),
           ),
           child: Row(
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 18)),
+              Opacity(
+                opacity: enabled ? 1.0 : 0.4,
+                child: Text(emoji, style: const TextStyle(fontSize: 18)),
+              ),
               const SizedBox(width: 12),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color:
-                      selected ? Colors.white : AppColors.textPrimary,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: !enabled
+                            ? Colors.grey
+                            : selected
+                            ? Colors.white
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    if (!enabled)
+                      const Text(
+                        'Coming soon',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              if (selected)
+              if (selected && enabled)
                 const Icon(Icons.check_circle,
                     color: Colors.white, size: 18),
+              if (!enabled)
+                Icon(Icons.lock_outline,
+                    color: Colors.grey.shade400, size: 16),
             ],
           ),
         ),
