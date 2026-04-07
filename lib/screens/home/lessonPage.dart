@@ -14,8 +14,7 @@ class LessonPage extends StatefulWidget {
 
 class _LessonPageState extends State<LessonPage> {
 
-  // Keep track of current content
-  int currentContentIndex = 0; // 0 means intro page
+  int currentContentIndex = 0;
   late final List<Content> content = widget.lesson.content;
   late final int lessonLength = widget.lesson.content.length;
 
@@ -30,15 +29,12 @@ class _LessonPageState extends State<LessonPage> {
   }
 
   Widget buildContentPage() {
-    // Gets the proper content page look based on content type
     final contentObject = content.firstWhere((c) => c.id == currentContentIndex);
 
-    // Map pertaining to the type of content (each content type will have its own
-    // set of attributes
+
     Map<String, dynamic> dataAttrs = contentObject.data;
 
-    // NOTE: key: ValueKey(contentObject.id) makes it so flutter creates a whole new
-    // widget with a fresh state (refreshes the state).
+
     switch (contentObject.type) {
       case 'text':
         return TextPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide,);
@@ -51,7 +47,6 @@ class _LessonPageState extends State<LessonPage> {
     }
   }
 
-  // Gets the progress for the progress bar
   double get progress{
     return currentContentIndex / (lessonLength+1);
   }
@@ -61,7 +56,6 @@ class _LessonPageState extends State<LessonPage> {
 
     Widget body;
 
-    // Intro page
     if (currentContentIndex == 0) {
       body = LessonIntroPage(
         lesson: widget.lesson,
@@ -69,7 +63,6 @@ class _LessonPageState extends State<LessonPage> {
       );
     }
 
-    // End of lesson page
     else if (currentContentIndex == lessonLength+1){
       body = LessonCompletePage(
           lessonTitle: widget.lesson.title,
@@ -82,10 +75,7 @@ class _LessonPageState extends State<LessonPage> {
     }
 
     else{
-      // If it is not the intro of the lesson. Get the content page based on the
-      // content type
 
-      // Get the correct content page
       body = buildContentPage();
     }
 
@@ -96,7 +86,6 @@ class _LessonPageState extends State<LessonPage> {
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
 
-        // Progress bar
         bottom: PreferredSize(
             preferredSize: const Size.fromHeight(6),
             child: Padding(
@@ -258,7 +247,6 @@ class LessonCompletePage extends StatelessWidget {
             ),
           ),
 
-          // Bottom button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

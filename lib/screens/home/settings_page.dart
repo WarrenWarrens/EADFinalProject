@@ -63,7 +63,6 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
-          // ── Permissions section ─────────────────────────────────────
           _SectionHeader(label: 'Permissions'),
           const SizedBox(height: 8),
           _ToggleTile(
@@ -97,7 +96,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 24),
 
-          // ── Audio section ──────────────────────────────────────────
           _SectionHeader(label: 'Audio'),
           const SizedBox(height: 8),
           _ActionTile(
@@ -122,7 +120,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 24),
 
-          // ── Account section ────────────────────────────────────────
           _SectionHeader(label: 'Account'),
           const SizedBox(height: 8),
           _ActionTile(
@@ -140,7 +137,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 24),
 
-          // ── Danger zone ────────────────────────────────────────────
           _SectionHeader(label: 'Data'),
           const SizedBox(height: 8),
           _ActionTile(
@@ -187,10 +183,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-//  Sub-widgets
-// ═══════════════════════════════════════════════════════════════════════════════
 
 class _SectionHeader extends StatelessWidget {
   final String label;

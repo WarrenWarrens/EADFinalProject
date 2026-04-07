@@ -101,19 +101,15 @@ class _StatsPageState extends State<StatsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Summary cards ───────────────────────────────────────────────
           if (_summary != null) _SummaryRow(summary: _summary!),
           const SizedBox(height: 24),
 
-          // ── Legend ──────────────────────────────────────────────────────
           const _CloudLegend(),
           const SizedBox(height: 16),
 
-          // ── Word cloud ─────────────────────────────────────────────────
           WordCloud(records: _records),
           const SizedBox(height: 28),
 
-          // ── Word list breakdown ────────────────────────────────────────
           const Text(
             'Word Breakdown',
             style: TextStyle(
@@ -129,10 +125,6 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-//  Summary row
-// ═══════════════════════════════════════════════════════════════════════════════
 
 class _SummaryRow extends StatelessWidget {
   final ({int totalWords, int totalAttempts, double overallAvg}) summary;
@@ -217,10 +209,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  Cloud legend
-// ═══════════════════════════════════════════════════════════════════════════════
-
 class _CloudLegend extends StatelessWidget {
   const _CloudLegend();
 
@@ -270,10 +258,6 @@ class _CloudLegend extends StatelessWidget {
       height: 8,
       decoration: BoxDecoration(color: c, shape: BoxShape.circle));
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-//  Word cloud
-// ═══════════════════════════════════════════════════════════════════════════════
 
 class WordCloud extends StatelessWidget {
   final List<VocabRecord> records;
@@ -357,10 +341,6 @@ class WordCloud extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  Word breakdown list
-// ═══════════════════════════════════════════════════════════════════════════════
-
 class _WordRow extends StatelessWidget {
   final VocabRecord record;
   const _WordRow({required this.record});
@@ -381,14 +361,12 @@ class _WordRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Colour indicator dot
             Container(
               width: 10,
               height: 10,
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: 12),
-            // Word
             Expanded(
               child: Text(
                 record.displayText,
@@ -399,7 +377,6 @@ class _WordRow extends StatelessWidget {
                 ),
               ),
             ),
-            // Attempts
             Text(
               '${record.totalAttempts}×',
               style: const TextStyle(
@@ -408,7 +385,6 @@ class _WordRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            // Score bar
             SizedBox(
               width: 60,
               child: ClipRRect(
@@ -422,7 +398,6 @@ class _WordRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            // Percentage
             SizedBox(
               width: 36,
               child: Text(

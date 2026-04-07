@@ -69,7 +69,6 @@ class CharacterPage extends StatelessWidget{
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                // Box with major content
                 GestureDetector(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +101,6 @@ class CharacterPage extends StatelessWidget{
                           ),
                         ),
 
-                        // Audio icon - Audio functionality will be implemented later!
                         Positioned(
                           top: 10,
                           right: 10,
@@ -129,7 +127,6 @@ class CharacterPage extends StatelessWidget{
             ),
           ),
 
-          // Bottom button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -146,7 +143,6 @@ class CharacterPage extends StatelessWidget{
 
 }
 
-// This page will reroute to the correct widget depending on the exerciseType
 class ExercisePage extends StatelessWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
@@ -189,11 +185,10 @@ class MultipleChoice extends StatefulWidget {
 }
 
 class _MultipleChoiceState extends State<MultipleChoice> {
-  int? selectedIndex; // Which option has been selected
-  bool hasSubmitted = false; // If the user has submitted the answer
+  int? selectedIndex;
+  bool hasSubmitted = false;
 
   bool get hasSelected{
-    // Returns true if the user has selected an option
     return selectedIndex != null;
   }
 
@@ -201,20 +196,16 @@ class _MultipleChoiceState extends State<MultipleChoice> {
     return hasSubmitted && widget.options[selectedIndex!]['correct'] == true;
   }
 
-  // Method to return option ui color
   Color _optionColor(int index) {
 
-    // On selection, before submission
     if (!hasSubmitted) {
       return index == selectedIndex ? AppColors.primaryLight : Colors.transparent;
     }
 
-    // Correct or incorrect highlight based on what user selected, after submission
     if (index == selectedIndex) {
       return isCorrect ? Colors.green.shade100 : Colors.red.shade100;
     }
 
-    // Highlights the actual correct answer
     if (widget.options[index]['correct'] == true) {
       return Colors.green.shade100;
     }
@@ -222,7 +213,6 @@ class _MultipleChoiceState extends State<MultipleChoice> {
     return Colors.transparent;
   }
 
-  // Method to return option ui border colour
   Color _optionBorderColor(int index) {
     if (!hasSubmitted) {
       return index == selectedIndex ? AppColors.primary : AppColors.primaryLight;
@@ -240,18 +230,15 @@ class _MultipleChoiceState extends State<MultipleChoice> {
   }
 
   void _onCheck() {
-    // Ensure user has selected an option
     if (!hasSelected) {
       return;
     }
 
-    // First button click action
     if (!hasSubmitted) {
       setState(() {
         hasSubmitted = true;
       });
     }
-    // Second button click action
     else {
       widget.onNext();
     }
@@ -261,16 +248,13 @@ class _MultipleChoiceState extends State<MultipleChoice> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24),
-      // Use LayoutBuilder or simply ensure the Column doesn't fight the Spacer
       child: Column(
         children: [
-          // 1. Wrap the main content in Expanded + SingleChildScrollView
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  // Top icon
                   Center(
                     child: Container(
                       width: 100,
@@ -287,7 +271,6 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // Question
                   Text(
                     widget.question,
                     textAlign: TextAlign.center,
@@ -298,7 +281,6 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  // List of options
                   ...List.generate(widget.options.length, (index) {
                     final option = widget.options[index];
                     return Padding(
@@ -332,7 +314,6 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                       ),
                     );
                   }),
-                  // Feedback on submission
                   if (hasSubmitted) ...[
                     const SizedBox(height: 16),
                     Row(
@@ -359,7 +340,6 @@ class _MultipleChoiceState extends State<MultipleChoice> {
             ),
           ),
 
-          // 2. Keep the button at the bottom (outside the scroll view)
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,

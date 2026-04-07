@@ -9,7 +9,6 @@ import '../../theme/app_theme.dart';
 import 'stats_page.dart';
 import 'settings_page.dart';
 
-// Reuse the goal + language constants from setup steps.
 const List<Map<String, String>> _kGoals = [
   {'id': 'native', 'label': 'Native', 'color': 'red'},
   {'id': 'intermediate', 'label': 'Intermediate', 'color': 'orange'},
@@ -78,7 +77,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (mounted) setState(() => _profile = updated);
   }
 
-  // ── Editors ────────────────────────────────────────────────────────────────
 
   void _saveName() {
     final trimmed = _nameController.text.trim();
@@ -340,7 +338,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }).join(', ');
   }
 
-  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +377,6 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
         child: Column(
           children: [
-            // ── Avatar ───────────────────────────────────────────────
             GestureDetector(
               onTap: _showAvatarPicker,
               child: Stack(
@@ -411,7 +407,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 20),
 
-            // ── Name ─────────────────────────────────────────────────
             _SettingsCard(
               icon: Icons.person_outline_rounded,
               label: 'Username',
@@ -470,7 +465,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 10),
 
-            // ── Language ─────────────────────────────────────────────
             _SettingsCard(
               icon: Icons.translate_rounded,
               label: 'Language',
@@ -493,7 +487,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 10),
 
-            // ── Learning Goal ────────────────────────────────────────
             _SettingsCard(
               icon: Icons.flag_rounded,
               label: 'Learning Goal',
@@ -517,7 +510,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 28),
 
-            // ── Word Cloud preview ───────────────────────────────────
             GestureDetector(
               onTap: () => Navigator.push(
                 context,
@@ -596,9 +588,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  Settings card
-// ═══════════════════════════════════════════════════════════════════════════════
+
 
 class _SettingsCard extends StatelessWidget {
   final IconData icon;
