@@ -42,7 +42,7 @@ class Win32Window {
   // Release OS resources associated with window.
   void Destroy();
 
-  // Inserts |content| into the window tree.
+  // Inserts |page-types| into the window tree.
   void SetChildContent(HWND content);
 
   // Returns the backing Window handle to enable clients to set icon and other
@@ -95,7 +95,7 @@ class Win32Window {
   // window handle for top level window.
   HWND window_handle_ = nullptr;
 
-  // window handle for hosted content.
+  // window handle for hosted page-types.
   HWND child_content_ = nullptr;
 };
 

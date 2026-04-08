@@ -3,7 +3,7 @@ import '../../../models/user_profile.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/common_widgets.dart';
 
-/// Available fictional languages — extend this list as you add content.
+/// Available fictional languages — extend this list as you add page-types.
 const List<Map<String, dynamic>> kLanguages = [
   {'id': 'navi', 'label': '"Na\'vi" (Avatar)', 'emoji': '🌿', 'enabled': true},
   {'id': 'klingon', 'label': '"Klingon" (Star Trek) 🚧', 'emoji': '🖖', 'enabled': false},

@@ -8,7 +8,7 @@ import '../../data/navi_lesson_audio.dart';
 import '../../persistent_bar.dart';
 import '../lessons/audio_mimicry_screen.dart';
 import '../lessons/simulation.dart';
-import 'lessonPage.dart';
+import '../lessons/lessonPage.dart';
 import 'stats_page.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════

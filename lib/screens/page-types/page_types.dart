@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import 'matching_screen.dart';
+import 'fill_in_blank_screen.dart';
 import '../../models/lessons.dart'; // adjust import to your model path
 
 class TextPage extends StatelessWidget {
@@ -166,6 +168,18 @@ class ExercisePage extends StatelessWidget {
           options: List<Map<String, dynamic>>.from(data['options']),
           onNext: onNext,
         );
+      case 'matching':
+        return Matching(
+          question: data['question'],
+          leftItems: data['leftItems'],
+          rightItems: data['rightItems'],
+          onNext: onNext,
+        );
+      case 'fill_blank':
+        return FillInBlank(
+            question: data['question'],
+            parts: data['parts'],
+            onNext: onNext);
       default:
         return const Center(child: Text('Unknown exercise type'));
     }
@@ -264,7 +278,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
       // Use LayoutBuilder or simply ensure the Column doesn't fight the Spacer
       child: Column(
         children: [
-          // 1. Wrap the main content in Expanded + SingleChildScrollView
+          // Wrap the main content in Expanded + SingleChildScrollView
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -359,7 +373,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
             ),
           ),
 
-          // 2. Keep the button at the bottom (outside the scroll view)
+          // Keep the button at the bottom (outside the scroll view)
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,

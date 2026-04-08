@@ -101,6 +101,40 @@
           { "text": "u", "correct": false }
         ]
       }
+    },
+    {
+      "id": 12,
+      "type": "exercise",
+      "data":{
+        "exerciseType": "matching",
+        "question": "Match the Na'vi words to English",
+        "leftItems": [
+          { "id": 1, "content": "Kaltxì" },
+          { "id": 2, "content": "Uniltìrantokx" },
+          { "id": 3, "content": "Eywa" },
+          { "id": 4, "content": "match" }
+        ],
+        "rightItems": [
+          { "id": 1, "content": "Hello" },
+          { "id": 2, "content": "Dreamwalker" },
+          { "id": 3, "content": "The Great Mother" },
+          { "id": 4, "content": "match2" }
+        ]
+      }
+    },
+
+    {
+      "id": 13,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "fill_blank",
+        "question": "Complete the sentence",
+        "parts": [
+          { "type": "text", "value": "Kaltxì, ma " },
+          { "type": "blank", "answer": "tìrey" },
+          { "type": "text", "value": "!" }
+        ]
+      }
     }
   ]
 }

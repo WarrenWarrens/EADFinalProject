@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:testing/screens/content/page_types.dart';
+import 'package:testing/screens/page-types/page_types.dart';
 import '../../models/lessons.dart';
 import '../../theme/app_theme.dart';
 
@@ -19,7 +19,27 @@ class _LessonPageState extends State<LessonPage> {
   late final List<Content> content = widget.lesson.content;
   late final int lessonLength = widget.lesson.content.length;
 
-
+  Future<bool> _onWillPop(BuildContext context) async {
+    return await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Exit Lesson"),
+            content: const Text("Are you sure you want to exit the lesson?"),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(true), // Dismiss dialog, pop screen
+                  child: const Text("Yes"),
+              ),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(false), // Dismiss dialog, do not pop screen
+                  child: const Text("No"),
+              )
+            ],
+          );
+        }
+    ) ?? false;
+  }
 
   void nextSlide() {
     if (currentContentIndex < lessonLength+1) {
@@ -30,10 +50,10 @@ class _LessonPageState extends State<LessonPage> {
   }
 
   Widget buildContentPage() {
-    // Gets the proper content page look based on content type
+    // Gets the proper page type look based on page-types type
     final contentObject = content.firstWhere((c) => c.id == currentContentIndex);
 
-    // Map pertaining to the type of content (each content type will have its own
+    // Map pertaining to the type of page-types (each page-types type will have its own
     // set of attributes
     Map<String, dynamic> dataAttrs = contentObject.data;
 
@@ -82,39 +102,54 @@ class _LessonPageState extends State<LessonPage> {
     }
 
     else{
-      // If it is not the intro of the lesson. Get the content page based on the
-      // content type
+      // If it is not the intro of the lesson. Get the page-types page based on the
+      // page-types type
 
-      // Get the correct content page
+      // Get the correct page type
       body = buildContentPage();
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Lesson ${widget.lesson.id} - ${widget.lesson.title}'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+    // To override the default back button action to show dialog
+    return PopScope(
+      canPop: false, // Prevents default back navigation
+        onPopInvoked: (bool didPop) async {
+        if (didPop) {
+          return;
+        }
+        final bool shouldPop = await _onWillPop(context);
+        if (shouldPop){
+          Navigator.of(context).pop();
+        }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Lesson ${widget.lesson.id} - ${widget.lesson.title}'),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            foregroundColor: AppColors.textPrimary,
 
-        // Progress bar
-        bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(6),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: AppColors.primaryLight,
-                  valueColor: AlwaysStoppedAnimation(AppColors.primary),
-                ),
-              ),
-            )
-        ),
-      ),
-      body: body,
+            // Progress bar
+            bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(6),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 6,
+                      backgroundColor: AppColors.primaryLight,
+                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                    ),
+                  ),
+                )
+            ),
+          ),
+          body: body,
+        )
     );
+
+
   }
 }
 

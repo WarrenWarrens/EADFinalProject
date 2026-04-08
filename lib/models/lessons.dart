@@ -45,7 +45,7 @@ class Lesson {
 class Content {
   final int id;
   final String type;
-  final Map<String, dynamic> data; // Depending on the content type, the data will have different attributes
+  final Map<String, dynamic> data; // Depending on the page-types type, the data will have different attributes
 
   const Content({
     required this.id,
@@ -53,7 +53,7 @@ class Content {
     required this.data,
   });
 
-  // Only a fromMap method since you cannot write to content data
+  // Only a fromMap method since you cannot write to page-type data
   factory Content.fromMap(Map<String, dynamic> map) {
     return Content(
       id: map['id'],
