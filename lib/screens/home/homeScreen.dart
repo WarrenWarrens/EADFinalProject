@@ -100,6 +100,28 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _goToKlingonLesson1(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('klingonlesson1.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
+  Future<void> _goToKlingonLesson2(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('klingonlesson2.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
   Future<void> _goToAudioMimicry(BuildContext ctx) async {
     await _enterLesson(() async {
       await Navigator.push(
@@ -264,6 +286,8 @@ class _HomeScreenState extends State<HomeScreen> {
             practiceInfo:
             "Here's how you'll practice:\n- Script matching\n- Audio drills",
             unlocked: true,
+            onTap: _goToKlingonLesson1,
+
           ),
           LessonEntry(
             id: 'kl_greetings',
@@ -273,6 +297,8 @@ class _HomeScreenState extends State<HomeScreen> {
             practiceInfo:
             "Here's how you'll practice:\n- Dialogue cards\n- Memory game",
             unlocked: true,
+            onTap: _goToKlingonLesson2,
+
           ),
           LessonEntry(
             id: 'kl_vocab',

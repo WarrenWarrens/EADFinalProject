@@ -1,0 +1,92 @@
+{
+  "id": 101,
+  "languageId": 2,
+  "title": "Klingon Greetings",
+  "objective": "Learn the basic, aggressive greetings of the Klingon Empire.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "Welcome to tlhIngan Hol (Klingon). The first thing you need to know is that Klingons do not have a direct translation for 'Hello'."
+      }
+    },
+    {
+      "id": 2,
+      "type": "text",
+      "data": {
+        "text": "Klingon culture values directness. Instead of asking how someone is doing, you ask them what they want."
+      }
+    },
+    {
+      "id": 3,
+      "type": "word",
+      "data": {
+        "ref": "nuqneH",
+        "description": "The closest thing to a greeting. It literally translates to 'What do you want?'. It is spoken forcefully."
+      }
+    },
+    {
+      "id": 4,
+      "type": "word",
+      "data": {
+        "ref": "Qapla'",
+        "description": "Success! Used as both a farewell and a wish of good fortune before a battle or endeavor."
+      }
+    },
+    {
+      "id": 5,
+      "type": "character",
+      "data": {
+        "letter": "Q",
+        "description": "Pay attention to the capital 'Q'. In Klingon, it is a harsh, scraping sound at the back of the throat, much harder than the English 'k'."
+      }
+    },
+    {
+      "id": 6,
+      "type": "character",
+      "data": {
+        "letter": "q",
+        "description": "The lowercase 'q' is a softer sound, similar to a standard English 'k' but pronounced further back in the mouth."
+      }
+    },
+    {
+      "id": 7,
+      "type": "word",
+      "data": {
+        "ref": "pItlh",
+        "description": "Done! / Finished! Often said when a task is completed."
+      }
+    },
+    {
+      "id": 8,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'nuqneH' literally translate to?",
+        "options": [
+          { "text": "Good morning", "correct": false },
+          { "text": "What do you want?", "correct": true },
+          { "text": "Success to your house", "correct": false },
+          { "text": "Hello friend", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "instruction": "Match the Klingon word with its English meaning.",
+        "refs": ["nuqneH", "Qapla'", "pItlh"]
+      }
+    },
+    {
+      "id": 10,
+      "type": "text",
+      "data": {
+        "text": "MajQa'! (Well done!) You've taken your first steps into the Klingon language."
+      }
+    }
+  ]
+}
