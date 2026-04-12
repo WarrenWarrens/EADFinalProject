@@ -479,7 +479,7 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
     final item = _items[_currentIndex];
     if (_score != null) {
       _scores[item.id] = _score!;
-      _tracker.recordAttempt(
+      _tracker.recordVocalAttempt(
         wordId: item.id,
         displayText: item.navi,
         score: _score!,

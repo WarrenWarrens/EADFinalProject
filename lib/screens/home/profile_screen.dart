@@ -640,6 +640,7 @@ class _StatsTab extends StatelessWidget {
           initiallyExpanded: false,
           child: _DictionaryContent(
             language: language,
+            records: vocabRecords,       // ← ADD THIS LINE
             accentColor: accentColor,
           ),
         ),
@@ -897,84 +898,65 @@ class _WordCloudContent extends StatelessWidget {
 
 class _DictionaryContent extends StatelessWidget {
   final AppLanguage language;
+  final List<VocabRecord> records;
   final Color accentColor;
 
   const _DictionaryContent({
     required this.language,
+    required this.records,
     required this.accentColor,
   });
 
-  List<Map<String, String>> get _words {
-    switch (language) {
-      case AppLanguage.klingon:
-        return [
-          {'word': 'nuqneH', 'meaning': 'What do you want?'},
-          {'word': "Qapla'", 'meaning': 'Success / Farewell'},
-          {'word': 'tlhIngan', 'meaning': 'Klingon (person)'},
-          {'word': 'batlh', 'meaning': 'Honor'},
-          {'word': 'Heghlu\'meH QaQ jajvam', 'meaning': 'Today is a good day to die'},
-        ];
-      case AppLanguage.highValyrian:
-        return [
-          {'word': 'Rytsas', 'meaning': 'Hello'},
-          {'word': 'Kirimvose', 'meaning': 'Thank you'},
-          {'word': 'Zaldrīzes', 'meaning': 'Dragon'},
-          {'word': 'Valar Morghulis', 'meaning': 'All men must die'},
-          {'word': 'Valar Dohaeris', 'meaning': 'All men must serve'},
-        ];
-      case AppLanguage.navi:
-      default:
-        return [
-          {"word": "Kaltxì", "meaning": "Hello"},
-          {"word": "Irayo", "meaning": "Thank you"},
-          {"word": "Srane", "meaning": "Yes"},
-          {"word": "Kehe", "meaning": "No"},
-          {"word": "Oel ngati kameie", "meaning": "I see you"},
-        ];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final words = _words;
+    if (records.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(20),
+        child: Text(
+          'Practice some words and they\'ll appear here.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+        ),
+      );
+    }
+    final sorted = [...records]
+      ..sort((a, b) => a.displayText.toLowerCase().compareTo(b.displayText.toLowerCase()));
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
-        children: words.asMap().entries.map((e) {
+        children: sorted.asMap().entries.map((e) {
           final i = e.key;
-          final w = e.value;
+          final r = e.value;
+          final vocal = r.vocalAverage;
+          final nonVocal = r.nonVocalAverage;
           return Padding(
-            padding: EdgeInsets.only(bottom: i < words.length - 1 ? 8 : 0),
+            padding: EdgeInsets.only(bottom: i < sorted.length - 1 ? 10 : 0),
             child: Row(
               children: [
                 Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    shape: BoxShape.circle,
-                  ),
+                  width: 6, height: 6,
+                  decoration: BoxDecoration(color: accentColor, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   flex: 2,
-                  child: Text(
-                    w['word']!,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: Text(r.displayText,
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
                 ),
-                Expanded(
-                  flex: 3,
+                _MiniRing(label: '🎤', value: vocal, accent: accentColor),
+                const SizedBox(width: 8),
+                _MiniRing(label: '📝', value: nonVocal, accent: accentColor),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 38,
                   child: Text(
-                    w['meaning']!,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFFAAAAAA),
-                    ),
+                    '${(r.rollingAverage * 100).round()}%',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: _WordCloudContent._scoreColor(r.rollingAverage)),
                   ),
                 ),
               ],
@@ -1607,6 +1589,42 @@ class _ActionTile extends StatelessWidget {
                   size: 18, color: const Color(0xFFBBBBBB)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MiniRing extends StatelessWidget {
+  final String label;
+  final double? value;   // null = no data yet
+  final Color accent;
+  const _MiniRing({required this.label, required this.value, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    final v = value;
+    return SizedBox(
+      width: 30,
+      child: Column(
+        children: [
+          SizedBox(
+            width: 20, height: 20,
+            child: Stack(alignment: Alignment.center, children: [
+              CircularProgressIndicator(
+                value: v ?? 0,
+                strokeWidth: 2.5,
+                backgroundColor: const Color(0xFF333333),
+                color: v == null ? const Color(0xFF555555) : accent,
+              ),
+              Text(label, style: const TextStyle(fontSize: 9)),
+            ]),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            v == null ? '—' : '${(v * 100).round()}',
+            style: const TextStyle(fontSize: 9, color: Color(0xFFAAAAAA)),
+          ),
+        ],
       ),
     );
   }
