@@ -15,6 +15,7 @@ migrate_working_dir/
 *.tmp
 *.temp
 *.onnx
+*.task
 
 # Environment Variables & Secrets (CRITICAL)
 .env
