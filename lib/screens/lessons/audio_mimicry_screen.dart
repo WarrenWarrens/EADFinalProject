@@ -14,6 +14,7 @@ import '../../services/tts_service.dart';
 import '../../services/audio_analysis_service.dart';
 import '../../services/vocab_tracking_service.dart';
 import '../../theme/app_theme.dart';
+import '../../services/audio_analysis_service_onnx.dart';
 
 // Maximum recording duration before auto-stop.
 const int kMaxRecordingSeconds = 20;
@@ -40,6 +41,8 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
   bool _isRecording = false;
   bool _hasRecorded = false;
   double? _score;
+  static const bool _useOnnx = true;
+  String? _heardIpa;
   String? _feedback;
   String _statusMessage = 'Tap the speaker to hear the pronunciation';
 
@@ -378,15 +381,56 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
       _isRecording = false;
       _statusMessage = 'Analysing\u2026';
     });
-    await _scoreLocally(item);
+    if (_useOnnx) {
+      await _scoreWithOnnx(item);
+    } else {
+      await _scoreLocally(item);
+    }
+  }
+  Future<void> _scoreWithOnnx(VocabItem item) async {
+    print('[ONNX] _scoreWithOnnx entered, useOnnx=$_useOnnx');
+    if (_recordingPath == null) return;
+
+    try {
+      await NaviIpaService().init();
+      final result = await NaviIpaService().score(
+        wavPath: _recordingPath!,
+        expectedIpa: item.ipa.replaceAll(RegExp(r'[\[\]/]'), ''),
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _score = result.score;
+        _heardIpa = result.heard;
+        _feedback = _ipaFeedback(result);
+        _segmentScores = [];
+        _hasRecorded = true;
+        _statusMessage = _feedback!;
+      });
+    } catch (e) {
+      print('[Score] ONNX analysis error: $e');
+      if (!mounted) return;
+      setState(() {
+        _score = 0.0;
+        _hasRecorded = true;
+        _statusMessage = 'Phoneme analysis failed — try again';
+      });
+    }
   }
 
+  String _ipaFeedback(({String heard, String expected, double score}) r) {
+    if (r.score >= 0.85) return 'Great! Heard "${r.heard}"';
+    if (r.score >= 0.65) return 'Close — heard "${r.heard}", expected "${r.expected}"';
+    if (r.score >= 0.40) return 'Try again — heard "${r.heard}"';
+    return 'Didn\'t catch it — heard "${r.heard}"';
+  }
   // ── Local MFCC + DTW scoring ──────────────────────────────────────────────
   //
   // Compares the user's WAV recording against the reference TTS WAV using
   // MFCC feature extraction and Dynamic Time Warping. Fully offline.
 
   Future<void> _scoreLocally(VocabItem item) async {
+    print('[MFCC] _scoreLocally entered — THIS SHOULD NOT FIRE');
     if (_recordingPath == null) return;
 
     // Check that we have a reference to compare against

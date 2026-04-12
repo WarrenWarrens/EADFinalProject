@@ -9,7 +9,7 @@ import 'services/local_storage_service.dart';
 import 'services/music_service.dart';
 import 'services/volume_service.dart';
 import 'widgets/app_language.dart';
-
+import 'screens/model_bootstrap_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,7 +92,8 @@ class _LinguaLoreAppState extends State<LinguaLoreApp>
           themeMode: themeMode,
           debugShowCheckedModeBanner: false,
           navigatorKey: appNavigatorKey,
-          home: const _StartupRouter(),
+          //home: const _StartupRouter(),
+          home: const _ModelGate(),
           builder: (context, child) {
             return PersistentBarWrapper(
               child: child ?? const SizedBox.shrink(),
@@ -151,5 +152,24 @@ class _StartupRouterState extends State<_StartupRouter> {
     return const Scaffold(
       body: Center(child: CircularProgressIndicator()),
     );
+  }
+}
+/// Gates the rest of the app on model availability. On first launch (or
+/// after user cleared app data), shows the download UI. Otherwise proceeds
+/// immediately to the normal startup routing.
+class _ModelGate extends StatefulWidget {
+  const _ModelGate();
+
+  @override
+  State<_ModelGate> createState() => _ModelGateState();
+}
+
+class _ModelGateState extends State<_ModelGate> {
+  bool _ready = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_ready) return const _StartupRouter();
+    return ModelBootstrapPage(onReady: () => setState(() => _ready = true));
   }
 }

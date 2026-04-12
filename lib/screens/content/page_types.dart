@@ -16,6 +16,7 @@ import '../../services/tts_service.dart';
 import '../../services/volume_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_language.dart';
+import '../../services/audio_analysis_service_onnx.dart';
 
 class TextPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -737,7 +738,9 @@ class AudioMimicryExercise extends StatefulWidget {
 class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
   final AudioPlayer _player = AudioPlayer();
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
-
+  String? _cachedReferenceIpa;
+  String? _heardIpa;          // ← ADD
+  String? _referenceIpa;      // ← ADD (the expected/reference transcription we scored against)
   String? _localPath;
   String? _referenceWavPath;   // PCM16 WAV — required for analysis
   String? _naviText;
@@ -887,12 +890,15 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
         await _recorder.startRecorder(
           toFile: _recordPath,
           codec: Codec.pcm16WAV,
+          sampleRate: 16000,
+          numChannels: 1,
         );
         setState(() {
           _isRecording = true;
-          // Clear any previous result when the user starts a fresh take.
           _score = null;
           _feedback = null;
+          _heardIpa = null;
+          _referenceIpa = null;
         });
       }
     } catch (e) {
@@ -901,41 +907,78 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
     }
   }
 
-  /// Compare the recorded attempt against the reference WAV using
-  /// AudioAnalysisService and surface a score + feedback message.
+  /// On-device Wav2Vec2 CTC scoring via NaviIpaService.
+  /// Priority for the expected IPA:
+  ///   1. Hand-authored IPA from the lesson/dictionary (_expectedIpa)
+  ///   2. Transcribe the reference WAV through the same model, use that
+  ///   3. Transcribe-only (no score) as last resort
   Future<void> _scoreRecording() async {
+    print('[ONNX] page_types._scoreRecording fired, refWav=$_referenceWavPath');
     if (_recordPath == null) return;
-    if (_referenceWavPath == null) {
-      // No reference available (TTS-hint-only items, or conversion failed).
-      // Still mark as recorded so the Continue button enables, but skip
-      // scoring since there's nothing meaningful to compare against.
-      if (mounted) {
-        setState(() {
-          _feedback = 'Recorded — no reference audio available for scoring.';
-        });
-      }
-      return;
-    }
 
     setState(() => _scoring = true);
     try {
-      final result = await AudioAnalysisService.compare(
-        referencePath: _referenceWavPath!,
-        attemptPath: _recordPath!,
-      );
-      if (mounted) {
+      await NaviIpaService().init();
+
+      // ── Resolve target IPA ─────────────────────────────────────────────
+      String expected = '';
+
+      if (_referenceWavPath != null) {
+        // Transcribe the reference TTS audio through the same model.
+        // Whatever phonemes the model hears in the reference become our
+        // target — this self-consistent approach cancels out model bias.
+        if (_cachedReferenceIpa != null) {
+          expected = _cachedReferenceIpa!;
+        } else {
+          try {
+            expected = await NaviIpaService().transcribe(_referenceWavPath!);
+            _cachedReferenceIpa = expected;
+            print('[ONNX] reference transcription → "$expected" (cached)');
+          } catch (e) {
+            debugPrint('[ONNX] reference transcription failed: $e');
+          }
+        }
+      }
+
+      if (expected.isEmpty) {
+        // Still nothing — transcribe the attempt so user sees *something*.
+        final heard = await NaviIpaService().transcribe(_recordPath!);
+        if (!mounted) return;
         setState(() {
-          _score = result.score;
-          _feedback = result.feedback;
+          _score = 0.5;
+          _heardIpa = heard;
+          _referenceIpa = null;
+          _feedback = 'No reference available — transcription only';
           _scoring = false;
         });
+        return;
       }
+
+      final result = await NaviIpaService().score(
+        wavPath: _recordPath!,
+        expectedIpa: expected,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _score = result.score;
+        _heardIpa = result.heard;
+        _referenceIpa = result.expected;
+        _feedback = result.score >= 0.85
+            ? 'Great match!'
+            : result.score >= 0.65
+            ? 'Close — small differences'
+            : result.score >= 0.40
+            ? 'Getting there — keep practising'
+            : 'Try again';
+        _scoring = false;
+      });
     } catch (e) {
-      debugPrint('[Mimicry] Analysis error: $e');
+      debugPrint('[ONNX] page_types scoring error: $e');
       if (mounted) {
         setState(() {
           _score = 0.0;
-          _feedback = 'Analysis failed — try recording again';
+          _feedback = 'Phoneme analysis failed — try again';
           _scoring = false;
         });
       }
@@ -1044,6 +1087,13 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
                       label: _scoreLabel(_score!),
                     ),
                   ),
+                  if (_heardIpa != null || _referenceIpa != null) ...[
+                    const SizedBox(height: 16),
+                    _IpaComparisonCard(
+                      heard: _heardIpa ?? '',
+                      reference: _referenceIpa,
+                    ),
+                  ],
                   if (_feedback != null && _feedback!.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Padding(
@@ -1120,6 +1170,76 @@ class _MimicryScoreBadge extends StatelessWidget {
   }
 }
 
+// ── IPA comparison card ──────────────────────────────────────────────────────
+//
+// Stacks reference IPA (what the model heard in the TTS/native reference)
+// over the player's IPA (what the model heard in their recording). Gives
+// the user concrete phonetic feedback instead of just a score.
+
+class _IpaComparisonCard extends StatelessWidget {
+  final String heard;
+  final String? reference;
+
+  const _IpaComparisonCard({required this.heard, this.reference});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.inputBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (reference != null && reference!.isNotEmpty) ...[
+            _row('Reference', reference!, AppColors.primary),
+            const SizedBox(height: 8),
+            const Divider(height: 1),
+            const SizedBox(height: 8),
+          ],
+          _row('You said', heard.isEmpty ? '(nothing detected)' : heard,
+              AppColors.textPrimary),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(String label, String ipa, Color color) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 78,
+          child: Text(
+            label,
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+                letterSpacing: 0.3),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            '/$ipa/',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: color,
+              fontFamily: 'monospace',
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 // ── MatchingExercise ──────────────────────────────────────────────────────────
 
 class MatchingExercise extends StatefulWidget {

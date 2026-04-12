@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
@@ -512,6 +514,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final lessons = _getLessons();
     final accent = _selectedLanguage.accentColor;
     final palette = AppTheme.of(context);
+
+
 
     return Scaffold(
       backgroundColor: palette.background,

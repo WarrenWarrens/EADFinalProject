@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/app_language.dart';
 import '../../widgets/app_nav_bar.dart';
 import 'profile_screen.dart';
+import '../lessons/simulation_convo.dart';
 
 class StudyPage extends StatefulWidget {
   final AppLanguage selectedLanguage;
@@ -184,6 +185,22 @@ class _StudyPageState extends State<StudyPage> {
             ),
           ),
           const Spacer(),
+          // ── Chat shortcut ──────────────────────────────────────────
+          IconButton(
+            tooltip: 'Chat with a Na\'vi speaker',
+            icon: const Icon(
+              Icons.chat_bubble_outline_rounded,
+              color: AppColors.textSecondary,
+            ),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const SimulationConvoScreen(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 4),
           _LanguageToggle(
             selected: _language,
             onChanged: _onLanguageChange,
