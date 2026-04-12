@@ -6,6 +6,9 @@ import '../../models/user_profile.dart';
 import '../../models/vocab_record.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/music_service.dart';
+import '../../services/volume_service.dart';
+import '../../theme/app_theme.dart';
+import 'study_page.dart';
 import '../../services/vocab_tracking_service.dart';
 import '../../widgets/app_nav_bar.dart';
 import '../../widgets/app_language.dart';
@@ -78,7 +81,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
   void _onNavTap(int index) {
-    if (index == 0) return;
+    if (index == 0) return; // already on Profile
+    if (index == 1) {
+      // Study — replace this route so back-stack stays clean.
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => StudyPage(selectedLanguage: _language),
+        ),
+      );
+      return;
+    }
+    // index == 2: Courses (the underlying home screen)
     Navigator.pop(context);
   }
 
@@ -90,8 +104,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
+      backgroundColor: palette.background,
       body: SafeArea(
         bottom: false,
         child: _loading
@@ -175,8 +190,9 @@ class _TabSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Container(
-      color: const Color(0xFF0D0D0D),
+      color: palette.background,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Row(
         children: List.generate(3, (i) {
@@ -192,10 +208,10 @@ class _TabSelector extends StatelessWidget {
                       duration: const Duration(milliseconds: 200),
                       height: 72,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1A),
+                        color: palette.surface,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: on ? accentColor : const Color(0xFF2A2A2A),
+                          color: on ? accentColor : palette.border,
                           width: on ? 2.5 : 1.5,
                         ),
                         boxShadow: on
@@ -210,7 +226,7 @@ class _TabSelector extends StatelessWidget {
                       child: Center(
                         child: Icon(
                           icons[i],
-                          color: on ? accentColor : const Color(0xFF555555),
+                          color: on ? accentColor : palette.textMuted,
                           size: 28,
                         ),
                       ),
@@ -223,7 +239,7 @@ class _TabSelector extends StatelessWidget {
                         fontWeight:
                         on ? FontWeight.w600 : FontWeight.w400,
                         color:
-                        on ? Colors.white : const Color(0xFF666666),
+                        on ? palette.textPrimary : palette.textMuted,
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -276,7 +292,7 @@ class _ProfileTab extends StatelessWidget {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2A2A2A),
+                    color: AppTheme.dark.surfaceAlt,
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
                         color: accentColor.withOpacity(0.35), width: 2),
@@ -304,7 +320,7 @@ class _ProfileTab extends StatelessWidget {
                       color: accentColor,
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: const Color(0xFF0D0D0D), width: 2.5),
+                          color: AppTheme.dark.background, width: 2.5),
                     ),
                     child: const Icon(
                       Icons.camera_alt_rounded,
@@ -323,6 +339,7 @@ class _ProfileTab extends StatelessWidget {
             label: 'Username',
             value: profile?.username ?? 'Not set',
             accentColor: accentColor,
+            onTap: profile == null ? null : () => _editUsername(context),
           ),
           const SizedBox(height: 12),
 
@@ -331,6 +348,7 @@ class _ProfileTab extends StatelessWidget {
             label: 'Email',
             value: profile?.email ?? 'Not set',
             accentColor: accentColor,
+            onTap: profile == null ? null : () => _editEmail(context),
           ),
           const SizedBox(height: 12),
 
@@ -339,6 +357,7 @@ class _ProfileTab extends StatelessWidget {
             label: 'Learning Goal',
             value: _goalLabel(profile?.learningGoal),
             accentColor: accentColor,
+            onTap: profile == null ? null : () => _editLearningGoal(context),
           ),
         ],
       ),
@@ -357,6 +376,154 @@ class _ProfileTab extends StatelessWidget {
         return 'Not set';
     }
   }
+
+  Future<void> _editUsername(BuildContext context) async {
+    final result = await _showTextEditDialog(
+      context,
+      title: 'Edit Username',
+      initial: profile?.username ?? '',
+      hint: 'Username',
+    );
+    if (result != null && result != profile?.username) {
+      await onSave(profile!.copyWith(username: result));
+    }
+  }
+
+  Future<void> _editEmail(BuildContext context) async {
+    final result = await _showTextEditDialog(
+      context,
+      title: 'Edit Email',
+      initial: profile?.email ?? '',
+      hint: 'name@example.com',
+      keyboardType: TextInputType.emailAddress,
+      validator: (v) {
+        if (v.isEmpty) return 'Email cannot be empty';
+        // Pragmatic RFC-5322-ish: local@domain.tld, no spaces, TLD ≥ 2 chars.
+        final re = RegExp(
+            r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$");
+        if (!re.hasMatch(v)) return 'Enter a valid email address';
+        return null;
+      },
+    );
+    if (result != null && result != profile?.email) {
+      await onSave(profile!.copyWith(email: result));
+    }
+  }
+
+  Future<String?> _showTextEditDialog(
+      BuildContext context, {
+        required String title,
+        required String initial,
+        required String hint,
+        TextInputType keyboardType = TextInputType.text,
+        String? Function(String value)? validator,
+      }) {
+    final controller = TextEditingController(text: initial);
+    String? errorText;
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocalState) => AlertDialog(
+          backgroundColor: AppTheme.dark.surface,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20)),
+          title: Text(title,
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.w700)),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: keyboardType,
+            style: const TextStyle(color: Colors.white),
+            onChanged: (_) {
+              if (errorText != null) {
+                setLocalState(() => errorText = null);
+              }
+            },
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(color: Color(0xFF666666)),
+              errorText: errorText,
+              filled: true,
+              fillColor: AppTheme.dark.surfaceAlt,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: const Color(0xFF333333)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: accentColor, width: 1.5),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel',
+                  style: TextStyle(color: Color(0xFF999999))),
+            ),
+            TextButton(
+              onPressed: () {
+                final trimmed = controller.text.trim();
+                final err = validator?.call(trimmed);
+                if (err != null) {
+                  setLocalState(() => errorText = err);
+                  return;
+                }
+                Navigator.pop(ctx, trimmed);
+              },
+              child: Text('Save', style: TextStyle(color: accentColor)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editLearningGoal(BuildContext context) async {
+    const goals = [
+      ('beginner', 'Basic'),
+      ('intermediate', 'Intermediate Speaker'),
+      ('native', 'Native'),
+    ];
+    final current = profile?.learningGoal;
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.dark.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        title: const Text('Learning Goal',
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.w700)),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (id, label) in goals)
+              RadioListTile<String>(
+                value: id,
+                groupValue: current,
+                activeColor: accentColor,
+                title: Text(label,
+                    style: const TextStyle(color: Colors.white)),
+                onChanged: (v) => Navigator.pop(ctx, v),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel',
+                style: TextStyle(color: Color(0xFF999999))),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result != current) {
+      await onSave(profile!.copyWith(learningGoal: result));
+    }
+  }
 }
 
 class _ProfileInfoTile extends StatelessWidget {
@@ -364,59 +531,72 @@ class _ProfileInfoTile extends StatelessWidget {
   final String label;
   final String value;
   final Color accentColor;
+  final VoidCallback? onTap;
 
   const _ProfileInfoTile({
     required this.icon,
     required this.label,
     required this.value,
     required this.accentColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: accentColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: accentColor, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Row(
             children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0xFF999999),
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.4,
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: accentColor, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF999999),
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      value,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: Color(0xFF111111),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF111111),
-                  fontWeight: FontWeight.w600,
+              if (onTap != null)
+                const Icon(
+                  Icons.edit_outlined,
+                  size: 18,
+                  color: const Color(0xFFBBBBBB),
                 ),
-              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -598,7 +778,7 @@ class _ExpandableStatCardState extends State<_ExpandableStatCard>
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2A2A2A),
+                        color: AppTheme.dark.surfaceAlt,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: widget.child,
@@ -634,11 +814,11 @@ class _WordCloudContent extends StatelessWidget {
     } else if (avg >= 0.45) {
       final t = ((avg - 0.45) / 0.30).clamp(0.0, 1.0);
       return Color.lerp(
-          const Color(0xFFFF9800), const Color(0xFF8BC34A), t)!;
+          AppColors.warning, const Color(0xFF8BC34A), t)!;
     } else {
       final t = (avg / 0.45).clamp(0.0, 1.0);
       return Color.lerp(
-          const Color(0xFFB71C1C), const Color(0xFFFF9800), t)!;
+          const Color(0xFFB71C1C), AppColors.warning, t)!;
     }
   }
 
@@ -842,8 +1022,8 @@ class _LessonsContent extends StatelessWidget {
   }
 
   Color _scoreColor(int score) {
-    if (score >= 80) return const Color(0xFF4CAF50);
-    if (score >= 60) return const Color(0xFFFF9800);
+    if (score >= 80) return AppColors.success;
+    if (score >= 60) return AppColors.warning;
     return const Color(0xFF666666);
   }
 
@@ -944,7 +1124,8 @@ class _SettingsTabState extends State<_SettingsTab> {
   late bool _notifications;
   late bool _microphone;
   late bool _camera;
-  late bool _musicPlaying;
+  late double _musicVolume;
+  late double _voiceVolume;
 
   @override
   void initState() {
@@ -953,7 +1134,62 @@ class _SettingsTabState extends State<_SettingsTab> {
     _notifications = widget.profile?.notifications ?? true;
     _microphone = widget.profile?.allowMicrophone ?? false;
     _camera = widget.profile?.allowCamera ?? false;
-    _musicPlaying = MusicService().isPlaying;
+    _musicVolume = VolumeService().musicVolume;
+    _voiceVolume = VolumeService().voiceVolume;
+  }
+
+  void _setMusicVolume(double v) {
+    setState(() => _musicVolume = v);
+    MusicService().setMusicVolume(v);
+  }
+
+  void _setVoiceVolume(double v) {
+    setState(() => _voiceVolume = v);
+    VolumeService().setVoiceVolume(v);
+  }
+
+  // 0 = dark, 1 = light — matches AppTheme.themes indices.
+  String _themeLabel(int idx) => idx == 0 ? 'Dark' : 'Light';
+
+  Future<void> _showThemePicker(BuildContext context, Color accent) async {
+    final current = appThemeIndex.value;
+    final result = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.dark.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        title: const Text('Theme',
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.w700)),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (int i = 0; i < AppTheme.themes.length; i++)
+              RadioListTile<int>(
+                value: i,
+                groupValue: current,
+                activeColor: accent,
+                title: Text(_themeLabel(i),
+                    style: const TextStyle(color: Colors.white)),
+                onChanged: (v) => Navigator.pop(ctx, v),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel',
+                style: TextStyle(color: Color(0xFF999999))),
+          ),
+        ],
+      ),
+    );
+    if (result != null) {
+      appThemeIndex.value = result;
+      if (mounted) setState(() {}); // refresh subtitle text
+    }
   }
 
   void _toggle(String field, bool value) {
@@ -982,24 +1218,11 @@ class _SettingsTabState extends State<_SettingsTab> {
     ));
   }
 
-  void _toggleMusic() {
-    final music = MusicService();
-    setState(() {
-      if (_musicPlaying) {
-        music.pause();
-        _musicPlaying = false;
-      } else {
-        music.resume();
-        _musicPlaying = true;
-      }
-    });
-  }
-
   void _showResetConfirm() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: AppTheme.dark.surface,
         shape:
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Reset all data?',
@@ -1039,13 +1262,34 @@ class _SettingsTabState extends State<_SettingsTab> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       children: [
         _SettingsSectionHeader(label: 'Audio'),
-        _ToggleTile(
-          icon: Icons.music_note_rounded,
-          label: 'Stop Music',
-          subtitle: 'Pause the background music',
-          value: _musicPlaying,
+        _SliderTile(
+          icon: Icons.volume_up_rounded,
+          label: 'Music Volume',
+          subtitle: 'Background music level',
+          value: _musicVolume,
           accentColor: accent,
-          onChanged: (_) => _toggleMusic(),
+          onChanged: _setMusicVolume,
+        ),
+        const SizedBox(height: 8),
+        _SliderTile(
+          icon: Icons.record_voice_over_rounded,
+          label: 'Voice Volume',
+          subtitle: 'Spoken word and TTS level',
+          value: _voiceVolume,
+          accentColor: accent,
+          onChanged: _setVoiceVolume,
+        ),
+
+        const SizedBox(height: 16),
+
+        _SettingsSectionHeader(label: 'Appearance'),
+        _ActionTile(
+          icon: Icons.palette_outlined,
+          label: 'Theme',
+          subtitle: _themeLabel(appThemeIndex.value),
+          accentColor: accent,
+          isDanger: false,
+          onTap: () => _showThemePicker(context, accent),
         ),
 
         const SizedBox(height: 16),
@@ -1113,7 +1357,7 @@ class _SettingsTabState extends State<_SettingsTab> {
           icon: Icons.delete_outline_rounded,
           label: 'Reset All Data',
           subtitle: 'Clear progress and start fresh',
-          accentColor: const Color(0xFFE53935),
+          accentColor: AppColors.error,
           isDanger: true,
           onTap: _showResetConfirm,
         ),
@@ -1209,6 +1453,95 @@ class _ToggleTile extends StatelessWidget {
 }
 
 
+class _SliderTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final double value;
+  final Color accentColor;
+  final ValueChanged<double> onChanged;
+
+  const _SliderTile({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.value,
+    required this.accentColor,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(icon, color: accentColor, size: 18),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(label,
+                        style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF111111))),
+                    Text('${(value * 100).round()}%',
+                        style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF666666))),
+                  ],
+                ),
+                Text(subtitle,
+                    style: const TextStyle(
+                        fontSize: 11, color: Color(0xFF999999))),
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 3,
+                    thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 7),
+                    overlayShape: const RoundSliderOverlayShape(
+                        overlayRadius: 14),
+                    activeTrackColor: accentColor,
+                    inactiveTrackColor: const Color(0xFFE0E0E0),
+                    thumbColor: accentColor,
+                    overlayColor: accentColor.withOpacity(0.15),
+                  ),
+                  child: Slider(
+                    value: value.clamp(0.0, 1.0),
+                    min: 0,
+                    max: 1,
+                    onChanged: onChanged,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 class _ActionTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1259,7 +1592,7 @@ class _ActionTile extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: isDanger
-                          ? const Color(0xFFE53935)
+                          ? AppColors.error
                           : const Color(0xFF111111),
                     ),
                   ),

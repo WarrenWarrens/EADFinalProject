@@ -1,4 +1,4 @@
-import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_scatter/flutter_scatter.dart';
 import '../../models/vocab_record.dart';
@@ -39,18 +39,10 @@ class _StatsPageState extends State<StatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: const BackButton(color: AppColors.textPrimary),
         title: const Text(
           'Your Progress',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
       body: _loading
@@ -228,22 +220,22 @@ class _CloudLegend extends StatelessWidget {
             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
           const SizedBox(width: 8),
-          _dot(const Color(0xFF4CAF50)),
+          _dot(AppColors.success),
           const SizedBox(width: 4),
           const Text('Strong',
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
-          _dot(const Color(0xFFFF9800)),
+          _dot(AppColors.warning),
           const SizedBox(width: 4),
           const Text('OK',
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           const SizedBox(width: 12),
-          _dot(const Color(0xFFE53935)),
+          _dot(AppColors.error),
           const SizedBox(width: 4),
           const Text('Weak',
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           const Spacer(),
-          const Text('Size = frequency',
+          const Text('Size = difficulty',
               style: TextStyle(
                   fontSize: 10,
                   color: AppColors.textSecondary,
@@ -277,26 +269,26 @@ class WordCloud extends StatelessWidget {
     }
   }
 
-  /// Logarithmic font size scaling.
-  /// Prevents one very high-frequency word from dwarfing everything else.
-  /// Min 14, max 48.
-  static double fontSize(int attempts, int maxAttempts) {
-    if (maxAttempts <= 1) return 22.0;
-    final logAttempts = log(attempts.clamp(1, maxAttempts).toDouble());
-    final logMax = log(maxAttempts.toDouble());
-    final t = (logAttempts / logMax).clamp(0.0, 1.0);
-    return 14.0 + t * 34.0;
+  /// Font size driven by difficulty: lowest score → largest text.
+  ///
+  /// Sizes are static endpoints — lerp is linear between them so the
+  /// visual difference is predictable regardless of the dataset.
+  ///   rollingAverage = 0.0 (never correct)  → [_maxFontSize] (48)
+  ///   rollingAverage = 1.0 (always correct) → [_minFontSize] (14)
+  static const double _minFontSize = 14.0;
+  static const double _maxFontSize = 48.0;
+
+  static double fontSize(double rollingAverage) {
+    final t = rollingAverage.clamp(0.0, 1.0);
+    return _maxFontSize + t * (_minFontSize - _maxFontSize);
   }
 
   @override
   Widget build(BuildContext context) {
     if (records.isEmpty) return const SizedBox.shrink();
 
-    final maxAttempts =
-    records.map((r) => r.totalAttempts).reduce((a, b) => a > b ? a : b);
-
     final children = records.map((r) {
-      final size = fontSize(r.totalAttempts, maxAttempts);
+      final size = fontSize(r.rollingAverage);
       final color = scoreColor(r.rollingAverage);
       return Tooltip(
         message:

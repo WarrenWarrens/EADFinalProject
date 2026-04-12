@@ -50,10 +50,7 @@ class _SimScreenState extends State<SimScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Conversation Simulation'),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          foregroundColor: AppColors.textPrimary,
+          title: const Text('Conversation Simulation'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(24),

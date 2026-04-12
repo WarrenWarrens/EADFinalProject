@@ -1,0 +1,225 @@
+{
+  "id": 3,
+  "languageId": 1,
+  "title": "Na'vi Introductions",
+  "objective": "Learn to greet others, introduce yourself, and ask how someone is doing.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "Now that you know some words, let's learn how to use them in real situations. This lesson covers greetings — the phrases you need to start any conversation in Na'vi."
+      }
+    },
+    {
+      "id": 2,
+      "type": "text",
+      "data": {
+        "text": "Na'vi greetings range from casual to deeply spiritual. Unlike English, where 'hello' works in almost any setting, Na'vi has different greetings for different relationships and moments."
+      }
+    },
+    {
+      "id": 3,
+      "type": "text",
+      "data": {
+        "text": "👋 The basics"
+      }
+    },
+    {
+      "id": 4,
+      "type": "word",
+      "data": {
+        "ref": "kaltxì",
+        "description": "The everyday greeting. Use it like English 'hi' or 'hello' — appropriate in most situations."
+      }
+    },
+    {
+      "id": 5,
+      "type": "phrase",
+      "data": {
+        "navi": "Kaltxì, ma 'eylan",
+        "english": "Hello, friend",
+        "ttsHint": "kahl-tee, mah ay-lahn",
+        "breakdown": [
+          { "ref": "kaltxì" },
+          { "navi": "ma", "english": "(used before names/titles when addressing someone)" },
+          { "ref": "'eylan" }
+        ],
+        "description": "A warmer, friendlier version. The little word 'ma' is the vocative marker — use it whenever you're speaking directly to someone by name or title."
+      }
+    },
+    {
+      "id": 6,
+      "type": "phrase",
+      "data": {
+        "navi": "Eywa ngahu",
+        "english": "Eywa be with you",
+        "ttsHint": "ay-wah ngah-hoo",
+        "breakdown": [
+          { "ref": "eywa" },
+          { "navi": "ngahu", "english": "with you" }
+        ],
+        "description": "A blessing used when parting ways. Eywa is the Na'vi name for their planetary mother spirit. Closer to 'goodbye and bless you' than just 'bye'."
+      }
+    },
+    {
+      "id": 7,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which of these is the standard everyday greeting in Na'vi?",
+        "options": [
+          { "text": "Eywa ngahu",   "correct": false },
+          { "text": "Kaltxì",       "correct": true },
+          { "text": "ma 'eylan",    "correct": false },
+          { "text": "Oel ngati",    "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "audio_mimicry",
+        "instruction": "Listen to the greeting, then record yourself saying it.",
+        "navi": "Kaltxì, ma 'eylan",
+        "english": "Hello, friend",
+        "ttsHint": "kahl-tee, mah ay-lahn"
+      }
+    },
+    {
+      "id": 9,
+      "type": "text",
+      "data": {
+        "text": "🌿 Asking how someone is"
+      }
+    },
+    {
+      "id": 10,
+      "type": "phrase",
+      "data": {
+        "navi": "Ngaru lu fpom srak?",
+        "english": "How are you? (lit: 'Do you have well-being?')",
+        "ttsHint": "ngah-roo loo fpom srahk",
+        "breakdown": [
+          { "navi": "Ngaru", "english": "to you" },
+          { "navi": "lu",    "english": "is/are" },
+          { "ref": "fpom" },
+          { "ref": "srak" }
+        ],
+        "description": "The closest equivalent to 'how are you?'. Note that 'srak' at the end of any sentence turns it into a yes/no question."
+      }
+    },
+    {
+      "id": 11,
+      "type": "phrase",
+      "data": {
+        "navi": "Oeru lu fpom",
+        "english": "I am well",
+        "ttsHint": "oh-eh-roo loo fpom",
+        "breakdown": [
+          { "navi": "Oeru", "english": "to me" },
+          { "navi": "lu",   "english": "is/are" },
+          { "ref": "fpom" }
+        ],
+        "description": "The standard answer when someone asks how you are. Literally: 'to me there is well-being'."
+      }
+    },
+    {
+      "id": 12,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "fill_in_blank",
+        "instruction": "Complete the response: someone has just asked you how you are.",
+        "sentence": "Oeru lu _____.",
+        "answer": "fpom",
+        "hint": "well-being",
+        "options": ["fpom", "tute", "Eywa", "ikran"]
+      }
+    },
+    {
+      "id": 13,
+      "type": "text",
+      "data": {
+        "text": "💫 The deeper greeting"
+      }
+    },
+    {
+      "id": 14,
+      "type": "phrase",
+      "data": {
+        "navi": "Oel ngati kameie",
+        "english": "I See you",
+        "ttsHint": "oh-el ngah-tee kah-meh-ee-eh",
+        "breakdown": [
+          { "navi": "Oel",    "english": "I (agent)" },
+          { "navi": "ngati",  "english": "you (object)" },
+          { "ref":  "kame" }
+        ],
+        "description": "The most famous Na'vi phrase. This isn't ordinary 'seeing' — it means 'I see into you, I understand who you are'. Used between people who deeply respect each other. Capitalized in English as 'See' to mark the difference from physical sight."
+      }
+    },
+    {
+      "id": 15,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "listen_choose",
+        "instruction": "Listen and choose what this phrase means.",
+        "navi": "Eywa ngahu",
+        "ttsHint": "ay-wah ngah-hoo",
+        "options": [
+          { "text": "Hello, friend",      "correct": false },
+          { "text": "How are you?",       "correct": false },
+          { "text": "Eywa be with you",   "correct": true  },
+          { "text": "I See you",          "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "instruction": "Match each phrase to its meaning.",
+        "pairs": [
+          { "left": "Kaltxì",            "right": "Hello" },
+          { "left": "Eywa ngahu",        "right": "Eywa be with you" },
+          { "left": "Oeru lu fpom",      "right": "I am well" },
+          { "left": "Oel ngati kameie",  "right": "I See you" }
+        ]
+      }
+    },
+    {
+      "id": 17,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "audio_mimicry",
+        "instruction": "The most famous Na'vi phrase. Listen, then record yourself.",
+        "navi": "Oel ngati kameie",
+        "english": "I See you",
+        "ttsHint": "oh-el ngah-tee kah-meh-ee-eh"
+      }
+    },
+    {
+      "id": 18,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does the word 'ma' do in 'Kaltxì, ma 'eylan'?",
+        "options": [
+          { "text": "It means 'hello'",                                  "correct": false },
+          { "text": "It marks that you're addressing someone directly", "correct": true  },
+          { "text": "It means 'friend'",                                "correct": false },
+          { "text": "It's a question marker",                           "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 19,
+      "type": "text",
+      "data": {
+        "text": "🎉 You can now greet a Na'vi speaker, ask how they're doing, respond when asked, and say goodbye with a blessing. That's enough to start a real conversation. You've finished the Fundamental level — the Intermediate lessons will start teaching you how Na'vi sentences are actually built."
+      }
+    }
+  ]
+}

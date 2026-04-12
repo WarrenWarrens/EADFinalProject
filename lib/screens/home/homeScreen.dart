@@ -8,6 +8,7 @@ import '../../data/navi_lesson_audio.dart';
 import '../../widgets/app_nav_bar.dart';
 import '../../widgets/app_language.dart';
 import '../../widgets/lesson_card.dart';
+import '../../theme/app_theme.dart';
 import '../lessons/audio_mimicry_screen.dart';
 import '../lessons/simulation.dart';
 import 'lessonPage.dart';
@@ -30,6 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedDifficulty = 0;
   int _selectedNav = 2;
   AppLanguage _selectedLanguage = AppLanguage.navi;
+  // Index of the currently expanded lesson card (-1 = none). Only one
+  // card may be expanded at a time within the list.
+  int _expandedLessonIndex = -1;
 
   static const _difficultyLabels = ['Fundamental', 'Intermediate', 'Advanced'];
   static const _difficultyIcons = [
@@ -51,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() => _profile = saved);
   }
 
-
   Future<void> _enterLesson(Future<void> Function() navigate) async {
     _bar.enterLesson();
     _music.fadeToWhisper();
@@ -65,6 +68,28 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _goToLesson1(BuildContext ctx) async {
     await _enterLesson(() async {
       final lesson = await loadLesson('lesson1.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
+  Future<void> _goToLesson2(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson2_vocabulary.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
+  Future<void> _goToLesson3(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson3_introductions.json');
       if (!mounted) return;
       await Navigator.push(
         ctx,
@@ -134,17 +159,21 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'nv_vocab',
             title: 'Vocabulary',
             description:
-            "Here's what you'll learn:\n- Core Na'vi words\n- Common phrases",
+            "Here's what you'll learn:\n- Family words\n- Nature & world words",
             practiceInfo:
-            "Here's how you'll practice:\n- Flashcards\n- Fill in the blank",
+            "Here's how you'll practice:\n- Flashcards\n- Audio mimicry",
+            unlocked: true,
+            onTap: _goToLesson2,
           ),
           LessonEntry(
             id: 'nv_introductions',
             title: 'Introductions',
             description:
-            "Here's what you'll learn:\n- How to greet others\n- Self-introductions",
+            "Here's what you'll learn:\n- Greetings & farewells\n- Self-introductions",
             practiceInfo:
-            "Here's how you'll practice:\n- Role play\n- Dialogue exercises",
+            "Here's how you'll practice:\n- Dialogue exercises\n- Audio mimicry",
+            unlocked: true,
+            onTap: _goToLesson3,
           ),
         ];
       case 1:
@@ -482,9 +511,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final lessons = _getLessons();
     final accent = _selectedLanguage.accentColor;
+    final palette = AppTheme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
+      backgroundColor: palette.background,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -494,7 +524,10 @@ class _HomeScreenState extends State<HomeScreen> {
               labels: _difficultyLabels,
               icons: _difficultyIcons,
               accentColor: accent,
-              onSelect: (i) => setState(() => _selectedDifficulty = i),
+              onSelect: (i) => setState(() {
+                _selectedDifficulty = i;
+                _expandedLessonIndex = -1;
+              }),
             ),
 
             Expanded(
@@ -506,6 +539,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   return LessonCard(
                     lesson: entry,
                     accentColor: accent,
+                    expanded: _expandedLessonIndex == i,
+                    onExpansionChanged: () {
+                      setState(() {
+                        _expandedLessonIndex =
+                        _expandedLessonIndex == i ? -1 : i;
+                      });
+                    },
                     onBegin: entry.unlocked
                         ? () => entry.onTap?.call(ctx)
                         : null,
@@ -524,6 +564,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _selectedLanguage = lang;
             _selectedDifficulty = 0;
+            _expandedLessonIndex = -1;
           });
         },
       ),
@@ -549,8 +590,9 @@ class _DifficultySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Container(
-      color: const Color(0xFF0D0D0D),
+      color: palette.background,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Row(
         children: List.generate(3, (i) {
@@ -566,12 +608,12 @@ class _DifficultySelector extends StatelessWidget {
                       duration: const Duration(milliseconds: 200),
                       height: 72,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1A),
+                        color: palette.surface,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isSelected
                               ? accentColor
-                              : const Color(0xFF2A2A2A),
+                              : palette.border,
                           width: isSelected ? 2.5 : 1.5,
                         ),
                         boxShadow: isSelected
@@ -588,7 +630,7 @@ class _DifficultySelector extends StatelessWidget {
                           icons[i],
                           color: isSelected
                               ? accentColor
-                              : const Color(0xFF555555),
+                              : palette.textMuted,
                           size: 28,
                         ),
                       ),
@@ -602,8 +644,8 @@ class _DifficultySelector extends StatelessWidget {
                             ? FontWeight.w600
                             : FontWeight.w400,
                         color: isSelected
-                            ? Colors.white
-                            : const Color(0xFF666666),
+                            ? palette.textPrimary
+                            : palette.textMuted,
                         letterSpacing: 0.2,
                       ),
                     ),

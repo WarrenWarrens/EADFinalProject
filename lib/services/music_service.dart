@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
+import 'volume_service.dart';
 
 /// Background music tracks available in the app.
 enum MusicTrack {
@@ -43,8 +44,11 @@ class MusicService {
   Timer? _fadeTimer;
 
   // ── Config ─────────────────────────────────────────────────────────────────
-  static const double fullVolume = 0.6;
-  static const double whisperVolume = 0.08;
+  /// User-controlled ceiling. Falls back to 0.5 before VolumeService is loaded.
+  double get _fullVolume => VolumeService().musicVolume;
+  /// Whisper is ~13 % of the user ceiling (preserves original 0.08/0.6 ratio).
+  double get _whisperVolume => (_fullVolume * 0.13).clamp(0.0, 1.0);
+
   static const Duration crossfadeDuration = Duration(milliseconds: 2000);
   static const Duration whisperFadeDuration = Duration(milliseconds: 1500);
 
@@ -76,7 +80,7 @@ class MusicService {
     try {
       await _activePlayer!.setAsset(_assetPaths[track]!);
       await _activePlayer!.setLoopMode(LoopMode.one);
-      await _activePlayer!.setVolume(_isWhisper ? whisperVolume : fullVolume);
+      await _activePlayer!.setVolume(_isWhisper ? _whisperVolume : _fullVolume);
       await _activePlayer!.play();
       print('[Music] Playing ${track.name}');
     } catch (e) {
@@ -96,7 +100,7 @@ class MusicService {
     }
 
     final oldPlayer = _activePlayer;
-    final targetVolume = _isWhisper ? whisperVolume : fullVolume;
+    final targetVolume = _isWhisper ? _whisperVolume : _fullVolume;
 
     // Set up the new player on the inactive slot.
     _playerB ??= AudioPlayer();
@@ -146,7 +150,7 @@ class MusicService {
   Future<void> fadeToWhisper() async {
     if (_activePlayer == null || _isWhisper) return;
     _isWhisper = true;
-    await _fadeTo(whisperVolume, whisperFadeDuration);
+    await _fadeTo(_whisperVolume, whisperFadeDuration);
     print('[Music] Faded to whisper');
   }
 
@@ -155,7 +159,7 @@ class MusicService {
   Future<void> fadeBack() async {
     if (_activePlayer == null || !_isWhisper) return;
     _isWhisper = false;
-    await _fadeTo(fullVolume, whisperFadeDuration);
+    await _fadeTo(_fullVolume, whisperFadeDuration);
     print('[Music] Faded back to full');
   }
 
@@ -178,6 +182,13 @@ class MusicService {
     _playerB = null;
     _activePlayer = null;
     _currentTrack = null;
+  }
+
+  /// Update music volume and apply immediately to the active player.
+  Future<void> setMusicVolume(double v) async {
+    await VolumeService().setMusicVolume(v);
+    if (_activePlayer == null) return;
+    await _activePlayer!.setVolume(_isWhisper ? _whisperVolume : _fullVolume);
   }
 
   /// Whether music is currently playing.

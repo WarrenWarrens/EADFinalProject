@@ -1,0 +1,193 @@
+{
+  "id": 2,
+  "languageId": 1,
+  "title": "Na'vi Vocabulary",
+  "objective": "Learn essential Na'vi words for family and the natural world.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "Now that you know the sounds, let's learn some words. Na'vi has a relatively small vocabulary — around 2,600 words — but the words you'll learn here are the foundation everything else is built on."
+      }
+    },
+    {
+      "id": 2,
+      "type": "text",
+      "data": {
+        "text": "We'll start with two groups: people in your family, and things in the natural world. The Na'vi live close to nature, and many of their core words reflect that."
+      }
+    },
+    {
+      "id": 3,
+      "type": "text",
+      "data": {
+        "text": "👨‍👩‍👧 Family"
+      }
+    },
+    {
+      "id": 4,
+      "type": "word",
+      "data": {
+        "ref": "tute",
+        "description": "The general word for a person, regardless of age or gender. Tap to hear it."
+      }
+    },
+    {
+      "id": 5,
+      "type": "word",
+      "data": {
+        "ref": "sa'nok",
+        "description": "Mother. The apostrophe is a glottal stop — a tiny pause in your throat, like the gap in the English 'uh-oh'."
+      }
+    },
+    {
+      "id": 6,
+      "type": "word",
+      "data": {
+        "ref": "sempul",
+        "description": "Father. Stress falls on the first syllable: SEM-pul."
+      }
+    },
+    {
+      "id": 7,
+      "type": "word",
+      "data": {
+        "ref": "'eveng",
+        "description": "Child. Notice the leading apostrophe — that's another glottal stop right at the start of the word."
+      }
+    },
+    {
+      "id": 8,
+      "type": "word",
+      "data": {
+        "ref": "tsmukan",
+        "description": "Brother. The 'tsm' cluster is unusual to English speakers — practice it slowly."
+      }
+    },
+    {
+      "id": 9,
+      "type": "word",
+      "data": {
+        "ref": "tsmuke",
+        "description": "Sister. Same 'tsm' cluster — once you've got brother, this one is easy."
+      }
+    },
+    {
+      "id": 10,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which Na'vi word means 'mother'?",
+        "options": [
+          { "text": "sempul", "correct": false },
+          { "text": "sa'nok", "correct": true },
+          { "text": "tute",   "correct": false },
+          { "text": "'eveng", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "instruction": "Match each Na'vi word with its meaning.",
+        "refs": ["tute", "sa'nok", "sempul", "tsmukan", "tsmuke"]
+      }
+    },
+    {
+      "id": 12,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "audio_mimicry",
+        "ref": "'eveng",
+        "instruction": "Listen, then tap and hold the microphone to record yourself saying it."
+      }
+    },
+    {
+      "id": 13,
+      "type": "text",
+      "data": {
+        "text": "🌳 The natural world"
+      }
+    },
+    {
+      "id": 14,
+      "type": "word",
+      "data": {
+        "ref": "utral",
+        "description": "Tree. Trees are sacred to the Na'vi — Hometree (Kelutral) is the largest one of all."
+      }
+    },
+    {
+      "id": 15,
+      "type": "word",
+      "data": {
+        "ref": "txep",
+        "description": "Fire. The 'tx' is an ejective — pronounced with a small pop of air, harder than a regular 't'."
+      }
+    },
+    {
+      "id": 16,
+      "type": "word",
+      "data": {
+        "ref": "ikran",
+        "description": "The mountain banshee — the flying creature Na'vi warriors bond with. A core part of their culture."
+      }
+    },
+    {
+      "id": 17,
+      "type": "word",
+      "data": {
+        "ref": "nantang",
+        "description": "The pack-hunting predator of Pandora. Fast, dangerous, and feared even by experienced hunters."
+      }
+    },
+    {
+      "id": 18,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "listen_choose",
+        "instruction": "Listen to the word and choose what it means.",
+        "ref": "txep",
+        "options": [
+          { "text": "fire",   "correct": true },
+          { "text": "tree",   "correct": false },
+          { "text": "child",  "correct": false },
+          { "text": "father", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 19,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which of these words means 'banshee'?",
+        "options": [
+          { "text": "nantang", "correct": false },
+          { "text": "utral",   "correct": false },
+          { "text": "ikran",   "correct": true },
+          { "text": "txep",    "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 20,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "audio_mimicry",
+        "ref": "nantang",
+        "instruction": "Listen to this word, then record yourself."
+      }
+    },
+    {
+      "id": 21,
+      "type": "text",
+      "data": {
+        "text": "🎉 Great work! You now know your first ten Na'vi words. In the next lesson, you'll learn how to put them to use by introducing yourself."
+      }
+    }
+  ]
+}

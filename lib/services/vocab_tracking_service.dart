@@ -66,11 +66,13 @@ class VocabTrackingService {
     await _persist();
   }
 
-  /// Get all tracked words, sorted by total attempts descending.
+  /// Get all tracked words, sorted by rolling average ascending (hardest first).
+  /// Hardest words appear largest in the word cloud and tend to land centrally
+  /// in the scatter layout.
   Future<List<VocabRecord>> getAllRecords() async {
     final all = await _loadAll();
     final list = all.values.toList()
-      ..sort((a, b) => b.totalAttempts.compareTo(a.totalAttempts));
+      ..sort((a, b) => a.rollingAverage.compareTo(b.rollingAverage));
     return list;
   }
 

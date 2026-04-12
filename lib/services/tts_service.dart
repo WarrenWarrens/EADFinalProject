@@ -3,20 +3,108 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-
-const TtsProvider kActiveTtsProvider = TtsProvider.googleTranslate;
-// const TtsProvider kActiveTtsProvider = TtsProvider.elevenLabs;
 
 const String kElevenLabsApiKey  = 'YOUR_ELEVENLABS_API_KEY_HERE';
 const String kElevenLabsVoiceId = '21m00Tcm4TlvDq8ikWAM';
 
-enum TtsProvider { googleTranslate, elevenLabs }
-
 class TtsService {
 
-  // ── Public entry point ─────────────────────────────────────────────────────
+  // ── On-device TTS (flutter_tts) ────────────────────────────────────────────
+  //
+  // Used for Klingon and as a general fallback when no community recordings
+  // exist.  Speaks directly through the device speaker — no file needed.
+  // Speech rate is slowed so the engine attempts to sound out syllables rather
+  // than spelling individual letters.
+
+  static FlutterTts? _flutterTts;
+
+  // null = not yet attempted; true = engine OK; false = engine unavailable.
+  // Once false, all on-device TTS calls are silently skipped rather than
+  // retrying a broken binder (e.g. DeadObjectException on certain AVDs).
+  static bool? _ttsAvailable;
+
+  static Future<FlutterTts?> _ensureTts() async {
+    if (_ttsAvailable == false) return null;
+    if (_flutterTts != null) return _flutterTts!;
+    try {
+      _flutterTts = FlutterTts();
+      await _flutterTts!.setLanguage('en-US');
+      await _flutterTts!.setSpeechRate(0.4);   // slow — helps with alien words
+      await _flutterTts!.setPitch(0.95);
+      await _flutterTts!.setVolume(1.0);
+      _ttsAvailable = true;
+      return _flutterTts!;
+    } catch (e) {
+      print('[TTS] Engine init failed (TTS binder unavailable?): $e');
+      _flutterTts = null;
+      _ttsAvailable = false;
+      return null;
+    }
+  }
+
+  /// Speak [text] directly through the device speaker.
+  /// Returns immediately once speech starts.  Call [stop] to cancel.
+  /// Silently no-ops if the on-device TTS engine is unavailable.
+  static Future<void> speak(String text) async {
+    try {
+      final tts = await _ensureTts();
+      await tts?.speak(text);
+    } catch (e) {
+      print('[TTS] Device speak error: $e');
+      _ttsAvailable = false;
+      _flutterTts = null;
+    }
+  }
+
+  /// Stop any in-progress device TTS playback.
+  static Future<void> stop() async {
+    try {
+      await _flutterTts?.stop();
+    } catch (_) {}
+  }
+
+  /// Whether the device TTS engine is currently speaking.
+  static bool _isSpeaking = false;
+  static bool get isSpeaking => _isSpeaking;
+
+  /// Initialise completion tracking so callers can observe speaking state.
+  /// Returns without registering handlers if the engine is unavailable.
+  static Future<void> initListeners({
+    void Function()? onStart,
+    void Function()? onComplete,
+  }) async {
+    final tts = await _ensureTts();
+    if (tts == null) return;
+    tts.setStartHandler(() {
+      _isSpeaking = true;
+      onStart?.call();
+    });
+    tts.setCompletionHandler(() {
+      _isSpeaking = false;
+      onComplete?.call();
+    });
+    tts.setCancelHandler(() {
+      _isSpeaking = false;
+      onComplete?.call();
+    });
+    tts.setErrorHandler((msg) {
+      _isSpeaking = false;
+      onComplete?.call();
+      print('[TTS] Engine error: $msg');
+    });
+  }
+
+  /// Reset the engine availability flag so the next call retries init.
+  /// Useful if the app is foregrounded after a TTS service restart.
+  static void resetEngine() {
+    _flutterTts = null;
+    _ttsAvailable = null;
+  }
+
+  // ── Public entry point (Na'vi — Reykunyu + fallback) ───────────────────────
   //
   // Pass both the Na'vi word and its English translation.
   // We query Reykunyu via English (language=en) to avoid Na'vi diacritic
@@ -30,7 +118,7 @@ class TtsService {
     final reykunyuPath = await _reykunyu(naviWord: naviWord, english: english);
     if (reykunyuPath != null) return reykunyuPath;
     print('[TTS] No Reykunyu audio for "$naviWord" — using TTS fallback');
-    return _fallback(ttsHint);
+    return _googleTranslate(ttsHint);
   }
 
   // ── Single-word audio (for per-word phrase fetching) ───────────────────────
@@ -46,16 +134,20 @@ class TtsService {
     final reykunyuPath = await _reykunyuDirect(naviWord);
     if (reykunyuPath != null) return reykunyuPath;
     print('[TTS] No Reykunyu audio for word "$naviWord" — using TTS hint');
-    return _fallback(ttsHint);
+    return _googleTranslate(ttsHint);
   }
 
+  // ── Plain TTS (no Na'vi / Reykunyu processing) ────────────────────────────
+
+  /// Synthesise [text] to a file using Google Translate TTS.
+  /// For Klingon dictionary results, prefer [speak] instead — it uses the
+  /// on-device engine which sounds out words rather than spelling them.
+  static Future<String?> synthesise(String text) => _googleTranslate(text);
+
   // ── Reykunyu direct Na'vi search ───────────────────────────────────────────
-  //
-  // Queries Reykunyu with the Na'vi word itself (no English needed).
-  // Used for individual words extracted from phrases.
 
   static Future<String?> _reykunyuDirect(String naviWord) async {
-    if (naviWord.trim().contains(' ')) return null; // phrases not supported
+    if (naviWord.trim().contains(' ')) return null;
 
     try {
       final uri = Uri(
@@ -82,24 +174,30 @@ class TtsService {
       final data = jsonDecode(res.body);
       if (data is! Map) return null;
 
-      // Direct Na'vi search results live in "fromNa'vi".
-      final fromNavi = data["fromNa\u2019vi"]
-          ?? data["fromNa'vi"];
+      final fromNavi = data["fromNa\u2019vi"] ?? data["fromNa'vi"];
       if (fromNavi is! List || fromNavi.isEmpty) return null;
 
-      // Try each result — take the first one with audio.
+      const sieyng = 's\u00ec\u2019eyng';
       final naviLower = naviWord.toLowerCase();
-      for (final wordObj in fromNavi) {
-        if (wordObj is! Map) continue;
 
-        final resultNavi = (wordObj["na\u2019vi"] ?? wordObj["na'vi"] ?? '')
-            .toString()
-            .toLowerCase();
+      for (final envelope in fromNavi) {
+        if (envelope is! Map) continue;
 
-        if (resultNavi != naviLower) continue;
+        final wordList = envelope[sieyng] ?? envelope["sì'eyng"];
+        if (wordList is! List) continue;
 
-        final audioPath = await _extractAudio(wordObj, naviWord);
-        if (audioPath != null) return audioPath;
+        for (final wordObj in wordList) {
+          if (wordObj is! Map) continue;
+
+          final resultNavi = (wordObj["na\u2019vi"] ?? wordObj["na'vi"] ?? '')
+              .toString()
+              .toLowerCase();
+
+          if (resultNavi != naviLower) continue;
+
+          final audioPath = await _extractAudio(wordObj, naviWord);
+          if (audioPath != null) return audioPath;
+        }
       }
 
       return null;
@@ -110,32 +208,17 @@ class TtsService {
   }
 
   // ── Reykunyu community audio ───────────────────────────────────────────────
-  //
-  // Strategy: query the English translation with language=en.
-  // Results come back in "toNa'vi" as a list of word objects, each with audio.
-  // We find the entry whose na'vi field matches naviWord (case-insensitive).
-  //
-  // This avoids percent-encoding Na'vi diacritics (ì, ä, etc.) directly,
-  // which was causing 400 errors from the server.
-  //
-  // For phrases: we use the first word of the English translation as the query,
-  // since phrases have no single community audio entry anyway and will fall
-  // through to TTS.
 
   static Future<String?> _reykunyu({
     required String naviWord,
     required String english,
   }) async {
-    // For phrases, Reykunyu has no per-phrase audio — skip straight to TTS.
     if (naviWord.trim().contains(' ')) {
       print('[TTS] Skipping Reykunyu for phrase "$naviWord" — using TTS');
       return null;
     }
 
     try {
-      // Use the English translation as the search query with language=en.
-      // e.g. "Hello" → /api/fwew-search?query=hello&language=en
-      // This returns plain ASCII in the URL, no diacritic encoding problems.
       final uri = Uri(
         scheme: 'https',
         host: 'reykunyu.lu',
@@ -160,13 +243,9 @@ class TtsService {
       final data = jsonDecode(res.body);
       if (data is! Map) return null;
 
-      // English → Na'vi results live in "toNa'vi".
-      final toNavi = data["toNa\u2019vi"]   // right single quote '
-          ?? data["toNa'vi"];               // ASCII apostrophe fallback
+      final toNavi = data["toNa\u2019vi"] ?? data["toNa'vi"];
       if (toNavi is! List || toNavi.isEmpty) return null;
 
-      // Find the entry that matches our Na'vi word (case-insensitive).
-      // The "na'vi" field on each result holds the Na'vi spelling.
       final naviLower = naviWord.toLowerCase();
       for (final wordObj in toNavi) {
         if (wordObj is! Map) continue;
@@ -177,7 +256,6 @@ class TtsService {
 
         if (resultNavi != naviLower) continue;
 
-        // Matched — now extract audio.
         final audioPath = _extractAudio(wordObj, naviWord);
         if (audioPath != null) return audioPath;
       }
@@ -191,8 +269,6 @@ class TtsService {
     }
   }
 
-  // Walks pronunciation → audio for a single word object and fetches the first
-  // available mp3. Returns the local file path or null if none found.
   static Future<String?> _extractAudio(Map wordObj, String naviWord) async {
     final pronunciation = wordObj['pronunciation'];
     if (pronunciation is! List || pronunciation.isEmpty) return null;
@@ -227,16 +303,7 @@ class TtsService {
     return null;
   }
 
-  // ── TTS fallback ───────────────────────────────────────────────────────────
-
-  static Future<String?> _fallback(String text) async {
-    switch (kActiveTtsProvider) {
-      case TtsProvider.googleTranslate:
-        return _googleTranslate(text);
-      case TtsProvider.elevenLabs:
-        return _elevenLabs(text);
-    }
-  }
+  // ── Google Translate TTS (file-based, for Na'vi fallback) ──────────────────
 
   static Future<String?> _googleTranslate(String text) async {
     try {
@@ -258,41 +325,6 @@ class TtsService {
       return _saveTempFile(res.bodyBytes, 'mp3');
     } catch (e) {
       print('[TTS] Google exception: $e');
-      return null;
-    }
-  }
-
-  static Future<String?> _elevenLabs(String text) async {
-    if (kElevenLabsApiKey == 'YOUR_ELEVENLABS_API_KEY_HERE') {
-      print('[TTS] ElevenLabs key not set');
-      return null;
-    }
-    try {
-      final res = await http.post(
-        Uri.parse(
-            'https://api.elevenlabs.io/v1/text-to-speech/$kElevenLabsVoiceId'),
-        headers: {
-          'xi-api-key': kElevenLabsApiKey,
-          'Content-Type': 'application/json',
-          'Accept': 'audio/mpeg',
-        },
-        body: jsonEncode({
-          'text': text,
-          'model_id': 'eleven_monolingual_v1',
-          'voice_settings': {
-            'stability': 0.6,
-            'similarity_boost': 0.8,
-          },
-        }),
-      ).timeout(const Duration(seconds: 20));
-
-      if (res.statusCode != 200) {
-        print('[TTS] ElevenLabs error: ${res.statusCode}');
-        return null;
-      }
-      return _saveTempFile(res.bodyBytes, 'mp3');
-    } catch (e) {
-      print('[TTS] ElevenLabs exception: $e');
       return null;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_language.dart';
+import '../theme/app_theme.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  AppNavBar — shared bottom navigation bar.
@@ -32,8 +33,9 @@ class AppNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Container(
-      color: const Color(0xFF0D0D0D),
+      color: palette.background,
       child: SafeArea(
         top: false,
         child: Padding(
@@ -51,7 +53,7 @@ class AppNavBar extends StatelessWidget {
                 child: Container(
                   height: 52,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A1A),
+                    color: palette.surface,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
@@ -250,16 +252,16 @@ class _LanguagePopup extends StatelessWidget {
   Widget build(BuildContext context) {
     final others = currentLanguage.others;
 
+    final palette = AppTheme.of(context);
     return Material(
       color: Colors.transparent,
       child: Container(
         width: buttonWidth + 88,
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
+          color: palette.surface,
           borderRadius: BorderRadius.circular(14),
-          border:
-          Border.all(color: const Color(0xFF2E2E2E), width: 1),
+          border: Border.all(color: palette.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.5),
@@ -325,10 +327,10 @@ class _PopupItemState extends State<_PopupItem> {
             const SizedBox(width: 10),
             Text(
               widget.language.label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: AppTheme.of(context).textPrimary,
               ),
             ),
           ],
@@ -368,11 +370,10 @@ class _NavItem extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 13,
-            fontWeight:
-            selected ? FontWeight.w600 : FontWeight.w400,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             color: selected
                 ? Colors.white
-                : const Color(0xFF666666),
+                : AppTheme.of(context).textMuted,
           ),
         ),
       ),

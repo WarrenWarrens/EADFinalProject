@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:testing/screens/content/page_types.dart';
+import '../../screens/content/page_types.dart';
 import '../../models/lessons.dart';
 import '../../theme/app_theme.dart';
 
@@ -37,9 +37,13 @@ class _LessonPageState extends State<LessonPage> {
 
     switch (contentObject.type) {
       case 'text':
-        return TextPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide,);
+        return TextPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       case 'character':
         return CharacterPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+      case 'word':
+        return WordPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+      case 'phrase':
+        return PhrasePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       case 'exercise':
         return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       default:
@@ -82,10 +86,6 @@ class _LessonPageState extends State<LessonPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Lesson ${widget.lesson.id} - ${widget.lesson.title}'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-
         bottom: PreferredSize(
             preferredSize: const Size.fromHeight(6),
             child: Padding(
@@ -150,7 +150,6 @@ class LessonIntroPage extends StatelessWidget {
             lesson.title,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -160,9 +159,7 @@ class LessonIntroPage extends StatelessWidget {
           Text(
             lesson.objective,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
 
           const Spacer(),

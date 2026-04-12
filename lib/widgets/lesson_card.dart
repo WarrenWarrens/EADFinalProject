@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 
 class LessonEntry {
@@ -38,11 +39,19 @@ class LessonCard extends StatefulWidget {
 
   final VoidCallback? onBegin;
 
+  /// Controlled expansion. When provided, the parent owns the expanded state
+  /// (used to enforce single-card-open behavior on the lesson list). When
+  /// null, the card manages its own state.
+  final bool? expanded;
+  final VoidCallback? onExpansionChanged;
+
   const LessonCard({
     super.key,
     required this.lesson,
     this.accentColor = const Color(0xFF5B4FFF),
     this.onBegin,
+    this.expanded,
+    this.onExpansionChanged,
   });
 
   @override
@@ -51,9 +60,11 @@ class LessonCard extends StatefulWidget {
 
 class _LessonCardState extends State<LessonCard>
     with SingleTickerProviderStateMixin {
-  bool _expanded = false;
+  bool _internalExpanded = false;
   late AnimationController _controller;
   late Animation<double> _expandAnimation;
+
+  bool get _expanded => widget.expanded ?? _internalExpanded;
 
   @override
   void initState() {
@@ -61,6 +72,7 @@ class _LessonCardState extends State<LessonCard>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 280),
+      value: _expanded ? 1.0 : 0.0,
     );
     _expandAnimation = CurvedAnimation(
       parent: _controller,
@@ -70,20 +82,39 @@ class _LessonCardState extends State<LessonCard>
   }
 
   @override
+  void didUpdateWidget(covariant LessonCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync animation when parent flips controlled expansion.
+    if (widget.expanded != oldWidget.expanded && widget.expanded != null) {
+      widget.expanded! ? _controller.forward() : _controller.reverse();
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
   void _toggle() {
-    setState(() => _expanded = !_expanded);
-    _expanded ? _controller.forward() : _controller.reverse();
+    if (widget.onExpansionChanged != null) {
+      // Parent-controlled — let it decide.
+      widget.onExpansionChanged!();
+      return;
+    }
+    setState(() => _internalExpanded = !_internalExpanded);
+    _internalExpanded ? _controller.forward() : _controller.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
     final locked = !widget.lesson.unlocked;
     final accent = widget.accentColor;
+    final palette = AppTheme.of(context);
+    // Inner contrast block: in dark mode use the lighter surfaceAlt;
+    // in light mode use the darker parchment divider tone for visible contrast.
+    final innerBlockColor =
+    palette.isDark ? palette.surfaceAlt : palette.divider;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -91,7 +122,7 @@ class _LessonCardState extends State<LessonCard>
         onTap: _toggle,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: palette.surface,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -106,7 +137,7 @@ class _LessonCardState extends State<LessonCard>
                       height: 44,
                       decoration: BoxDecoration(
                         color: locked
-                            ? const Color(0xFFF0F0F0)
+                            ? palette.surfaceAlt
                             : accent.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -114,9 +145,7 @@ class _LessonCardState extends State<LessonCard>
                         locked
                             ? Icons.lock_outline_rounded
                             : Icons.star_rounded,
-                        color: locked
-                            ? const Color(0xFFBBBBBB)
-                            : accent,
+                        color: locked ? palette.textMuted : accent,
                         size: 24,
                       ),
                     ),
@@ -128,8 +157,8 @@ class _LessonCardState extends State<LessonCard>
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
                           color: locked
-                              ? const Color(0xFF999999)
-                              : const Color(0xFF111111),
+                              ? palette.textMuted
+                              : palette.textPrimary,
                         ),
                       ),
                     ),
@@ -140,9 +169,7 @@ class _LessonCardState extends State<LessonCard>
                       curve: Curves.easeOutCubic,
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: _expanded
-                            ? accent
-                            : const Color(0xFF888888),
+                        color: _expanded ? accent : palette.textMuted,
                         size: 22,
                       ),
                     ),
@@ -160,7 +187,7 @@ class _LessonCardState extends State<LessonCard>
                       margin: const EdgeInsets.symmetric(horizontal: 12),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF3A3A3A),
+                        color: innerBlockColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -169,9 +196,11 @@ class _LessonCardState extends State<LessonCard>
                           Text(
                             widget.lesson.description,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
-                              color: Colors.white,
+                              color: palette.isDark
+                                  ? Colors.white
+                                  : palette.textPrimary,
                               height: 1.6,
                             ),
                           ),
@@ -179,9 +208,11 @@ class _LessonCardState extends State<LessonCard>
                           Text(
                             widget.lesson.practiceInfo,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
-                              color: Colors.white,
+                              color: palette.isDark
+                                  ? Colors.white
+                                  : palette.textPrimary,
                               height: 1.6,
                             ),
                           ),
@@ -201,12 +232,12 @@ class _LessonCardState extends State<LessonCard>
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             color: locked
-                                ? const Color(0xFFF0F0F0)
+                                ? palette.surfaceAlt
                                 : accent.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: locked
-                                  ? const Color(0xFFE0E0E0)
+                                  ? palette.border
                                   : accent.withOpacity(0.4),
                             ),
                           ),
@@ -216,9 +247,7 @@ class _LessonCardState extends State<LessonCard>
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: locked
-                                  ? const Color(0xFFBBBBBB)
-                                  : accent,
+                              color: locked ? palette.textMuted : accent,
                               letterSpacing: 1.2,
                             ),
                           ),

@@ -18,13 +18,15 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    MusicService().play(MusicTrack.landing);
+    //MusicService().play(MusicTrack.landing);
   }
 
   Future<void> _continueAsGuest(BuildContext context) async {
     final storage = LocalStorageService();
     final guest = UserProfile.guest();
     await storage.saveProfile(guest);
+    await storage.saveSetupStep(0);
+    await storage.setOnboardingComplete(false);
     if (!context.mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const ProfileSetupPage()),

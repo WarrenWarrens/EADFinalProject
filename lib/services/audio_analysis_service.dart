@@ -4,12 +4,17 @@
 //
 // Pipeline:
 //   1. Read raw PCM samples from WAV files (16-bit mono)
-//   2. Pre-emphasise, frame, window (Hamming)
-//   3. Compute power spectrum via FFT
-//   4. Apply Mel filterbank → log energies
-//   5. DCT → 13 MFCCs per frame
-//   6. Compare two MFCC sequences with DTW
-//   7. Normalise DTW distance → 0.0–1.0 similarity score
+//   2. Trim leading/trailing silence (amplitude threshold)
+//   3. Noise gate — reject attempt if median spectral flatness > 0.72
+//      (catches blowing, wind, mic-rubbing — broadband noise scores near 1.0)
+//   4. Estimate noise PSD from the quietest 10 % of frames (minimum statistics)
+//   5. Pre-emphasise, frame, window (Hamming)
+//   6. Compute power spectrum via FFT
+//   7. Berouti spectral subtraction on attempt frames (α=2, β=0.01)
+//   8. Apply Mel filterbank → log energies
+//   9. DCT → 13 MFCCs per frame
+//  10. Compare reference vs. denoised attempt with DTW
+//  11. Normalise DTW distance → 0.0–1.0 similarity score
 //
 // No native code, no plugins, no network calls.
 
@@ -67,8 +72,8 @@ class AudioAnalysisService {
       }
 
       // 2. Trim silence from both ends (below -40 dB ≈ amplitude < 0.01)
-      final refTrimmed = refSamples;
-      final attTrimmed = attSamples;
+      final refTrimmed = _trimSilence(refSamples);
+      final attTrimmed = _trimSilence(attSamples);
 
       if (refTrimmed.length < 400 || attTrimmed.length < 400) {
         return const AudioAnalysisResult(
@@ -77,9 +82,26 @@ class AudioAnalysisService {
         );
       }
 
-      // 3. Extract MFCC features
+      // 3. Noise gate — reject attempts that are broadband noise (blowing, wind,
+      //    mic-rubbing, etc.).  Spectral flatness near 1.0 means energy is spread
+      //    uniformly across all bins with no formant structure.
+      final flatness = _medianSpectralFlatness(attTrimmed);
+      if (flatness > _noiseFlatnessThreshold) {
+        print('[AudioAnalysis] Noise gate: flatness=${flatness.toStringAsFixed(3)} '
+            '> threshold=$_noiseFlatnessThreshold — rejected');
+        return const AudioAnalysisResult(
+          score: 0.0,
+          feedback: 'That sounded like noise — try speaking clearly into the mic',
+        );
+      }
+
+      // 4. Estimate noise floor from the quietest frames of the attempt, then
+      //    apply Berouti spectral subtraction during MFCC extraction.
+      final noisePsd = _estimateNoisePsd(attTrimmed);
+
+      // 5. Extract MFCC features (reference is clean TTS — no denoising needed)
       final refMfcc = _extractMfcc(refTrimmed);
-      final attMfcc = _extractMfcc(attTrimmed);
+      final attMfcc = _extractMfcc(attTrimmed, noisePsd: noisePsd);
 
       if (refMfcc.isEmpty || attMfcc.isEmpty) {
         return const AudioAnalysisResult(
@@ -88,22 +110,23 @@ class AudioAnalysisService {
         );
       }
 
-      // 4. DTW comparison
+      // 6. DTW comparison
       final dtwResult = _dtw(refMfcc, attMfcc);
       final rawDistance = dtwResult.normalisedDistance;
 
-      // 5. Convert distance to similarity score (0–1)
+      // 7. Convert distance to similarity score (0–1)
       // Empirical mapping: distance of 0 → score 1.0, distance ≥ 25 → score 0.0
       // The sigmoid-like mapping gives more granularity in the 50-90% range.
       final score = _distanceToScore(rawDistance);
 
-      // 6. Generate per-segment scores for the UI
+      // 8. Generate per-segment scores for the UI
       final segmentScores = _computeSegmentScores(dtwResult.path, refMfcc, attMfcc);
 
-      // 7. Generate feedback
+      // 9. Generate feedback
       final feedback = _generateFeedback(score, refTrimmed.length, attTrimmed.length);
 
-      print('[AudioAnalysis] DTW distance: ${rawDistance.toStringAsFixed(2)}, '
+      print('[AudioAnalysis] flatness=${flatness.toStringAsFixed(3)}, '
+          'DTW distance: ${rawDistance.toStringAsFixed(2)}, '
           'score: ${(score * 100).round()}%, '
           'ref frames: ${refMfcc.length}, att frames: ${attMfcc.length}');
 
@@ -230,6 +253,101 @@ class AudioAnalysisService {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
+  //  Noise detection & denoising
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /// Spectral flatness threshold above which an attempt is treated as noise.
+  ///
+  /// Speech: median flatness ≈ 0.05–0.35 (formant peaks break up the spectrum).
+  /// Blowing / wind: flatness ≈ 0.65–0.95 (energy spread flat across all bins).
+  /// A value of 0.72 gives a comfortable gap between speech and blowing while
+  /// staying tolerant of unusual phonemes (Na'vi ejectives, Klingon uvulars).
+  static const double _noiseFlatnessThreshold = 0.72;
+
+  /// Returns the median per-frame spectral flatness (Wiener entropy) of [samples].
+  ///
+  /// Flatness = geometric_mean(power) / arithmetic_mean(power) per frame.
+  /// Only frames with meaningful energy are included so silence padding doesn't
+  /// drag the median down.
+  static double _medianSpectralFlatness(Float64List samples) {
+    final hamming = _hammingWindow(_frameLength);
+    final flatnesses = <double>[];
+
+    for (int start = 0; start + _frameLength <= samples.length; start += _frameStep) {
+      final frame = Float64List(_fftSize);
+      for (int i = 0; i < _frameLength; i++) {
+        frame[i] = samples[start + i] * hamming[i];
+      }
+
+      final spectrum = _powerSpectrum(frame);
+
+      // Skip frames below a modest energy floor (silence / very quiet regions)
+      final energy = spectrum.fold(0.0, (double a, double b) => a + b);
+      if (energy < 1e-6) continue;
+
+      // Spectral flatness: geometric / arithmetic mean over positive-frequency bins
+      double logSum = 0.0;
+      double linSum = 0.0;
+      final n = spectrum.length;
+      for (int k = 0; k < n; k++) {
+        final v = spectrum[k] < 1e-12 ? 1e-12 : spectrum[k];
+        logSum += log(v);
+        linSum += v;
+      }
+      final geoMean = exp(logSum / n);
+      final ariMean = linSum / n;
+      if (ariMean > 0) flatnesses.add(geoMean / ariMean);
+    }
+
+    if (flatnesses.isEmpty) return 0.0;
+    flatnesses.sort();
+    return flatnesses[flatnesses.length ~/ 2]; // median
+  }
+
+  /// Estimate the noise power spectral density from the quietest frames of
+  /// [samples] using a minimum-statistics approach.
+  ///
+  /// Uses the quietest 10 % of frames (minimum 3) so the estimate reflects
+  /// the ambient noise floor rather than the speech signal itself.
+  static Float64List _estimateNoisePsd(Float64List samples) {
+    final halfFft = _fftSize ~/ 2 + 1;
+    final hamming = _hammingWindow(_frameLength);
+
+    // Collect per-frame energy so we can sort and pick the quietest ones
+    final frameEnergies = <({int start, double energy})>[];
+    for (int start = 0; start + _frameLength <= samples.length; start += _frameStep) {
+      double energy = 0.0;
+      for (int i = 0; i < _frameLength; i++) {
+        final s = samples[start + i];
+        energy += s * s;
+      }
+      frameEnergies.add((start: start, energy: energy));
+    }
+
+    if (frameEnergies.isEmpty) return Float64List(halfFft);
+
+    frameEnergies.sort((a, b) => a.energy.compareTo(b.energy));
+    final noiseCount = max(3, frameEnergies.length ~/ 10);
+
+    final noisePsd = Float64List(halfFft);
+    for (int f = 0; f < noiseCount; f++) {
+      final frame = Float64List(_fftSize);
+      final s = frameEnergies[f].start;
+      for (int i = 0; i < _frameLength; i++) {
+        frame[i] = samples[s + i] * hamming[i];
+      }
+      final spectrum = _powerSpectrum(frame);
+      for (int k = 0; k < halfFft; k++) {
+        noisePsd[k] += spectrum[k];
+      }
+    }
+    for (int k = 0; k < halfFft; k++) {
+      noisePsd[k] /= noiseCount;
+    }
+    return noisePsd;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
   //  MFCC extraction
   // ═══════════════════════════════════════════════════════════════════════════
 
@@ -243,7 +361,11 @@ class AudioAnalysisService {
 
   /// Extract MFCC feature vectors from raw PCM samples.
   /// Returns a list of frames, each frame is a list of [_numMfcc] coefficients.
-  static List<List<double>> _extractMfcc(Float64List samples) {
+  ///
+  /// If [noisePsd] is provided, Berouti spectral subtraction is applied to each
+  /// frame's power spectrum before the Mel filterbank (α=2 over-subtraction,
+  /// β=0.01 spectral floor).  Pass the output of [_estimateNoisePsd].
+  static List<List<double>> _extractMfcc(Float64List samples, {Float64List? noisePsd}) {
     // Resample to 16kHz if the WAV has a different rate?
     // For now we assume 16kHz (flutter_sound records at this rate by default).
 
@@ -271,6 +393,20 @@ class AudioAnalysisService {
 
       // Power spectrum via FFT
       final spectrum = _powerSpectrum(frame);
+
+      // Spectral subtraction — Berouti method:
+      //   clean[k] = max(β·noise[k],  spectrum[k] − α·noise[k])
+      //   α = 2.0  (over-subtraction keeps residual musical noise low)
+      //   β = 0.01 (spectral floor so Mel energies never collapse to log(0))
+      if (noisePsd != null) {
+        const alpha = 2.0;
+        const beta  = 0.01;
+        for (int k = 0; k < spectrum.length; k++) {
+          final floor      = beta * noisePsd[k];
+          final subtracted = spectrum[k] - alpha * noisePsd[k];
+          spectrum[k]      = subtracted > floor ? subtracted : floor;
+        }
+      }
 
       // Apply Mel filterbank
       final melEnergies = Float64List(_numMelFilters);

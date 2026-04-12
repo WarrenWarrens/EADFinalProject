@@ -1,3 +1,4 @@
+import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
 import 'persistent_bar.dart';
@@ -6,10 +7,28 @@ import 'screens/setup/profile_setup_page.dart';
 import 'screens/home/homeScreen.dart';
 import 'services/local_storage_service.dart';
 import 'services/music_service.dart';
+import 'services/volume_service.dart';
+import 'widgets/app_language.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Safety net: catch unhandled errors that bubble up through the Flutter
+  // engine boundary (e.g. DeadObjectException from the flutter_tts plugin
+  // when the Android TTS binder dies on certain emulator images).
+  PlatformDispatcher.instance.onError = (error, stack) {
+    final msg = error.toString();
+    if (msg.contains('DeadObjectException') ||
+        msg.contains('TextToSpeech') ||
+        msg.contains('TTS')) {
+      debugPrint('[App] TTS engine error caught at platform boundary: $error');
+      return true; // handled — do not crash
+    }
+    return false;
+  };
+
+  await VolumeService().load();
   runApp(const LinguaLoreApp());
 }
 
@@ -22,6 +41,12 @@ class LinguaLoreApp extends StatefulWidget {
 
 class _LinguaLoreAppState extends State<LinguaLoreApp>
     with WidgetsBindingObserver {
+  // ThemeData built once from constants — same object references on every
+  // build so Flutter never invalidates the Material tree unnecessarily.
+  static final _accent      = AppTheme.accentFor(AppLanguage.navi);
+  static final _materialDark  = AppTheme.dark.toMaterialTheme(_accent);
+  static final _materialLight = AppTheme.light.toMaterialTheme(_accent);
+
   @override
   void initState() {
     super.initState();
@@ -52,18 +77,32 @@ class _LinguaLoreAppState extends State<LinguaLoreApp>
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LinguaLore',
-      theme: AppTheme.theme,
-      debugShowCheckedModeBanner: false,
-      navigatorKey: appNavigatorKey,
-      home: const _StartupRouter(),
-      builder: (context, child) {
-        return PersistentBarWrapper(child: child ?? const SizedBox.shrink());
-      },
-      routes: {
-        '/setup': (_) => const ProfileSetupPage(),
-        '/home': (_) => const HomeScreen(),
+    // ValueListenableBuilder only rebuilds MaterialApp when the user
+    // explicitly switches themes in Settings — not on every frame.
+    return ValueListenableBuilder<int>(
+      valueListenable: appThemeIndex,
+      builder: (context, idx, _) {
+        final themeMode = AppTheme.themes[idx].isDark
+            ? ThemeMode.dark
+            : ThemeMode.light;
+        return MaterialApp(
+          title: 'LinguaLore',
+          theme: _materialLight,
+          darkTheme: _materialDark,
+          themeMode: themeMode,
+          debugShowCheckedModeBanner: false,
+          navigatorKey: appNavigatorKey,
+          home: const _StartupRouter(),
+          builder: (context, child) {
+            return PersistentBarWrapper(
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
+          routes: {
+            '/setup': (_) => const ProfileSetupPage(),
+            '/home': (_) => const HomeScreen(),
+          },
+        );
       },
     );
   }

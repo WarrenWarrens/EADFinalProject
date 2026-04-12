@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import '../../models/lesson_model.dart';
+import '../../services/volume_service.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/tts_service.dart';
 import '../../services/audio_analysis_service.dart';
@@ -306,6 +307,7 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
       _referenceWavPath = _wavCache[item.id];
 
       await _player.setFilePath(cachedPath);
+      await _player.setVolume(VolumeService().voiceVolume);
       await _player.play();
       await _player.processingStateStream
           .firstWhere((s) => s == ProcessingState.completed);
@@ -510,7 +512,7 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   Color _scoreColor(double s) {
-    if (s >= 0.75) return const Color(0xFF4CAF50);
+    if (s >= 0.75) return AppColors.success;
     if (s >= 0.50) return AppColors.warning;
     return AppColors.error;
   }
@@ -546,12 +548,7 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
           : 0.0;
 
       return Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          leading: const BackButton(color: AppColors.textPrimary),
-        ),
+        appBar: AppBar(),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -564,13 +561,13 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
                   width: 120,
                   height: 120,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFD4C5F9),
+                    color: AppColors.primaryLight,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.headphones_rounded,
                     size: 60,
-                    color: Color(0xFF6B4EFF),
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -615,8 +612,8 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
                           child: LinearProgressIndicator(
                             value: preloadProgress,
                             minHeight: 6,
-                            backgroundColor: const Color(0xFFE8DEFF),
-                            color: const Color(0xFF6B4EFF),
+                            backgroundColor: AppColors.buttonSoft,
+                            color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -635,14 +632,14 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.check_circle,
-                          color: const Color(0xFF4CAF50), size: 16),
+                      const Icon(Icons.check_circle,
+                          color: AppColors.success, size: 16),
                       const SizedBox(width: 6),
-                      Text(
+                      const Text(
                         'Audio ready!',
                         style: TextStyle(
                           fontSize: 13,
-                          color: const Color(0xFF4CAF50),
+                          color: AppColors.success,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -690,14 +687,9 @@ class _AudioMimicryScreenState extends State<AudioMimicryScreen>
     final progress = (_currentIndex + 1) / _items.length;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: const BackButton(color: AppColors.textPrimary),
         title: Text(widget.lesson.title,
             style: const TextStyle(
-                color: AppColors.textPrimary,
                 fontSize: 16,
                 fontWeight: FontWeight.w600)),
         bottom: PreferredSize(
@@ -1142,9 +1134,9 @@ class _SegmentScoreCard extends StatelessWidget {
   });
 
   Color _barColor(double s) {
-    if (s >= 0.75) return const Color(0xFF4CAF50);
-    if (s >= 0.50) return const Color(0xFFFFC107);
-    return const Color(0xFFE53935);
+    if (s >= 0.75) return AppColors.success;
+    if (s >= 0.50) return AppColors.warning;
+    return AppColors.error;
   }
 
   @override
@@ -1234,11 +1226,11 @@ class _SegmentScoreCard extends StatelessWidget {
 
           // Legend
           const Row(children: [
-            _LegendDot(color: Color(0xFF4CAF50), label: 'Good match'),
+            _LegendDot(color: AppColors.success, label: 'Good match'),
             SizedBox(width: 12),
-            _LegendDot(color: Color(0xFFFFC107), label: 'Close'),
+            _LegendDot(color: AppColors.warning, label: 'Close'),
             SizedBox(width: 12),
-            _LegendDot(color: Color(0xFFE53935), label: 'Needs work'),
+            _LegendDot(color: AppColors.error, label: 'Needs work'),
           ]),
         ],
       ),

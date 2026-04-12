@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/music_service.dart';
+import '../../services/volume_service.dart';
 import '../../theme/app_theme.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -15,6 +16,8 @@ class _SettingsPageState extends State<SettingsPage> {
   final _storage = LocalStorageService();
   UserProfile? _profile;
   bool _loading = true;
+  double _musicVolume = 0.5;
+  double _voiceVolume = 0.5;
 
   @override
   void initState() {
@@ -27,6 +30,8 @@ class _SettingsPageState extends State<SettingsPage> {
     if (mounted) {
       setState(() {
         _profile = profile;
+        _musicVolume = VolumeService().musicVolume;
+        _voiceVolume = VolumeService().voiceVolume;
         _loading = false;
       });
     }
@@ -46,18 +51,10 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: const BackButton(color: AppColors.textPrimary),
         title: const Text(
           'Settings',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
       body: ListView(
@@ -98,23 +95,23 @@ class _SettingsPageState extends State<SettingsPage> {
 
           _SectionHeader(label: 'Audio'),
           const SizedBox(height: 8),
-          _ActionTile(
-            icon: Icons.music_off_rounded,
-            label: 'Stop Music',
-            subtitle: 'Pause the background music',
-            onTap: () {
-              final music = MusicService();
-              if (music.isPlaying) {
-                music.pause();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Music paused')),
-                );
-              } else {
-                music.resume();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Music resumed')),
-                );
-              }
+          _SliderTile(
+            icon: Icons.music_note_rounded,
+            label: 'Music Volume',
+            value: _musicVolume,
+            onChanged: (v) {
+              setState(() => _musicVolume = v);
+              MusicService().setMusicVolume(v);
+            },
+          ),
+          const SizedBox(height: 6),
+          _SliderTile(
+            icon: Icons.record_voice_over_rounded,
+            label: 'Voice Volume',
+            value: _voiceVolume,
+            onChanged: (v) {
+              setState(() => _voiceVolume = v);
+              VolumeService().setVoiceVolume(v);
             },
           ),
 
@@ -253,6 +250,82 @@ class _ToggleTile extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: AppColors.primary,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SliderTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  const _SliderTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 10, 12, 6),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.inputBorder),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.primary),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      '${(value * 100).round()}%',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 3,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                    activeTrackColor: AppColors.primary,
+                    inactiveTrackColor: AppColors.inputBorder,
+                    thumbColor: AppColors.primary,
+                    overlayColor: AppColors.primary.withOpacity(0.15),
+                  ),
+                  child: Slider(
+                    value: value,
+                    min: 0,
+                    max: 1,
+                    onChanged: onChanged,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

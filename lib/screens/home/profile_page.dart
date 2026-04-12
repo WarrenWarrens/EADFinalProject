@@ -136,7 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
                         color: !enabled
-                            ? Colors.grey.shade200
+                            ? AppColors.parchmentDark
                             : isSelected
                             ? AppColors.primary
                             : AppColors.parchmentLight,
@@ -154,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
                               color: !enabled
-                                  ? Colors.grey
+                                  ? AppColors.textSecondary
                                   : isSelected
                                   ? Colors.white
                                   : AppColors.textPrimary,
@@ -165,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             const Text('Coming soon',
                                 style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey,
+                                    color: AppColors.textSecondary,
                                     fontStyle: FontStyle.italic)),
                           ],
                           if (isSelected && enabled) ...[
@@ -312,14 +312,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Color _goalColor(String key) {
     switch (key) {
-      case 'red':
-        return const Color(0xFFE53935);
-      case 'orange':
-        return const Color(0xFFFF9800);
-      case 'green':
-        return const Color(0xFF4CAF50);
-      default:
-        return AppColors.primary;
+      case 'red':    return AppColors.error;
+      case 'orange': return AppColors.warning;
+      case 'green':  return AppColors.success;
+      default:       return AppColors.primary;
     }
   }
 
@@ -348,18 +344,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: const BackButton(color: AppColors.textPrimary),
         title: const Text(
           'Profile',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         actions: [
           IconButton(
@@ -368,7 +356,6 @@ class _ProfilePageState extends State<ProfilePage> {
               MaterialPageRoute(builder: (_) => const SettingsPage()),
             ),
             icon: const Icon(Icons.settings_rounded),
-            color: AppColors.textSecondary,
             tooltip: 'Settings',
           ),
         ],
