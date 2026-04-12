@@ -100,6 +100,17 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _goToLesson4(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson4_cases.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
   Future<void> _goToAudioMimicry(BuildContext ctx) async {
     await _enterLesson(() async {
       await Navigator.push(
