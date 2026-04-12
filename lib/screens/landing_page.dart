@@ -6,6 +6,7 @@ import '../models/user_profile.dart';
 import 'auth/login_page.dart';
 import 'auth/signup_page.dart';
 import 'setup/profile_setup_page.dart';
+import '../widgets/common_widgets.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -37,68 +38,66 @@ class _LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.parchment,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 36),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Spacer(flex: 3),
+      body: ResponsiveFormLayout(
+        padding: const EdgeInsets.symmetric(horizontal: 36),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Spacer(flex: 3),
 
-              // ── Logo ──────────────────────────────────────────────
-              Image.asset(
-                'assets/Logo/Lingualogo.png',
-                width: 320,
-                fit: BoxFit.contain,
+            // ── Logo ──────────────────────────────────────────────
+            Image.asset(
+              'assets/Logo/Lingualogo.png',
+              width: 320,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 16),
+
+            // ── Tagline ───────────────────────────────────────────
+            Text(
+              'Learn through magic and play',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: AppColors.goldDark,
+                fontStyle: FontStyle.italic,
+                height: 1.5,
               ),
-              const SizedBox(height: 16),
+            ),
 
-              // ── Tagline ───────────────────────────────────────────
-              Text(
-                'Learn through magic and play',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: AppColors.goldDark,
-                  fontStyle: FontStyle.italic,
-                  height: 1.5,
-                ),
+            const Spacer(flex: 4),
+
+            // ── Begin Your Journey (Sign Up) — filled purple ──────
+            _LandingButton(
+              label: 'Begin Your Journey',
+              style: _ButtonStyle.filled,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SignupPage()),
               ),
+            ),
+            const SizedBox(height: 30),
 
-              const Spacer(flex: 4),
-
-              // ── Begin Your Journey (Sign Up) — filled purple ──────
-              _LandingButton(
-                label: 'Begin Your Journey',
-                style: _ButtonStyle.filled,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SignupPage()),
-                ),
+            // ── Resume Your Adventure (Login) — gold-bordered ─────
+            _LandingButton(
+              label: 'Resume Your Adventure',
+              style: _ButtonStyle.outlined,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const LoginPage()),
               ),
-              const SizedBox(height: 30),
+            ),
+            const SizedBox(height: 30),
 
-              // ── Resume Your Adventure (Login) — gold-bordered ─────
-              _LandingButton(
-                label: 'Resume Your Adventure',
-                style: _ButtonStyle.outlined,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                ),
-              ),
-              const SizedBox(height: 30),
+            // ── Continue as Guest — parchment fill ────────────────
+            _LandingButton(
+              label: 'Continue as Guest',
+              style: _ButtonStyle.soft,
+              onTap: () => _continueAsGuest(context),
+            ),
 
-              // ── Continue as Guest — parchment fill ────────────────
-              _LandingButton(
-                label: 'Continue as Guest',
-                style: _ButtonStyle.soft,
-                onTap: () => _continueAsGuest(context),
-              ),
+            const SizedBox(height: 40),
 
-              const SizedBox(height: 40),
-
-              const SizedBox(height: 44),
-            ],
-          ),
+            const SizedBox(height: 44),
+          ],
         ),
       ),
     );
@@ -161,29 +160,30 @@ class _LandingButton extends StatelessWidget {
     }
 
     return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: bgColor,
-          foregroundColor: fgColor,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(26),
-            side: border,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-        ),
-        onPressed: onTap,
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
-          ),
-        ),
-      ),
+        width: double.infinity,
+        height: 52,
+        child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: bgColor,
+              foregroundColor: fgColor,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(26),
+                side: border,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+            ),
+            onPressed: onTap,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.3,
+              ),
+            )
+        )
     );
+
   }
 }

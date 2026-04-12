@@ -110,7 +110,14 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: EdgeInsets.only(
+            left: 32,
+            right: 32,
+            top: 8,
+            // Grow with the keyboard so focused fields at the
+            // bottom of the form can always scroll into view.
+            bottom: 24 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
@@ -124,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) =>
-                      (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                  (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
                 ),
                 const SizedBox(height: 12),
 
@@ -135,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                   obscure: true,
                   showClearButton: false,
                   validator: (v) =>
-                      (v == null || v.length < 6) ? 'Password too short' : null,
+                  (v == null || v.length < 6) ? 'Password too short' : null,
                 ),
                 const SizedBox(height: 8),
 

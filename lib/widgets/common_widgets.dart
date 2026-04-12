@@ -206,8 +206,21 @@ class AppTextField extends StatelessWidget {
       obscureText: obscure,
       keyboardType: keyboardType,
       validator: validator,
+      // Typed text — explicit so it doesn't inherit M3's default onSurface
+      // tone, which can render near-invisible on the parchment background.
+      style: const TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+      cursorColor: AppColors.primary,
       decoration: InputDecoration(
         hintText: hint,
+        hintStyle: const TextStyle(
+          color: AppColors.textSecondary,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+        ),
         suffixIcon: showClearButton
             ? IconButton(
           icon: const Icon(Icons.cancel_outlined,
@@ -532,6 +545,54 @@ class _MysticTextButtonState extends State<MysticTextButton>
                   ),
                 ],
               ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+/// Scroll-aware layout for form/step pages. Ensures content fits on short
+/// devices (e.g. Pixel 2 at 732 logical dp with the keyboard open) AND
+/// breathes on tall devices (Pixel 9/10 Pro) by filling the viewport when
+/// there's room so Spacer() children can expand.
+///
+/// Usage: replace `SafeArea(child: Padding(child: Column(...)))` with
+/// `ResponsiveFormLayout(child: Column(...))`. The child should still use
+/// Spacer() for vertical centering — this widget preserves that behavior
+/// on tall screens and falls back to natural flow on short ones.
+class ResponsiveFormLayout extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  const ResponsiveFormLayout({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.symmetric(horizontal: 32),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+          final effectivePadding = padding.add(EdgeInsets.only(
+            top: 16,
+            bottom: 24 + bottomInset,
+          ));
+          return SingleChildScrollView(
+            padding: effectivePadding,
+            child: ConstrainedBox(
+              // Fill the viewport when possible so Spacers still center
+              // content vertically on tall screens. When the keyboard
+              // shrinks the viewport below this height the ScrollView
+              // takes over and the content can scroll freely.
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight -
+                    effectivePadding.vertical.clamp(0.0, constraints.maxHeight),
+              ),
+              child: IntrinsicHeight(child: child),
             ),
           );
         },

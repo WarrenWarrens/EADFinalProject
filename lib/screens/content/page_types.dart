@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../models/dictionary_entry.dart';
+import '../../services/audio_analysis_service.dart';
 import '../../services/dictionary_service.dart';
 import '../../services/tts_service.dart';
 import '../../services/volume_service.dart';
@@ -58,7 +63,7 @@ class TextPage extends StatelessWidget {
   }
 }
 
-class CharacterPage extends StatelessWidget{
+class CharacterPage extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
 
@@ -69,7 +74,34 @@ class CharacterPage extends StatelessWidget{
   });
 
   @override
+  State<CharacterPage> createState() => _CharacterPageState();
+}
+
+class _CharacterPageState extends State<CharacterPage> {
+  bool _playing = false;
+
+  Future<void> _playLetter() async {
+    if (_playing) return;
+    setState(() => _playing = true);
+    try {
+      final letter = widget.data['letter'] as String? ?? '';
+      // Optional pronunciation hint from the lesson JSON (e.g. "ah" for 'ä'),
+      // otherwise speak the letter itself via the on-device TTS engine.
+      final hint = widget.data['ttsHint'] as String? ?? letter;
+      // Stop any prior utterance first — if the engine is stuck in a
+      // 'speaking' state from a previous session, a fresh speak() call can
+      // be silently dropped. stop() clears that state on all platforms.
+      await TtsService.stop();
+      await TtsService.speak(hint);
+    } catch (e) {
+      debugPrint('[CharacterPage] TTS error: $e');
+    }
+    if (mounted) setState(() => _playing = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final data = widget.data;
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -80,19 +112,12 @@ class CharacterPage extends StatelessWidget{
               children: [
 
                 GestureDetector(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Audio feature will be implemented later!"),
-                          showCloseIcon: true,
-                        )
-                    );
-                  },
+                  onTap: _playLetter,
                   child: Container(
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
+                      color: _playing ? AppColors.primary : AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: AppColors.primary,
@@ -104,9 +129,10 @@ class CharacterPage extends StatelessWidget{
                         Center(
                           child: Text(
                             data['letter'],
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 60,
                               fontWeight: FontWeight.bold,
+                              color: _playing ? Colors.white : null,
                             ),
                           ),
                         ),
@@ -115,8 +141,8 @@ class CharacterPage extends StatelessWidget{
                           top: 10,
                           right: 10,
                           child: Icon(
-                            Icons.volume_up_rounded,
-                            color: AppColors.primary,
+                            _playing ? Icons.volume_up_rounded : Icons.play_arrow_rounded,
+                            color: _playing ? Colors.white : AppColors.primary,
                           ),
                         ),
                       ],
@@ -140,7 +166,7 @@ class CharacterPage extends StatelessWidget{
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: onNext,
+              onPressed: widget.onNext,
               child: const Text("Continue"),
             ),
           ),
@@ -493,73 +519,73 @@ class _WordPageState extends State<WordPage> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Word display box
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.primary, width: 2),
+                  ),
+                  child: Column(
                     children: [
-                      // Word display box
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.primary, width: 2),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              _result?.word ?? widget.data['ref'] ?? '',
-                              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-                            ),
-                            if (_result?.syllables != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                _result!.syllables!,
-                                style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      // Translation
                       Text(
-                        overrideEnglish ?? _result?.translation ?? '',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                        _result?.word ?? widget.data['ref'] ?? '',
+                        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
                       ),
-                      if (_result?.wordType != null) ...[
-                        const SizedBox(height: 6),
+                      if (_result?.syllables != null) ...[
+                        const SizedBox(height: 4),
                         Text(
-                          _result!.wordType!,
-                          style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
-                        ),
-                      ],
-                      const SizedBox(height: 24),
-                      // Audio chip(s)
-                      if (_result != null && _result!.audio.isNotEmpty)
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          alignment: WrapAlignment.center,
-                          children: _result!.audio.map((a) => _LessonAudioChip(
-                            label: a.speaker,
-                            localPath: a.localPath,
-                          )).toList(),
-                        )
-                      else
-                        _LessonAudioChip(
-                          label: 'Listen',
-                          ttsText: _result?.word ?? widget.data['ref'],
-                        ),
-                      if (description != null) ...[
-                        const SizedBox(height: 20),
-                        Text(
-                          description,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 16, color: AppColors.textSecondary, height: 1.5),
+                          _result!.syllables!,
+                          style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
                         ),
                       ],
                     ],
                   ),
+                ),
+                const SizedBox(height: 20),
+                // Translation
+                Text(
+                  overrideEnglish ?? _result?.translation ?? '',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                ),
+                if (_result?.wordType != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    _result!.wordType!,
+                    style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                // Audio chip(s)
+                if (_result != null && _result!.audio.isNotEmpty)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: _result!.audio.map((a) => _LessonAudioChip(
+                      label: a.speaker,
+                      localPath: a.localPath,
+                    )).toList(),
+                  )
+                else
+                  _LessonAudioChip(
+                    label: 'Listen',
+                    ttsText: _result?.word ?? widget.data['ref'],
+                  ),
+                if (description != null) ...[
+                  const SizedBox(height: 20),
+                  Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: AppColors.textSecondary, height: 1.5),
+                  ),
+                ],
+              ],
+            ),
           ),
           SizedBox(
             width: double.infinity,
@@ -629,61 +655,61 @@ class _PhrasePageState extends State<PhrasePage> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  // Phrase box
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.primary, width: 2),
+                    ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 20),
-                        // Phrase box
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLight,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppColors.primary, width: 2),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(navi, textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 8),
-                              Text(english, textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _LessonAudioChip(label: 'Listen', ttsText: ttsHint),
-                        if (_breakdown.isNotEmpty) ...[
-                          const SizedBox(height: 24),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text('Word breakdown',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _breakdown.map((w) {
-                              final lp = w['localPath'] as String?;
-                              return _LessonAudioChip(
-                                label: '${w['navi']} — ${w['english']}',
-                                localPath: lp,
-                                ttsText: lp == null ? w['navi'] as String? : null,
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                        if (description != null) ...[
-                          const SizedBox(height: 20),
-                          Text(description, textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 16, color: AppColors.textSecondary, height: 1.5)),
-                        ],
-                        const SizedBox(height: 20),
+                        Text(navi, textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        Text(english, textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  _LessonAudioChip(label: 'Listen', ttsText: ttsHint),
+                  if (_breakdown.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Word breakdown',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _breakdown.map((w) {
+                        final lp = w['localPath'] as String?;
+                        return _LessonAudioChip(
+                          label: '${w['navi']} — ${w['english']}',
+                          localPath: lp,
+                          ttsText: lp == null ? w['navi'] as String? : null,
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                  if (description != null) ...[
+                    const SizedBox(height: 20),
+                    Text(description, textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: AppColors.textSecondary, height: 1.5)),
+                  ],
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
           ),
           SizedBox(
             width: double.infinity,
@@ -713,6 +739,7 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
 
   String? _localPath;
+  String? _referenceWavPath;   // PCM16 WAV — required for analysis
   String? _naviText;
   String? _englishText;
   String? _ttsHint;
@@ -721,6 +748,10 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
   bool _isPlaying = false;
   bool _isRecording = false;
   bool _hasRecorded = false;
+  bool _recorderReady = false;
+  bool _scoring = false;
+  double? _score;
+  String? _feedback;
   String? _recordPath;
 
   @override
@@ -730,7 +761,21 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
   }
 
   Future<void> _init() async {
-    await _recorder.openRecorder();
+    // Request runtime microphone permission before opening the recorder.
+    // Without this, flutter_sound.startRecorder() silently fails on Android
+    // 13+ because RECORD_AUDIO is a dangerous permission.
+    final status = await Permission.microphone.request();
+    if (status == PermissionStatus.granted) {
+      try {
+        await _recorder.openRecorder();
+        _recorderReady = true;
+      } catch (e) {
+        debugPrint('[Mimicry] openRecorder failed: $e');
+      }
+    } else {
+      debugPrint('[Mimicry] Microphone permission denied');
+    }
+
     final ref = widget.data['ref'] as String?;
     if (ref != null) {
       final result = await DictionaryService().lookupWord(ref, AppLanguage.navi);
@@ -742,13 +787,42 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
       _englishText = widget.data['english'] as String?;
       _ttsHint = widget.data['ttsHint'] as String?;
     }
+
+    // Prepare a WAV copy of the reference audio for AudioAnalysisService
+    // (it reads raw PCM samples so it can't accept mp3/ogg/aac directly).
+    // Done in the background — recording still works even if conversion
+    // fails, just without a score.
+    if (_localPath != null) {
+      _referenceWavPath = await _convertToWav(_localPath!);
+    }
+
     if (mounted) setState(() => _loading = false);
+  }
+
+  /// Convert an audio file to 16 kHz mono PCM16 WAV in the temp directory.
+  /// Returns the new path, or null if conversion fails.
+  Future<String?> _convertToWav(String sourcePath) async {
+    try {
+      if (sourcePath.toLowerCase().endsWith('.wav')) return sourcePath;
+      final dir = await getTemporaryDirectory();
+      final wavPath =
+          '${dir.path}/mimicry_ref_${DateTime.now().millisecondsSinceEpoch}.wav';
+      final session = await FFmpegKit.execute(
+        '-y -i "$sourcePath" -ar 16000 -ac 1 -sample_fmt s16 "$wavPath"',
+      );
+      final code = await session.getReturnCode();
+      if (ReturnCode.isSuccess(code)) return wavPath;
+      debugPrint('[Mimicry] WAV conversion failed for $sourcePath');
+    } catch (e) {
+      debugPrint('[Mimicry] WAV conversion error: $e');
+    }
+    return null;
   }
 
   @override
   void dispose() {
     _player.dispose();
-    _recorder.closeRecorder();
+    if (_recorderReady) _recorder.closeRecorder();
     super.dispose();
   }
 
@@ -771,15 +845,114 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
   }
 
   Future<void> _toggleRecord() async {
-    if (_isRecording) {
-      await _recorder.stopRecorder();
-      setState(() { _isRecording = false; _hasRecorded = true; });
-    } else {
-      final dir = await getTemporaryDirectory();
-      _recordPath = '${dir.path}/mimicry_${DateTime.now().millisecondsSinceEpoch}.aac';
-      await _recorder.startRecorder(toFile: _recordPath, codec: Codec.aacADTS);
-      setState(() => _isRecording = true);
+    // If the recorder never opened (permission denied, engine error), prompt
+    // the user to grant permission via system settings rather than silently
+    // failing when the mic is tapped.
+    if (!_recorderReady) {
+      final status = await Permission.microphone.request();
+      if (status == PermissionStatus.granted) {
+        try {
+          await _recorder.openRecorder();
+          _recorderReady = true;
+        } catch (e) {
+          debugPrint('[Mimicry] openRecorder retry failed: $e');
+        }
+      }
+      if (!_recorderReady) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Microphone access is required to record. Enable it in system settings.'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
     }
+
+    try {
+      if (_isRecording) {
+        await _recorder.stopRecorder();
+        setState(() { _isRecording = false; _hasRecorded = true; });
+        // Kick off analysis. We don't block the UI on this — the user sees
+        // "Scoring…" until it completes, then the badge swaps in.
+        _scoreRecording();
+      } else {
+        final dir = await getTemporaryDirectory();
+        _recordPath =
+        '${dir.path}/mimicry_${DateTime.now().millisecondsSinceEpoch}.wav';
+        // PCM16 WAV so AudioAnalysisService can read raw samples directly.
+        await _recorder.startRecorder(
+          toFile: _recordPath,
+          codec: Codec.pcm16WAV,
+        );
+        setState(() {
+          _isRecording = true;
+          // Clear any previous result when the user starts a fresh take.
+          _score = null;
+          _feedback = null;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Mimicry] Record toggle error: $e');
+      if (mounted) setState(() => _isRecording = false);
+    }
+  }
+
+  /// Compare the recorded attempt against the reference WAV using
+  /// AudioAnalysisService and surface a score + feedback message.
+  Future<void> _scoreRecording() async {
+    if (_recordPath == null) return;
+    if (_referenceWavPath == null) {
+      // No reference available (TTS-hint-only items, or conversion failed).
+      // Still mark as recorded so the Continue button enables, but skip
+      // scoring since there's nothing meaningful to compare against.
+      if (mounted) {
+        setState(() {
+          _feedback = 'Recorded — no reference audio available for scoring.';
+        });
+      }
+      return;
+    }
+
+    setState(() => _scoring = true);
+    try {
+      final result = await AudioAnalysisService.compare(
+        referencePath: _referenceWavPath!,
+        attemptPath: _recordPath!,
+      );
+      if (mounted) {
+        setState(() {
+          _score = result.score;
+          _feedback = result.feedback;
+          _scoring = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[Mimicry] Analysis error: $e');
+      if (mounted) {
+        setState(() {
+          _score = 0.0;
+          _feedback = 'Analysis failed — try recording again';
+          _scoring = false;
+        });
+      }
+    }
+  }
+
+  Color _scoreColor(double s) {
+    if (s >= 0.75) return AppColors.success;
+    if (s >= 0.50) return AppColors.warning;
+    return AppColors.error;
+  }
+
+  String _scoreLabel(double s) {
+    if (s >= 0.85) return 'Excellent!';
+    if (s >= 0.70) return 'Good';
+    if (s >= 0.50) return 'Keep practising';
+    return 'Try again';
   }
 
   @override
@@ -795,52 +968,98 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(instruction, textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 16, color: AppColors.textSecondary)),
-                      const SizedBox(height: 32),
-                      if (_naviText != null)
-                        Text(_naviText!, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
-                      if (_englishText != null && _englishText!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(_englishText!, style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
-                      ],
-                      const SizedBox(height: 32),
-                      // Play button
-                      ElevatedButton.icon(
-                        onPressed: _isPlaying ? null : _playReference,
-                        icon: Icon(_isPlaying ? Icons.volume_up_rounded : Icons.play_circle_rounded),
-                        label: Text(_isPlaying ? 'Playing…' : 'Listen'),
-                      ),
-                      const SizedBox(height: 20),
-                      // Record button
-                      GestureDetector(
-                        onTap: _hasListened ? _toggleRecord : null,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: 80, height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _isRecording
-                                ? AppColors.error
-                                : (_hasListened ? AppColors.primary : AppColors.primaryLight),
-                          ),
-                          child: Icon(
-                            _isRecording ? Icons.stop_rounded : Icons.mic_rounded,
-                            color: Colors.white, size: 36,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _isRecording
-                            ? 'Recording… tap to stop'
-                            : (_hasRecorded ? 'Recorded! Tap to redo.' : (_hasListened ? 'Tap mic to record' : 'Listen first')),
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                    ],
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(instruction, textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: AppColors.textSecondary)),
+                const SizedBox(height: 32),
+                if (_naviText != null)
+                  Text(_naviText!, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
+                if (_englishText != null && _englishText!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(_englishText!, style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
+                ],
+                const SizedBox(height: 32),
+                // Play button
+                ElevatedButton.icon(
+                  onPressed: _isPlaying ? null : _playReference,
+                  icon: Icon(_isPlaying ? Icons.volume_up_rounded : Icons.play_circle_rounded),
+                  label: Text(_isPlaying ? 'Playing…' : 'Listen'),
+                ),
+                const SizedBox(height: 20),
+                // Record button — always tappable. Previously this was
+                // gated behind _hasListened, which made the button
+                // appear broken if Listen failed or the user wanted to
+                // try recording first. The Continue button below still
+                // requires having listened, preserving the intended
+                // flow without leaving a dead-looking button onscreen.
+                GestureDetector(
+                  onTap: _toggleRecord,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 80, height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _isRecording
+                          ? AppColors.error
+                          : AppColors.primary,
+                    ),
+                    child: Icon(
+                      _isRecording ? Icons.stop_rounded : Icons.mic_rounded,
+                      color: Colors.white, size: 36,
+                    ),
                   ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _isRecording
+                      ? 'Recording… tap to stop'
+                      : (_hasRecorded
+                      ? 'Recorded! Tap to redo.'
+                      : (_hasListened
+                      ? 'Tap mic to record'
+                      : 'Tap Listen first, then record')),
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+                // Scoring indicator + result badge — styled to match
+                // the audio_mimicry_screen badge for consistency.
+                if (_scoring) ...[
+                  const SizedBox(height: 16),
+                  const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Scoring…',
+                      style: TextStyle(color: AppColors.textSecondary)),
+                ] else if (_score != null) ...[
+                  const SizedBox(height: 16),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    child: _MimicryScoreBadge(
+                      key: ValueKey(_score),
+                      score: _score!,
+                      color: _scoreColor(_score!),
+                      label: _scoreLabel(_score!),
+                    ),
+                  ),
+                  if (_feedback != null && _feedback!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        _feedback!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ],
+              ],
+            ),
           ),
           SizedBox(
             width: double.infinity,
@@ -850,6 +1069,51 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
             ),
           ),
           const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Score badge for AudioMimicryExercise ─────────────────────────────────────
+//
+// Compact pill showing the pronunciation score result. Mirrors the styling
+// of _ScoreBadge in audio_mimicry_screen.dart so the two surfaces feel
+// consistent when the user switches between them.
+
+class _MimicryScoreBadge extends StatelessWidget {
+  final double score;
+  final Color color;
+  final String label;
+
+  const _MimicryScoreBadge({
+    super.key,
+    required this.score,
+    required this.color,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star_rounded, color: color, size: 22),
+          const SizedBox(width: 8),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w600, color: color)),
+          const SizedBox(width: 12),
+          Text('${(score * 100).round()}%',
+              style: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w700, color: color)),
         ],
       ),
     );
@@ -910,7 +1174,12 @@ class _MatchingExerciseState extends State<MatchingExercise> {
       }
     }
 
-    final shuffled = List<String>.from(answers)..shuffle();
+    // Derange so no right-side answer ends up paired with its own left
+    // on the first try — a plain shuffle() on 5 items often produces an
+    // order that looks unshuffled (or only 1–2 swaps off), which gives
+    // away the answers. Fall back to shuffle if derangement is impossible
+    // (n < 2 or all entries identical).
+    final shuffled = _derange(answers);
 
     if (mounted) {
       setState(() {
@@ -920,6 +1189,26 @@ class _MatchingExerciseState extends State<MatchingExercise> {
         _loading = false;
       });
     }
+  }
+
+  /// Return a permutation of [items] where items[i] != result[i] for every i.
+  /// Uses rejection sampling — simple and more than fast enough for the
+  /// short lists used in matching exercises. Falls back to a plain shuffle
+  /// if no derangement exists (duplicate entries in every slot).
+  static List<String> _derange(List<String> items) {
+    if (items.length < 2) return List<String>.from(items);
+    final rand = math.Random();
+    for (var attempt = 0; attempt < 20; attempt++) {
+      final candidate = List<String>.from(items)..shuffle(rand);
+      var ok = true;
+      for (var i = 0; i < items.length; i++) {
+        if (candidate[i] == items[i]) { ok = false; break; }
+      }
+      if (ok) return candidate;
+    }
+    // Fallback: cyclic shift by 1 guarantees derangement if all items unique.
+    final fallback = [items.last, ...items.sublist(0, items.length - 1)];
+    return fallback;
   }
 
   void _onTapLeft(int i) {
@@ -1003,79 +1292,98 @@ class _MatchingExerciseState extends State<MatchingExercise> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        Text(instruction, textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 16, color: AppColors.textSecondary)),
-                        const SizedBox(height: 24),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Left column
-                            Expanded(
-                              child: Column(
-                                children: List.generate(_leftItems.length, (i) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: GestureDetector(
-                                    onTap: () => _onTapLeft(i),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 150),
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                                      decoration: BoxDecoration(
-                                        color: _leftColor(i),
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: _leftBorder(i), width: 2),
+              child: Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Text(instruction, textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: AppColors.textSecondary)),
+                  const SizedBox(height: 24),
+                  // One Row per pair, wrapped in IntrinsicHeight so the
+                  // left (Na'vi, bold 16pt) and right (English, 14pt)
+                  // pills in that row share the taller pill's height.
+                  // Prevents the visual mismatch where the left column
+                  // ends up noticeably taller than the right.
+                  Column(
+                    children: List.generate(_leftItems.length, (i) {
+                      final hasRight = i < _rightItems.length;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => _onTapLeft(i),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 150),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14, horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      color: _leftColor(i),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: _leftBorder(i), width: 2),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        _leftItems[i],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
                                       ),
-                                      child: Text(_leftItems[i], textAlign: TextAlign.center,
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                                     ),
                                   ),
-                                )),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            // Right column
-                            Expanded(
-                              child: Column(
-                                children: List.generate(_rightItems.length, (i) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: GestureDetector(
-                                    onTap: () => _onTapRight(i),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 150),
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                                      decoration: BoxDecoration(
-                                        color: _rightColor(i),
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: _rightBorder(i), width: 2),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: hasRight
+                                    ? GestureDetector(
+                                  onTap: () => _onTapRight(i),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 150),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14, horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      color: _rightColor(i),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: _rightBorder(i), width: 2),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        _rightItems[i],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(fontSize: 14),
                                       ),
-                                      child: Text(_rightItems[i], textAlign: TextAlign.center,
-                                          style: const TextStyle(fontSize: 14)),
                                     ),
                                   ),
-                                )),
+                                )
+                                    : const SizedBox.shrink(),
                               ),
-                            ),
-                          ],
-                        ),
-                        if (_allMatched) ...[
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.check_circle, color: AppColors.success),
-                              SizedBox(width: 8),
-                              Text('All matched!', style: TextStyle(color: AppColors.success,
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
                             ],
                           ),
-                        ],
+                        ),
+                      );
+                    }),
+                  ),
+                  if (_allMatched) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.check_circle, color: AppColors.success),
+                        SizedBox(width: 8),
+                        Text('All matched!', style: TextStyle(color: AppColors.success,
+                            fontWeight: FontWeight.bold, fontSize: 16)),
                       ],
                     ),
-                  ),
+                  ],
+                ],
+              ),
+            ),
           ),
           SizedBox(
             width: double.infinity,
@@ -1185,67 +1493,67 @@ class _ListenChooseExerciseState extends State<ListenChooseExercise> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        // Listen button (big)
-                        GestureDetector(
-                          onTap: _playAudio,
-                          child: Container(
-                            width: 120, height: 120,
-                            decoration: BoxDecoration(
-                              color: _hasListened ? AppColors.primaryLight : AppColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(Icons.volume_up_rounded,
-                                color: _hasListened ? AppColors.primary : Colors.white, size: 56),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(instruction, textAlign: TextAlign.center,
-                            style: TextStyle(color: AppColors.textSecondary)),
-                        const SizedBox(height: 32),
-                        ...List.generate(options.length, (i) {
-                          final opt = options[i] as Map;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: GestureDetector(
-                              onTap: (_hasSubmitted || !_hasListened)
-                                  ? null
-                                  : () => setState(() => _selectedIndex = i),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                                decoration: BoxDecoration(
-                                  color: _optionColor(i),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: _optionBorder(i), width: 2),
-                                ),
-                                child: Text(opt['text'] as String, textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 18)),
-                              ),
-                            ),
-                          );
-                        }),
-                        if (_hasSubmitted) ...[
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(_isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                                  color: _isCorrect ? AppColors.success : AppColors.error),
-                              const SizedBox(width: 8),
-                              Text(_isCorrect ? 'Correct!' : 'Incorrect, try next time!',
-                                  style: TextStyle(
-                                      color: _isCorrect ? AppColors.success : AppColors.error,
-                                      fontWeight: FontWeight.bold, fontSize: 16)),
-                            ],
-                          ),
-                        ],
-                      ],
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  // Listen button (big)
+                  GestureDetector(
+                    onTap: _playAudio,
+                    child: Container(
+                      width: 120, height: 120,
+                      decoration: BoxDecoration(
+                        color: _hasListened ? AppColors.primaryLight : AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.volume_up_rounded,
+                          color: _hasListened ? AppColors.primary : Colors.white, size: 56),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Text(instruction, textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textSecondary)),
+                  const SizedBox(height: 32),
+                  ...List.generate(options.length, (i) {
+                    final opt = options[i] as Map;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GestureDetector(
+                        onTap: (_hasSubmitted || !_hasListened)
+                            ? null
+                            : () => setState(() => _selectedIndex = i),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                          decoration: BoxDecoration(
+                            color: _optionColor(i),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _optionBorder(i), width: 2),
+                          ),
+                          child: Text(opt['text'] as String, textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 18)),
+                        ),
+                      ),
+                    );
+                  }),
+                  if (_hasSubmitted) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(_isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                            color: _isCorrect ? AppColors.success : AppColors.error),
+                        const SizedBox(width: 8),
+                        Text(_isCorrect ? 'Correct!' : 'Incorrect, try next time!',
+                            style: TextStyle(
+                                color: _isCorrect ? AppColors.success : AppColors.error,
+                                fontWeight: FontWeight.bold, fontSize: 16)),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(

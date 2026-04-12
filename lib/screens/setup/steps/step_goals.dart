@@ -75,102 +75,100 @@ class _StepGoalsState extends State<StepGoals> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Spacer(flex: 2),
-              const Text(
-                'Please select your\nlearning goal!',
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '(Can be adjusted at any point!)',
-                style:
-                TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
+      resizeToAvoidBottomInset: true,
+      body: ResponsiveFormLayout(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Spacer(flex: 2),
+            const Text(
+              'Please select your\nlearning goal!',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '(Can be adjusted at any point!)',
+              style:
+              TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
 
-              ...kGoals.map((goal) {
-                final isSelected = _selected == goal['id'];
-                final dotColor = _goalColor(goal['color']!);
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: GestureDetector(
-                    onTap: () => setState(() => _selected = goal['id']),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.buttonSoft,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                              radius: 10,
-                              backgroundColor: dotColor),
-                          const SizedBox(width: 14),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                goal['label']!,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : AppColors.textPrimary,
-                                ),
+            ...kGoals.map((goal) {
+              final isSelected = _selected == goal['id'];
+              final dotColor = _goalColor(goal['color']!);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: GestureDetector(
+                  onTap: () => setState(() => _selected = goal['id']),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.buttonSoft,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                            radius: 10,
+                            backgroundColor: dotColor),
+                        const SizedBox(width: 14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              goal['label']!,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textPrimary,
                               ),
-                              Text(
-                                goal['sub']!,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isSelected
-                                      ? Colors.white70
-                                      : AppColors.textSecondary,
-                                ),
+                            ),
+                            Text(
+                              goal['sub']!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected
+                                    ? Colors.white70
+                                    : AppColors.textSecondary,
                               ),
-                            ],
-                          ),
-                          if (isSelected) ...[
-                            const Spacer(),
-                            const Icon(Icons.check_circle,
-                                color: Colors.white, size: 18),
+                            ),
                           ],
+                        ),
+                        if (isSelected) ...[
+                          const Spacer(),
+                          const Icon(Icons.check_circle,
+                              color: Colors.white, size: 18),
                         ],
-                      ),
+                      ],
                     ),
                   ),
-                );
-              }),
+                ),
+              );
+            }),
 
-              const Spacer(flex: 3),
+            const Spacer(flex: 3),
 
-              Row(
-                children: [
-                  NavButton(icon: Icons.arrow_back, onTap: widget.onBack),
-                  const Spacer(),
-                  NavButton(icon: Icons.arrow_forward, onTap: _next),
-                ],
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            Row(
+              children: [
+                NavButton(icon: Icons.arrow_back, onTap: widget.onBack),
+                const Spacer(),
+                NavButton(icon: Icons.arrow_forward, onTap: _next),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
     );

@@ -10,10 +10,8 @@ class VerifyEmailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+        backgroundColor: AppColors.background,
+        body: ResponsiveFormLayout(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -89,8 +87,7 @@ class VerifyEmailPage extends StatelessWidget {
               const Spacer(flex: 2),
             ],
           ),
-        ),
-      ),
+        )
     );
-  }
+    }
 }

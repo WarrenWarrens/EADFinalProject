@@ -71,11 +71,17 @@ class AudioAnalysisService {
         );
       }
 
-      // 2. Trim silence from both ends (below -40 dB ≈ amplitude < 0.01)
+      // 2. Trim silence from both ends using windowed RMS.
       final refTrimmed = _trimSilence(refSamples);
       final attTrimmed = _trimSilence(attSamples);
 
+      print('[AudioAnalysis] samples raw: ref=${refSamples.length} '
+          'att=${attSamples.length}  trimmed: ref=${refTrimmed.length} '
+          'att=${attTrimmed.length}');
+
       if (refTrimmed.length < 400 || attTrimmed.length < 400) {
+        print('[AudioAnalysis] Rejected: trimmed length below 400 '
+            '(ref=${refTrimmed.length}, att=${attTrimmed.length})');
         return const AudioAnalysisResult(
           score: 0.0,
           feedback: 'Recording too short — speak louder or longer',
@@ -231,25 +237,55 @@ class AudioAnalysisService {
   //  Pre-processing
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// Trim leading/trailing silence below the given amplitude threshold.
-  static Float64List _trimSilence(Float64List samples, {double threshold = 0.01}) {
-    int start = 0;
-    int end = samples.length - 1;
+  /// Trim leading/trailing silence using a short-window RMS energy scan.
+  ///
+  /// The previous implementation inspected individual samples, which was too
+  /// brittle — a single zero-crossing below the threshold would halt the
+  /// scan mid-speech, eating the start of words. A 20 ms RMS window smooths
+  /// over natural dips in amplitude within speech (plosive closures, vowel
+  /// tails) while still cleanly removing true silence.
+  ///
+  /// [threshold] is the RMS floor on a [-1.0, 1.0] sample scale. 0.004 ≈
+  /// -48 dB, roughly matching the ambient noise floor of a phone mic in a
+  /// quiet room; anything louder is treated as content.
+  static Float64List _trimSilence(Float64List samples,
+      {double threshold = 0.004}) {
+    if (samples.length < 320) return samples; // < 20ms at 16kHz
 
-    // Find first sample above threshold
-    while (start < end && samples[start].abs() < threshold) {
-      start++;
+    const window = 320; // 20 ms at 16 kHz
+    const hop = 160;    // 10 ms hop — 50 % overlap
+
+    int firstVoicedFrame = -1;
+    int lastVoicedFrame = -1;
+
+    for (var f = 0; f + window <= samples.length; f += hop) {
+      var sumSq = 0.0;
+      for (var i = 0; i < window; i++) {
+        final v = samples[f + i];
+        sumSq += v * v;
+      }
+      final rms = sqrt(sumSq / window);
+      if (rms > threshold) {
+        firstVoicedFrame = firstVoicedFrame < 0 ? f : firstVoicedFrame;
+        lastVoicedFrame = f + window;
+      }
     }
-    // Find last sample above threshold
-    while (end > start && samples[end].abs() < threshold) {
-      end--;
+
+    if (firstVoicedFrame < 0) {
+      // Whole buffer below threshold — return empty so downstream can report
+      // "recording too short" rather than crashing on a mystery empty-ish
+      // result.
+      print('[AudioAnalysis] _trimSilence: no frame above $threshold RMS '
+          '(buffer len=${samples.length})');
+      return Float64List(0);
     }
 
-    // Add small padding (50ms at 16kHz = 800 samples) to avoid clipping
-    start = max(0, start - 800);
-    end = min(samples.length - 1, end + 800);
-
-    return Float64List.sublistView(samples, start, end + 1);
+    // 50 ms padding on each end (800 samples at 16 kHz) so the analysis
+    // window includes a bit of attack/decay rather than snapping to the
+    // voiced edge and risking clipping formants.
+    final start = max(0, firstVoicedFrame - 800);
+    final end = min(samples.length, lastVoicedFrame + 800);
+    return Float64List.sublistView(samples, start, end);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -260,9 +296,10 @@ class AudioAnalysisService {
   ///
   /// Speech: median flatness ≈ 0.05–0.35 (formant peaks break up the spectrum).
   /// Blowing / wind: flatness ≈ 0.65–0.95 (energy spread flat across all bins).
-  /// A value of 0.72 gives a comfortable gap between speech and blowing while
-  /// staying tolerant of unusual phonemes (Na'vi ejectives, Klingon uvulars).
-  static const double _noiseFlatnessThreshold = 0.72;
+  /// A value of 0.80 leaves clean speech comfortably below the gate while
+  /// still catching pure broadband noise. Previously 0.72, which occasionally
+  /// rejected breathy speech from close-mic recordings on modern phones.
+  static const double _noiseFlatnessThreshold = 0.80;
 
   /// Returns the median per-frame spectral flatness (Wiener entropy) of [samples].
   ///

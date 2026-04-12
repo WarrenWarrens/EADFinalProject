@@ -58,10 +58,8 @@ class _StepLanguageState extends State<StepLanguage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+        backgroundColor: AppColors.background,
+        body: ResponsiveFormLayout(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -106,10 +104,9 @@ class _StepLanguageState extends State<StepLanguage> {
               const SizedBox(height: 24),
             ],
           ),
-        ),
-      ),
+        )
     );
-  }
+    }
 }
 
 class _LanguageChip extends StatelessWidget {

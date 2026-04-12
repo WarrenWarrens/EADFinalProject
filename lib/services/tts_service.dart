@@ -45,6 +45,18 @@ class TtsService {
     }
   }
 
+  /// Initialise the on-device TTS engine without speaking anything. Call this
+  /// ahead of the first real [speak] to avoid cold-start latency on the first
+  /// tap. Safe to call repeatedly — subsequent calls are no-ops once the
+  /// engine is ready.
+  ///
+  /// Note: do NOT use `speak('')` for warm-up — on some platforms an empty
+  /// speak never fires its completion handler, leaving the engine blocked
+  /// for the next real call.
+  static Future<void> warmUp() async {
+    await _ensureTts();
+  }
+
   /// Speak [text] directly through the device speaker.
   /// Returns immediately once speech starts.  Call [stop] to cancel.
   /// Silently no-ops if the on-device TTS engine is unavailable.

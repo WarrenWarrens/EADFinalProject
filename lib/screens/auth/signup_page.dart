@@ -90,7 +90,7 @@ class _SignupPageState extends State<SignupPage> {
       if (!mounted) return;
       // Google accounts are already verified, skip verify page
       Navigator.of(context).pushNamedAndRemoveUntil(
-        '/setup', (route) => false);
+          '/setup', (route) => false);
     } catch (e) {
       setState(() => _errorMessage = 'Google sign-up failed.');
     } finally {
@@ -104,7 +104,14 @@ class _SignupPageState extends State<SignupPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: EdgeInsets.only(
+            left: 32,
+            right: 32,
+            top: 8,
+            // Grow with the keyboard so focused fields at the
+            // bottom of the form can always scroll into view.
+            bottom: 24 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
@@ -117,7 +124,7 @@ class _SignupPageState extends State<SignupPage> {
                   hint: 'name',
                   controller: _nameController,
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
+                  (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
                 ),
                 const SizedBox(height: 12),
 
@@ -127,7 +134,7 @@ class _SignupPageState extends State<SignupPage> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) =>
-                      (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                  (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
                 ),
                 const SizedBox(height: 12),
 
@@ -138,7 +145,7 @@ class _SignupPageState extends State<SignupPage> {
                   obscure: true,
                   showClearButton: false,
                   validator: (v) =>
-                      (v == null || v.length < 6) ? 'At least 6 characters' : null,
+                  (v == null || v.length < 6) ? 'At least 6 characters' : null,
                 ),
                 const SizedBox(height: 8),
 
