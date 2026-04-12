@@ -12,6 +12,7 @@ import 'study_page.dart';
 import '../../services/vocab_tracking_service.dart';
 import '../../widgets/app_nav_bar.dart';
 import '../../widgets/app_language.dart';
+import 'vocab_detail_page.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  ProfileScreen — unified Profile / Stats / Settings screen.
@@ -625,6 +626,9 @@ class _StatsTab extends StatelessWidget {
           title: 'Your Word Cloud',
           accentColor: accentColor,
           initiallyExpanded: true,
+          onExpand: () => Navigator.push(context, MaterialPageRoute(
+            builder: (_) => VocabDetailPage(language: language, initialTab: 0),
+          )),
           child: _WordCloudContent(
             language: language,
             records: vocabRecords,
@@ -638,9 +642,12 @@ class _StatsTab extends StatelessWidget {
           title: 'Your Dictionary',
           accentColor: accentColor,
           initiallyExpanded: false,
+          onExpand: () => Navigator.push(context, MaterialPageRoute(
+            builder: (_) => VocabDetailPage(language: language, initialTab: 1),
+          )),
           child: _DictionaryContent(
             language: language,
-            records: vocabRecords,       // ← ADD THIS LINE
+            records: vocabRecords,
             accentColor: accentColor,
           ),
         ),
@@ -668,6 +675,7 @@ class _ExpandableStatCard extends StatefulWidget {
   final Color accentColor;
   final bool initiallyExpanded;
   final Widget child;
+  final VoidCallback? onExpand;   // ← ADD
 
   const _ExpandableStatCard({
     required this.icon,
@@ -675,6 +683,7 @@ class _ExpandableStatCard extends StatefulWidget {
     required this.accentColor,
     required this.initiallyExpanded,
     required this.child,
+    this.onExpand,                // ← ADD
   });
 
   @override
@@ -754,6 +763,15 @@ class _ExpandableStatCardState extends State<_ExpandableStatCard>
                       ),
                     ),
                   ),
+                  if (widget.onExpand != null)
+                    IconButton(
+                      icon: const Icon(Icons.open_in_full_rounded, size: 18),
+                      color: widget.accentColor.withOpacity(0.7),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: widget.onExpand,
+                    ),
+                  const SizedBox(width: 8),
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 280),
