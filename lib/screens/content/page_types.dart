@@ -17,6 +17,7 @@ import '../../services/volume_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_language.dart';
 import '../../services/audio_analysis_service_onnx.dart';
+import '../../services/vocab_tracking_service.dart';
 
 class TextPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -197,6 +198,7 @@ class ExercisePage extends StatelessWidget {
         return MultipleChoice(
           question: data['question'],
           options: List<Map<String, dynamic>>.from(data['options']),
+          ref: data['ref'] as String?,
           onNext: onNext,
         );
       case 'audio_mimicry':
@@ -217,12 +219,14 @@ class MultipleChoice extends StatefulWidget {
   final String question;
   final List<Map<String, dynamic>> options;
   final VoidCallback onNext;
+  final String? ref;   // ← simple single field
 
   const MultipleChoice({
     super.key,
     required this.question,
     required this.options,
     required this.onNext,
+    this.ref,
   });
 
   @override
@@ -280,9 +284,16 @@ class _MultipleChoiceState extends State<MultipleChoice> {
     }
 
     if (!hasSubmitted) {
-      setState(() {
-        hasSubmitted = true;
-      });
+      setState(() => hasSubmitted = true);
+      final wid = widget.ref;
+      if (wid != null) {
+        VocabTrackingService().recordNonVocalAttempt(
+          wordId: wid,
+          displayText: wid,
+          correct: isCorrect,
+          source: 'multiple_choice',
+        );
+      }
     }
     else {
       widget.onNext();
@@ -973,6 +984,15 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
             : 'Try again';
         _scoring = false;
       });
+      final wordId = widget.data['ref'] as String?;
+      if (wordId != null && _naviText != null) {
+        VocabTrackingService().recordVocalAttempt(
+          wordId: wordId,
+          displayText: _naviText!,
+          score: result.score,
+          source: 'page_types_mimicry',
+        );
+      }
     } catch (e) {
       debugPrint('[ONNX] page_types scoring error: $e');
       if (mounted) {
@@ -1354,6 +1374,21 @@ class _MatchingExerciseState extends State<MatchingExercise> {
     final l = _selectedLeft!;
     final r = _selectedRight!;
     final correct = _rightAnswers[l] == _rightItems[r];
+
+    // Record against the left-side word regardless of outcome.
+    final rawWordIds = widget.data['refs'] as List<dynamic>?;
+    if (rawWordIds != null && l < rawWordIds.length) {
+      final wid = rawWordIds[l] as String?;
+      if (wid != null) {
+        VocabTrackingService().recordNonVocalAttempt(
+          wordId: wid,
+          displayText: _leftItems[l],
+          correct: correct,
+          source: 'matching',
+        );
+      }
+    }
+
     if (correct) {
       setState(() {
         _matchedLeft[l] = true;
@@ -1595,6 +1630,15 @@ class _ListenChooseExerciseState extends State<ListenChooseExercise> {
     if (_selectedIndex == null) return;
     if (!_hasSubmitted) {
       setState(() => _hasSubmitted = true);
+      final wid = widget.data['ref'] as String?;
+      if (wid != null && _naviWord != null) {
+        VocabTrackingService().recordNonVocalAttempt(
+          wordId: wid,
+          displayText: _naviWord!,
+          correct: _isCorrect,
+          source: 'listen_choose',
+        );
+      }
     } else {
       widget.onNext();
     }
@@ -1713,6 +1757,15 @@ class _FillInBlankExerciseState extends State<FillInBlankExercise> {
     if (_chosen == null) return;
     if (!_hasSubmitted) {
       setState(() => _hasSubmitted = true);
+      final wid = widget.data['answer'] as String?;
+      if (wid != null) {
+        VocabTrackingService().recordNonVocalAttempt(
+          wordId: wid,
+          displayText: wid,
+          correct: _isCorrect,
+          source: 'fill_blank',
+        );
+      }
     } else {
       widget.onNext();
     }

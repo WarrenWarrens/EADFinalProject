@@ -41,28 +41,45 @@ class VocabTrackingService {
 
   // ── Public API ─────────────────────────────────────────────────────────────
 
-  /// Record an attempt for a word.
-  ///
-  /// [wordId]      — unique key, e.g. 'nv_01' or 'char_ä'
-  /// [displayText] — what the user sees, e.g. 'Kaltxì'
-  /// [score]       — 0.0–1.0
-  /// [source]      — 'audio_mimicry' | 'lesson'
-  Future<void> recordAttempt({
+  /// Record a vocal (mimicry/conversation) attempt. Score is the
+  /// continuous 0.0–1.0 from the phoneme scorer.
+  Future<void> recordVocalAttempt({
     required String wordId,
     required String displayText,
     required double score,
-    String source = 'unknown',
+    String source = 'vocal',
   }) async {
     final all = await _loadAll();
     final record = all.putIfAbsent(
       wordId,
-      () => VocabRecord(
+          () => VocabRecord(
         wordId: wordId,
         displayText: displayText,
         source: source,
       ),
     );
-    record.addScore(score);
+    record.addVocalScore(score);
+    await _persist();
+  }
+
+  /// Record a non-vocal (MC, matching, fill-in-blank) attempt.
+  /// Binary pass/fail per your design.
+  Future<void> recordNonVocalAttempt({
+    required String wordId,
+    required String displayText,
+    required bool correct,
+    String source = 'non_vocal',
+  }) async {
+    final all = await _loadAll();
+    final record = all.putIfAbsent(
+      wordId,
+          () => VocabRecord(
+        wordId: wordId,
+        displayText: displayText,
+        source: source,
+      ),
+    );
+    record.addNonVocalScore(correct);
     await _persist();
   }
 
