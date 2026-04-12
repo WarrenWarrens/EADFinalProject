@@ -49,21 +49,17 @@ class ModelDownloadService {
   factory ModelDownloadService() => _instance;
   ModelDownloadService._();
 
-  // ── EDIT THESE: your GitHub repo + release tag + actual sizes ─────────
-  static const String _repo = 'YOUR_GITHUB_USER/YOUR_REPO';
-  static const String _tag  = 'models-v1';
-
   static const List<ModelSpec> models = [
     ModelSpec(
       filename: 'navi_ipa.onnx',
-      url: 'https://github.com/$_repo/releases/download/$_tag/navi_ipa.onnx',
-      expectedBytes: 302 * 1024 * 1024,  // ~302 MB — set exactly
+      url: 'https://github.com/WarrenWarrens/EADFinalProject/releases/download/models-v1/navi_ipa.onnx',
+      expectedBytes: 355054890,
       displayName: "Na'vi pronunciation model",
     ),
     ModelSpec(
       filename: 'gemma-3n-E2B-it-int4.task',
-      url: 'https://github.com/$_repo/releases/download/$_tag/gemma-3n-E2B-it-int4.task',
-      expectedBytes: 2900 * 1024 * 1024, // ~2.9 GB — set exactly
+      url: 'https://huggingface.co/FUNFUN32/gemma-3n-E2B-it-int4.task/resolve/main/gemma-3n-E2B-it-int4.task',
+      expectedBytes: 3136226711,  // ← see note below
       displayName: 'Conversation model (Teylan)',
     ),
   ];
@@ -151,25 +147,23 @@ class ModelDownloadService {
         },
       );
 
-      // Bridge the controller's events into the async* stream.
-      final sub = controller.stream.listen(null);
       final completer = Completer<void>();
 
       downloadFuture.then((_) {
-        controller.close();
+        if (!controller.isClosed) controller.close();
         completer.complete();
       }).catchError((e, st) {
-        controller.addError(e, st);
-        controller.close();
+        if (!controller.isClosed) {
+          controller.addError(e, st);
+          controller.close();
+        }
         completer.completeError(e, st);
       });
 
-      await for (final p in controller.stream) {
-        yield p;
-      }
-      await sub.cancel();
-
       try {
+        await for (final p in controller.stream) {
+          yield p;
+        }
         await completer.future;
       } catch (e) {
         yield DownloadProgress(
