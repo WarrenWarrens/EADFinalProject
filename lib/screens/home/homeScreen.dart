@@ -110,6 +110,16 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
   }
+  Future<void> _goToLesson5(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson5_adjectives.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
 
   Future<void> _goToAudioMimicry(BuildContext ctx) async {
     await _enterLesson(() async {
@@ -198,6 +208,8 @@ class _HomeScreenState extends State<HomeScreen> {
             "Here's what you'll learn:\n- Subject & object cases\n- Grammatical roles",
             practiceInfo:
             "Here's how you'll practice:\n- Sentence building\n- Grammar drills",
+            unlocked: true,
+            onTap: _goToLesson4,
           ),
           LessonEntry(
             id: 'nv_adj',
@@ -205,7 +217,9 @@ class _HomeScreenState extends State<HomeScreen> {
             description:
             "Here's what you'll learn:\n- Describing people & things\n- Adjective placement",
             practiceInfo:
-            "Here's how you'll practice:\n- Matching game\n- Sentence creation",
+            "Here's how you'll practice:\n- Error Identification",
+            unlocked: true,
+            onTap: _goToLesson5,
           ),
           LessonEntry(
             id: 'nv_questions',
