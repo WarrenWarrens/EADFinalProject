@@ -122,6 +122,28 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _goToKlingonLesson3(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('klingonlesson3.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
+  Future<void> _goToKlingonLesson4(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('klingonlesson4.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
   Future<void> _goToAudioMimicry(BuildContext ctx) async {
     await _enterLesson(() async {
       await Navigator.push(
@@ -307,6 +329,8 @@ class _HomeScreenState extends State<HomeScreen> {
             "Here's what you'll learn:\n- Weapons & combat terms\n- Honor phrases",
             practiceInfo:
             "Here's how you'll practice:\n- Flashcards\n- Matching game",
+            unlocked: true,
+            onTap: _goToKlingonLesson3,
           ),
           LessonEntry(
             id: 'kl_commands',
@@ -315,6 +339,8 @@ class _HomeScreenState extends State<HomeScreen> {
             "Here's what you'll learn:\n- Imperative verb forms\n- Orders & directives",
             practiceInfo:
             "Here's how you'll practice:\n- Role play\n- Scenario drills",
+            unlocked: true,
+            onTap: _goToKlingonLesson4,
           ),
         ];
       case 1:
