@@ -1,0 +1,128 @@
+{
+  "id": 3,
+  "languageId": 1,
+  "title": "Na'vi Questions",
+  "objective": "Learn to ask and answer questions.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "Now that you've got the hang of some grammer rules, let's move onto questions."
+      }
+    },
+    {
+      "id": 2,
+      "type": "text",
+      "data": {
+        "text": "Navi has 2 types of questions: yes/no questions and information questions."
+      }
+    },
+    {
+      "id": 3,
+      "type": "text",
+      "data": {
+        "text": "Yes/no questions"
+      }
+    },
+    {
+      "id": 4,
+      "type": "Text",
+      "data": {
+        "description": "In Na'vi, yes/no questions are singled with the question marker 'srak'."
+      }
+    },
+    {
+      "id": 5,
+      "type": "phrase",
+      "data": {
+        "navi": "Ngaru lu fpom srak?",
+        "english": "Are you well?",
+        "breakdown": [
+          { "ref": "kaltxì" },
+          { "navi": "srak", "english": "question mark" },
+          { "ref": "'eylan" }
+        ],
+        "description": "An example of a yes/no question. This one means 'Are you well'?"
+      }
+    },
+    {
+      "id": 6,
+      "type": "Text",
+      "data": {
+        "description": "Yes/no questions can be answered with either srane 'yes' or kehe 'no'"
+      }
+    },
+    {
+      "id": 7,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which of these is a question marker in Na'vi?",
+        "options": [
+          { "text": "srake",   "correct": true },
+          { "text": "Kaltxì",       "correct": false },
+          { "text": "fuke",    "correct": false },
+          { "text": "ean",    "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "text",
+      "data": {
+        "text": "Information Questions"
+      }
+    },
+    {
+      "id": 9,
+      "type": "text",
+      "data": {
+        "text": "Information questions are formed by either adding pe to the begining or end of a noun."
+      }
+    },
+    {
+      "id": 10,
+      "type": "text",
+      "data": {
+        "text": "They are answered with an actual explanation"
+      }
+    },
+    {
+      "id": 11,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "fill_in_blank",
+        "instruction": ": someone has just asked you Ngaru lu fpom srak.",
+        "sentence": "_____.",
+        "answer": "srane",
+        "hint": "which question marker is in this question?",
+        "options": [
+          "faylun ",
+          "srane",
+          "eywa",
+          "Oeru pelun"
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "fill_in_blank",
+        "instruction": ": someone has just asked you Nga za'u ftu peseng",
+        "sentence": "_____.",
+        "answer": "Oe zola'u ftu Pandora",
+        "hint": "which question marker is in this question?",
+        "options": ["kehe ", "srane", "atxar", "Oe zola'u ftu Pandora"]
+      }
+    },
+    {
+      "id": 13,
+      "type": "text",
+      "data": {
+        "text": "🎉 You can now ask and answer questions in Na'vi!"
+      }
+    }
+  ]
+}
