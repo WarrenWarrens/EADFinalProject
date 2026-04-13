@@ -1,0 +1,92 @@
+{
+  "id": 104,
+  "languageId": 2,
+  "title": "Commands",
+  "objective": "Learn how to issue imperative orders to a single person.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "Klingons do not make polite requests. They give orders. To command a single person to do something, you usually add the prefix 'yI-' to the start of a verb."
+      }
+    },
+    {
+      "id": 2,
+      "type": "word",
+      "data": {
+        "ref": "yIqIm",
+        "description": "Pay attention! (Often yelled by a commanding officer before speaking)."
+      }
+    },
+    {
+      "id": 3,
+      "type": "word",
+      "data": {
+        "ref": "yIghoS",
+        "description": "Approach! / Come here! / Proceed! (Used to order someone to move toward you or a target)."
+      }
+    },
+    {
+      "id": 4,
+      "type": "word",
+      "data": {
+        "ref": "yIHIv",
+        "description": "Attack! (From the verb 'HIv', meaning to attack)."
+      }
+    },
+    {
+      "id": 5,
+      "type": "word",
+      "data": {
+        "ref": "yIba'",
+        "description": "Sit! (A blunt command to take a seat)."
+      }
+    },
+    {
+      "id": 6,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What prefix do you add to a verb to make it a command to a single person?",
+        "options": [
+          { "text": "nuq-", "correct": false },
+          { "text": "yI-", "correct": true },
+          { "text": "batlh-", "correct": false },
+          { "text": "pe-", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "fill_in_blank",
+        "instruction": "Complete the dialogue.",
+        "sentence": "Commander: \"Enemy ship sighted! _____!\"",
+        "answer": "yIHIv",
+        "hint": "The order to attack.",
+        "options": ["yIba'", "yIHIv", "yIqIm", "yIghoS"]
+      }
+    },
+    {
+      "id": 8,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "fill_in_blank",
+        "instruction": "Complete the dialogue.",
+        "sentence": "Officer: \"_____! The General is speaking!\"",
+        "answer": "yIqIm",
+        "hint": "The order to pay attention.",
+        "options": ["yIba'", "yIHIv", "yIqIm", "yIghoS"]
+      }
+    },
+    {
+      "id": 9,
+      "type": "text",
+      "data": {
+        "text": "Excellent. You now know how to bark orders like a true Klingon officer. pItlh! (Done!)"
+      }
+    }
+  ]
+}

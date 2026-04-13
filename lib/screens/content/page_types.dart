@@ -22,13 +22,58 @@ import '../../services/vocab_tracking_service.dart';
 class TextPage extends StatelessWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast;
 
   const TextPage({
     super.key,
     required this.data,
     required this.onNext,
+    required this.onLast, // 2. Required it in the constructor
+
   });
 
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.all(24),
+//       child: Column(
+//         children: [
+//           Expanded(
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Text(
+//                   data['text'],
+//                   textAlign: TextAlign.center,
+//                   style: TextStyle(
+//                       fontSize: 20
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//
+//           SizedBox(
+//             width: double.infinity,
+//             child: ElevatedButton(
+//               onPressed: onLast,
+//               child: const Text("Continue"),
+//             ),
+//           ),
+//           SizedBox(
+//             width: double.infinity,
+//             child: ElevatedButton(
+//               onPressed: onNext,
+//               child: const Text("Continue"),
+//             ),
+//           ),
+//
+//           const SizedBox(height: 12),
+//         ],
+//       ),
+//     );
+//   }
+// }
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -42,7 +87,7 @@ class TextPage extends StatelessWidget {
                 Text(
                   data['text'],
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 20
                   ),
                 ),
@@ -50,12 +95,29 @@ class TextPage extends StatelessWidget {
             ),
           ),
 
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onNext,
-              child: const Text("Continue"),
-            ),
+          // Side-by-side buttons using a Row
+          Row(
+            children: [
+              // Go Back Button (takes up 25% of the remaining space)
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: onLast, // Triggers the go back function
+                  child: const Text("Back"),
+                ),
+              ),
+
+              const SizedBox(width: 12), // Adds a small gap between the buttons
+
+              // Continue Button (takes up 75% of the remaining space)
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: onNext, // Triggers the next page function
+                  child: const Text("Continue"),
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 12),
@@ -65,14 +127,17 @@ class TextPage extends StatelessWidget {
   }
 }
 
+
 class CharacterPage extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast; // 1. Added the onLast callback
 
   const CharacterPage({
     super.key,
     required this.data,
     required this.onNext,
+    required this.onLast, // 2. Required it in the constructor
   });
 
   @override
@@ -119,10 +184,10 @@ class _CharacterPageState extends State<CharacterPage> {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: _playing ? AppColors.primary : AppColors.primaryLight,
+                      color: _playing ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         width: 2,
                       ),
                     ),
@@ -144,7 +209,8 @@ class _CharacterPageState extends State<CharacterPage> {
                           right: 10,
                           child: Icon(
                             _playing ? Icons.volume_up_rounded : Icons.play_arrow_rounded,
-                            color: _playing ? Colors.white : AppColors.primary,
+                            // Notice: AppColors.textPrimary might need to be Theme.of(context).colorScheme.onPrimary if you want it to adapt perfectly
+                            color: _playing ? Colors.white : Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ],
@@ -157,7 +223,7 @@ class _CharacterPageState extends State<CharacterPage> {
                 Text(
                   data['description'],
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 20
                   ),
                 ),
@@ -165,12 +231,25 @@ class _CharacterPageState extends State<CharacterPage> {
             ),
           ),
 
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: widget.onNext,
-              child: const Text("Continue"),
-            ),
+          // 3. Replaced the single SizedBox with the Row layout
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: widget.onLast, // Triggers the go back function
+                  child: const Text("Back"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: widget.onNext, // Triggers the next slide function
+                  child: const Text("Continue"),
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 12),
@@ -178,17 +257,18 @@ class _CharacterPageState extends State<CharacterPage> {
       ),
     );
   }
-
 }
 
 class ExercisePage extends StatelessWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast;
 
   const ExercisePage({
     super.key,
     required this.data,
     required this.onNext,
+    required this.onLast
   });
 
   @override
@@ -200,15 +280,16 @@ class ExercisePage extends StatelessWidget {
           options: List<Map<String, dynamic>>.from(data['options']),
           ref: data['ref'] as String?,
           onNext: onNext,
+          onLast: onLast
         );
       case 'audio_mimicry':
-        return AudioMimicryExercise(data: data, onNext: onNext);
+        return AudioMimicryExercise(data: data, onNext: onNext, onLast: onLast);
       case 'matching':
-        return MatchingExercise(data: data, onNext: onNext);
+        return MatchingExercise(data: data, onNext: onNext, onLast: onLast);
       case 'listen_choose':
-        return ListenChooseExercise(data: data, onNext: onNext);
+        return ListenChooseExercise(data: data, onNext: onNext, onLast: onLast);
       case 'fill_in_blank':
-        return FillInBlankExercise(data: data, onNext: onNext);
+        return FillInBlankExercise(data: data, onNext: onNext, onLast: onLast);
       default:
         return const Center(child: Text('Unknown exercise type'));
     }
@@ -219,6 +300,7 @@ class MultipleChoice extends StatefulWidget {
   final String question;
   final List<Map<String, dynamic>> options;
   final VoidCallback onNext;
+  final VoidCallback onLast;
   final String? ref;   // ← simple single field
 
   const MultipleChoice({
@@ -226,6 +308,7 @@ class MultipleChoice extends StatefulWidget {
     required this.question,
     required this.options,
     required this.onNext,
+    required this.onLast,
     this.ref,
   });
 
@@ -248,7 +331,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
   Color _optionColor(int index) {
 
     if (!hasSubmitted) {
-      return index == selectedIndex ? AppColors.primaryLight : Colors.transparent;
+      return index == selectedIndex ? Theme.of(context).colorScheme.primary.withOpacity(0.15): Colors.transparent;
     }
 
     if (index == selectedIndex) {
@@ -264,7 +347,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
 
   Color _optionBorderColor(int index) {
     if (!hasSubmitted) {
-      return index == selectedIndex ? AppColors.primary : AppColors.primaryLight;
+      return index == selectedIndex ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary.withOpacity(0.15);
     }
 
     if (index == selectedIndex) {
@@ -275,7 +358,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
       return AppColors.success;
     }
 
-    return AppColors.primaryLight;
+    return Theme.of(context).colorScheme.primary.withOpacity(0.15);
   }
 
   void _onCheck() {
@@ -315,14 +398,14 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                     child: Container(
                       width: 100,
                       height: 100,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryLight,
+                      decoration:  BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child:  Icon(
                         Icons.quiz_rounded,
                         size: 60,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -396,13 +479,34 @@ class _MultipleChoiceState extends State<MultipleChoice> {
             ),
           ),
 
+          // const SizedBox(height: 16),
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton(
+          //     onPressed: hasSelected ? _onCheck : null,
+          //     child: Text(hasSubmitted ? 'Continue' : 'Check'),
+          //   ),
+          // ),
+          // const SizedBox(height: 12),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: hasSelected ? _onCheck : null,
-              child: Text(hasSubmitted ? 'Continue' : 'Check'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: widget.onLast,
+                  child: const Text("Back"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: hasSelected ? _onCheck : null,
+                  child: Text(hasSubmitted ? 'Continue' : 'Check'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
@@ -464,7 +568,7 @@ class _LessonAudioChipState extends State<_LessonAudioChip> {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: _playing ? AppColors.primary : AppColors.primaryLight,
+          color: _playing ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary.withOpacity(0.15),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -472,7 +576,7 @@ class _LessonAudioChipState extends State<_LessonAudioChip> {
           children: [
             Icon(
               _playing ? Icons.volume_up_rounded : Icons.play_arrow_rounded,
-              color: _playing ? Colors.white : AppColors.primary,
+              color: _playing ? Colors.white : Theme.of(context).colorScheme.primary,
               size: 18,
             ),
             const SizedBox(width: 6),
@@ -495,8 +599,9 @@ class _LessonAudioChipState extends State<_LessonAudioChip> {
 class WordPage extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast;
 
-  const WordPage({super.key, required this.data, required this.onNext});
+  const WordPage({super.key, required this.data, required this.onNext, required this.onLast});
 
   @override
   State<WordPage> createState() => _WordPageState();
@@ -537,9 +642,9 @@ class _WordPageState extends State<WordPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight,
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.primary, width: 2),
+                    border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
                   ),
                   child: Column(
                     children: [
@@ -599,9 +704,30 @@ class _WordPageState extends State<WordPage> {
               ],
             ),
           ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(onPressed: widget.onNext, child: const Text('Continue')),
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton(onPressed: widget.onNext, child: const Text('Continue')),
+          // ),
+          // const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: widget.onLast,
+                  child: const Text("Back"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: widget.onNext,
+                  child: const Text('Continue'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
@@ -615,8 +741,9 @@ class _WordPageState extends State<WordPage> {
 class PhrasePage extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast;
 
-  const PhrasePage({super.key, required this.data, required this.onNext});
+  const PhrasePage({super.key, required this.data, required this.onNext, required this.onLast});
 
   @override
   State<PhrasePage> createState() => _PhrasePageState();
@@ -676,9 +803,9 @@ class _PhrasePageState extends State<PhrasePage> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.primary, width: 2),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
                     ),
                     child: Column(
                       children: [
@@ -723,9 +850,30 @@ class _PhrasePageState extends State<PhrasePage> {
               ),
             ),
           ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(onPressed: widget.onNext, child: const Text('Continue')),
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton(onPressed: widget.onNext, child: const Text('Continue')),
+          // ),
+          // const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: widget.onLast,
+                  child: const Text("Back"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: widget.onNext,
+                  child: const Text('Continue'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
@@ -739,8 +887,9 @@ class _PhrasePageState extends State<PhrasePage> {
 class AudioMimicryExercise extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast;
 
-  const AudioMimicryExercise({super.key, required this.data, required this.onNext});
+  const AudioMimicryExercise({super.key, required this.data, required this.onNext, required this.onLast});
 
   @override
   State<AudioMimicryExercise> createState() => _AudioMimicryExerciseState();
@@ -1065,7 +1214,7 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
                       shape: BoxShape.circle,
                       color: _isRecording
                           ? AppColors.error
-                          : AppColors.primary,
+                          : Theme.of(context).colorScheme.primary,
                     ),
                     child: Icon(
                       _isRecording ? Icons.stop_rounded : Icons.mic_rounded,
@@ -1131,12 +1280,33 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
               ],
             ),
           ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _hasListened ? widget.onNext : null,
-              child: const Text('Continue'),
-            ),
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton(
+          //     onPressed: _hasListened ? widget.onNext : null,
+          //     child: const Text('Continue'),
+          //   ),
+          // ),
+          // const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: widget.onLast,
+                  child: const Text("Back"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: _hasListened ? widget.onNext : null,
+                  child: const Text('Continue'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
@@ -1217,7 +1387,7 @@ class _IpaComparisonCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (reference != null && reference!.isNotEmpty) ...[
-            _row('Reference', reference!, AppColors.primary),
+            _row('Reference', reference!, Theme.of(context).colorScheme.primary),
             const SizedBox(height: 8),
             const Divider(height: 1),
             const SizedBox(height: 8),
@@ -1265,8 +1435,9 @@ class _IpaComparisonCard extends StatelessWidget {
 class MatchingExercise extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast;
 
-  const MatchingExercise({super.key, required this.data, required this.onNext});
+  const MatchingExercise({super.key, required this.data, required this.onNext, required this.onLast});
 
   @override
   State<MatchingExercise> createState() => _MatchingExerciseState();
@@ -1411,29 +1582,29 @@ class _MatchingExerciseState extends State<MatchingExercise> {
   Color _leftColor(int i) {
     if (_matchedLeft.containsKey(i)) return AppColors.success.withOpacity(0.15);
     if (_wrongLeft.contains(i)) return AppColors.error.withOpacity(0.15);
-    if (_selectedLeft == i) return AppColors.primaryLight;
+    if (_selectedLeft == i) return Theme.of(context).colorScheme.primary.withOpacity(0.15);
     return Colors.transparent;
   }
 
   Color _rightColor(int i) {
     if (_matchedRight.containsKey(i)) return AppColors.success.withOpacity(0.15);
     if (_wrongRight.contains(i)) return AppColors.error.withOpacity(0.15);
-    if (_selectedRight == i) return AppColors.primaryLight;
+    if (_selectedRight == i) return Theme.of(context).colorScheme.primary.withOpacity(0.15);
     return Colors.transparent;
   }
 
   Color _leftBorder(int i) {
     if (_matchedLeft.containsKey(i)) return AppColors.success;
     if (_wrongLeft.contains(i)) return AppColors.error;
-    if (_selectedLeft == i) return AppColors.primary;
-    return AppColors.primaryLight;
+    if (_selectedLeft == i) return Theme.of(context).colorScheme.primary;
+    return Theme.of(context).colorScheme.primary.withOpacity(0.15);
   }
 
   Color _rightBorder(int i) {
     if (_matchedRight.containsKey(i)) return AppColors.success;
     if (_wrongRight.contains(i)) return AppColors.error;
-    if (_selectedRight == i) return AppColors.primary;
-    return AppColors.primaryLight;
+    if (_selectedRight == i) return Theme.of(context).colorScheme.primary;
+    return Theme.of(context).colorScheme.primary.withOpacity(0.15);
   }
 
   @override
@@ -1540,12 +1711,33 @@ class _MatchingExerciseState extends State<MatchingExercise> {
               ),
             ),
           ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _allMatched ? widget.onNext : null,
-              child: const Text('Continue'),
-            ),
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton(
+          //     onPressed: _allMatched ? widget.onNext : null,
+          //     child: const Text('Continue'),
+          //   ),
+          // ),
+          // const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: widget.onLast,
+                  child: const Text("Back"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: _allMatched ? widget.onNext : null,
+                  child: const Text('Continue'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
@@ -1559,8 +1751,9 @@ class _MatchingExerciseState extends State<MatchingExercise> {
 class ListenChooseExercise extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast;
 
-  const ListenChooseExercise({super.key, required this.data, required this.onNext});
+  const ListenChooseExercise({super.key, required this.data, required this.onNext, required this.onLast});
 
   @override
   State<ListenChooseExercise> createState() => _ListenChooseExerciseState();
@@ -1613,17 +1806,17 @@ class _ListenChooseExerciseState extends State<ListenChooseExercise> {
       _hasSubmitted && (widget.data['options'] as List)[_selectedIndex!]['correct'] == true;
 
   Color _optionColor(int i) {
-    if (!_hasSubmitted) return i == _selectedIndex ? AppColors.primaryLight : Colors.transparent;
+    if (!_hasSubmitted) return i == _selectedIndex ? Theme.of(context).colorScheme.primary.withOpacity(0.15) : Colors.transparent;
     if (i == _selectedIndex) return _isCorrect ? AppColors.success.withOpacity(0.15) : AppColors.error.withOpacity(0.15);
     if ((widget.data['options'] as List)[i]['correct'] == true) return AppColors.success.withOpacity(0.15);
     return Colors.transparent;
   }
 
   Color _optionBorder(int i) {
-    if (!_hasSubmitted) return i == _selectedIndex ? AppColors.primary : AppColors.primaryLight;
+    if (!_hasSubmitted) return i == _selectedIndex ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary.withOpacity(0.15);
     if (i == _selectedIndex) return _isCorrect ? AppColors.success : AppColors.error;
     if ((widget.data['options'] as List)[i]['correct'] == true) return AppColors.success;
-    return AppColors.primaryLight;
+    return Theme.of(context).colorScheme.primary.withOpacity(0.15);
   }
 
   void _onCheck() {
@@ -1666,11 +1859,11 @@ class _ListenChooseExerciseState extends State<ListenChooseExercise> {
                     child: Container(
                       width: 120, height: 120,
                       decoration: BoxDecoration(
-                        color: _hasListened ? AppColors.primaryLight : AppColors.primary,
+                        color: _hasListened ? Theme.of(context).colorScheme.primary.withOpacity(0.15) : Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.volume_up_rounded,
-                          color: _hasListened ? AppColors.primary : Colors.white, size: 56),
+                          color: _hasListened ? Theme.of(context).colorScheme.primary : Colors.white, size: 56),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1719,13 +1912,34 @@ class _ListenChooseExerciseState extends State<ListenChooseExercise> {
               ),
             ),
           ),
+          // const SizedBox(height: 16),
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton(
+          //     onPressed: (_hasListened && _selectedIndex != null) ? _onCheck : null,
+          //     child: Text(_hasSubmitted ? 'Continue' : 'Check'),
+          //   ),
+          // ),
+          // const SizedBox(height: 12),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: (_hasListened && _selectedIndex != null) ? _onCheck : null,
-              child: Text(_hasSubmitted ? 'Continue' : 'Check'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: widget.onLast,
+                  child: const Text("Back"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: (_hasListened && _selectedIndex != null) ? _onCheck : null,
+                  child: Text(_hasSubmitted ? 'Continue' : 'Check'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],
@@ -1739,8 +1953,9 @@ class _ListenChooseExerciseState extends State<ListenChooseExercise> {
 class FillInBlankExercise extends StatefulWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
+  final VoidCallback onLast;
 
-  const FillInBlankExercise({super.key, required this.data, required this.onNext});
+  const FillInBlankExercise({super.key, required this.data, required this.onNext, required this.onLast});
 
   @override
   State<FillInBlankExercise> createState() => _FillInBlankExerciseState();
@@ -1796,10 +2011,10 @@ class _FillInBlankExerciseState extends State<FillInBlankExercise> {
                   Center(
                     child: Container(
                       width: 100, height: 100,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryLight, shape: BoxShape.circle,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.15), shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.edit_rounded, size: 52, color: AppColors.primary),
+                      child:  Icon(Icons.edit_rounded, size: 52, color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -1811,7 +2026,7 @@ class _FillInBlankExerciseState extends State<FillInBlankExercise> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(displaySentence, textAlign: TextAlign.center,
@@ -1830,13 +2045,13 @@ class _FillInBlankExerciseState extends State<FillInBlankExercise> {
                     children: options.map((opt) {
                       final isSelected = opt == _chosen;
                       Color bg = Colors.transparent;
-                      Color border = AppColors.primaryLight;
+                      Color border = Theme.of(context).colorScheme.primary.withOpacity(0.15);
                       if (_hasSubmitted && isSelected) {
                         bg = _isCorrect ? AppColors.success.withOpacity(0.15) : AppColors.error.withOpacity(0.15);
                         border = _isCorrect ? AppColors.success : AppColors.error;
                       } else if (!_hasSubmitted && isSelected) {
-                        bg = AppColors.primaryLight;
-                        border = AppColors.primary;
+                        bg = Theme.of(context).colorScheme.primary.withOpacity(0.15);
+                        border = Theme.of(context).colorScheme.primary;
                       } else if (_hasSubmitted && opt == answer) {
                         bg = AppColors.success.withOpacity(0.15);
                         border = AppColors.success;
@@ -1875,13 +2090,34 @@ class _FillInBlankExerciseState extends State<FillInBlankExercise> {
               ),
             ),
           ),
+          // const SizedBox(height: 16),
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton(
+          //     onPressed: _chosen != null ? _onCheck : null,
+          //     child: Text(_hasSubmitted ? 'Continue' : 'Check'),
+          //   ),
+          // ),
+          // const SizedBox(height: 12),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _chosen != null ? _onCheck : null,
-              child: Text(_hasSubmitted ? 'Continue' : 'Check'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: widget.onLast,
+                  child: const Text("Back"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: _chosen != null ? _onCheck : null,
+                  child: Text(_hasSubmitted ? 'Continue' : 'Check'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
         ],

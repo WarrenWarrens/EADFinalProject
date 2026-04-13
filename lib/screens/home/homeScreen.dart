@@ -120,10 +120,43 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
   }
-
-  Future<void> _goToLesson6(BuildContext ctx) async {
+  
+  Future<void> _goToKlingonLesson1(BuildContext ctx) async {
     await _enterLesson(() async {
-      final lesson = await loadLesson('lesson6_adjectives.json');
+      final lesson = await loadLesson('klingonlesson1.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
+  Future<void> _goToKlingonLesson2(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('klingonlesson2.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
+  Future<void> _goToKlingonLesson3(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('klingonlesson3.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
+  Future<void> _goToKlingonLesson4(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('klingonlesson4.json');
       if (!mounted) return;
       await Navigator.push(
         ctx,
@@ -302,6 +335,8 @@ class _HomeScreenState extends State<HomeScreen> {
             practiceInfo:
             "Here's how you'll practice:\n- Script matching\n- Audio drills",
             unlocked: true,
+            onTap: _goToKlingonLesson1,
+
           ),
           LessonEntry(
             id: 'kl_greetings',
@@ -311,6 +346,8 @@ class _HomeScreenState extends State<HomeScreen> {
             practiceInfo:
             "Here's how you'll practice:\n- Dialogue cards\n- Memory game",
             unlocked: true,
+            onTap: _goToKlingonLesson2,
+
           ),
           LessonEntry(
             id: 'kl_vocab',
@@ -319,6 +356,8 @@ class _HomeScreenState extends State<HomeScreen> {
             "Here's what you'll learn:\n- Weapons & combat terms\n- Honor phrases",
             practiceInfo:
             "Here's how you'll practice:\n- Flashcards\n- Matching game",
+            unlocked: true,
+            onTap: _goToKlingonLesson3,
           ),
           LessonEntry(
             id: 'kl_commands',
@@ -327,6 +366,8 @@ class _HomeScreenState extends State<HomeScreen> {
             "Here's what you'll learn:\n- Imperative verb forms\n- Orders & directives",
             practiceInfo:
             "Here's how you'll practice:\n- Role play\n- Scenario drills",
+            unlocked: true,
+            onTap: _goToKlingonLesson4,
           ),
         ];
       case 1:
@@ -581,6 +622,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   return LessonCard(
                     lesson: entry,
                     accentColor: accent,
+                    // accentColor: AppLanguage.klingon.accentColor,
+                    // onBegin: entry.unlocked ? () => entry.onTap?.call(context) : null,
                     expanded: _expandedLessonIndex == i,
                     onExpansionChanged: () {
                       setState(() {
@@ -589,7 +632,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     },
                     onBegin: entry.unlocked
-                        ? () => entry.onTap?.call(ctx)
+                        ? () => entry.onTap?.call(context)
                         : null,
                   );
                 },
