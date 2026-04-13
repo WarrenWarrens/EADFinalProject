@@ -225,18 +225,6 @@ class _ModelBootstrapPageState extends State<ModelBootstrapPage> {
           onPressed: _runRequired,
           child: const Text('Download & continue'),
         ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content:
-                Text('These models are required for LinguaLore to work.'),
-              ),
-            );
-          },
-          child: const Text('Not now'),
-        ),
       ],
     );
   }

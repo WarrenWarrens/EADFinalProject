@@ -166,7 +166,7 @@ class _LessonPageState extends State<LessonPage> {
       case 'phrase':
         return PhrasePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
       case 'exercise':
-        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
       case 'case':
         //return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
         return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
