@@ -121,6 +121,17 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
   
+  Future<void> _goToLesson6(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson6_questions.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
   Future<void> _goToKlingonLesson1(BuildContext ctx) async {
     await _enterLesson(() async {
       final lesson = await loadLesson('klingonlesson1.json');
