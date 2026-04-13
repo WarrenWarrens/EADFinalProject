@@ -103,7 +103,7 @@ class TextPage extends StatelessWidget {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: onLast, // Triggers the go back function
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
 
@@ -238,7 +238,7 @@ class _CharacterPageState extends State<CharacterPage> {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: widget.onLast, // Triggers the go back function
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
               const SizedBox(width: 12),
@@ -495,7 +495,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: widget.onLast,
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
               const SizedBox(width: 12),
@@ -716,7 +716,7 @@ class _WordPageState extends State<WordPage> {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: widget.onLast,
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
               const SizedBox(width: 12),
@@ -862,7 +862,7 @@ class _PhrasePageState extends State<PhrasePage> {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: widget.onLast,
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
               const SizedBox(width: 12),
@@ -1295,7 +1295,7 @@ class _AudioMimicryExerciseState extends State<AudioMimicryExercise> {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: widget.onLast,
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
               const SizedBox(width: 12),
@@ -1726,7 +1726,7 @@ class _MatchingExerciseState extends State<MatchingExercise> {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: widget.onLast,
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
               const SizedBox(width: 12),
@@ -1928,7 +1928,7 @@ class _ListenChooseExerciseState extends State<ListenChooseExercise> {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: widget.onLast,
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
               const SizedBox(width: 12),
@@ -2106,7 +2106,7 @@ class _FillInBlankExerciseState extends State<FillInBlankExercise> {
                 flex: 1,
                 child: ElevatedButton(
                   onPressed: widget.onLast,
-                  child: const Text("Go Back"),
+                  child: const Text("Back"),
                 ),
               ),
               const SizedBox(width: 12),
