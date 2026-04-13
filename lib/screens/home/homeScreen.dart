@@ -121,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _goToLesso6(BuildContext ctx) async {
+  Future<void> _goToLesson6(BuildContext ctx) async {
     await _enterLesson(() async {
       final lesson = await loadLesson('lesson6_adjectives.json');
       if (!mounted) return;
