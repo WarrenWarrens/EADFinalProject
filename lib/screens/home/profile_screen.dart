@@ -13,6 +13,8 @@ import '../../services/vocab_tracking_service.dart';
 import '../../widgets/app_nav_bar.dart';
 import '../../widgets/app_language.dart';
 import 'vocab_detail_page.dart';
+import '../../widgets/model_management_section.dart'; // adjust path
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  ProfileScreen — unified Profile / Stats / Settings screen.
@@ -1349,7 +1351,10 @@ class _SettingsTabState extends State<_SettingsTab> {
               : 'Registered',
           accentColor: accent,
         ),
-
+        // inside _SettingsTab.build, in the ListView children:
+        const SizedBox(height: 16),
+        _SettingsSectionHeader(label: 'Models'),
+        ModelManagementSection(accentColor: accent),
         const SizedBox(height: 16),
 
         _SettingsSectionHeader(label: 'Data'),
@@ -1361,6 +1366,7 @@ class _SettingsTabState extends State<_SettingsTab> {
           isDanger: true,
           onTap: _showResetConfirm,
         ),
+
       ],
     );
   }
