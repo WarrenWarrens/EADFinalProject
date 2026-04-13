@@ -1,0 +1,143 @@
+{
+  "id": 4,
+  "languageId": 1,
+  "title": "Na'vi Vowels",
+  "objective": "Learn the noun cases used in the Na'vi language.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "Cases are the system in which a word changes form to indicate if they're a subject, object, or possesson. In Na'vi, this is done by changing the ending of a word"
+      }
+    },
+    {
+      "id": 2,
+      "type": "text",
+      "data": {
+        "text": "Na'vi has 6 cases: Subjective, Agentive, Patientive, Genitive, Dative, and Topic."
+      }
+    },
+    {
+      "id": 3,
+      "type": "case",
+      "data": {
+        "type": "Subjective",
+        "example": "Po kä ne nantang",
+        "translation": "She's going towards the viperwolf",
+        "description": "This case is used for subject of intransitive (not direct) verbs. There is no ending suffix."
+      }
+    },
+    {
+      "id": 4,
+      "type": "case",
+      "data": {
+        "type": "Agentive",
+        "example": "nantangìl tse'a yerikit",
+        "translation": "The viperwolf sees a hexapede.",
+        "description": "This case is used for transitive (able to take a direct object) verbs. The ending forms are -l and ìl"
+      }
+    },
+    {
+      "id": 5,
+      "type": "case",
+      "data": {
+        "type": "Patientive",
+        "example": "nantangìl tse'a yerikit",
+        "translation": "The viperwolf sees a hexapede",
+        "description": "This case is used to indicate the direct object of a transitive verb. The ending forms are -t, -it and -ti. You should never see this case in a sentence with an intransitive verb"
+      }
+    },
+    {
+      "id": 6,
+      "type": "case",
+      "data": {
+        "type": "Dative",
+        "example": "Pol tìng pukit nantangur",
+        "translation": "He gives a book to the viperwolf",
+        "description": "This case is used to indicate the direct object of the sentence.  An indirect object describes 'to whom' or 'for whom' an action is performed. The endings are -r, -ru and -ur"
+      }
+    },
+    {
+      "id": 7,
+      "type": "case",
+      "data": {
+        "type": "Genitive",
+        "example": "nantangä puk",
+        "translation": "the book of the viperwolf",
+        "description": "This case is used to indicate possession,.  In Na'vi the genitive can come before or after the noun it possesses. The endings are -ä and -yä"
+      }
+    },
+    {
+      "id": 8,
+      "type": "case",
+      "data": {
+        "type": "Genitive",
+        "example": "Pukìri po irayo si nantangur",
+        "translation": "She thanks the viperwolf for the book",
+        "description": "This case is a little tricky. You use it when talking about things that may fall under the category 'for X, concerning X'. When thanking someone for somtehing or apologizing to someone for something, the thing you're thanking/apologixng for goes in the topical. The endings are  -ri and -ìri"
+      }
+    },
+    {
+      "id": 9,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which case do we use when indicating possesion",
+        "options": [
+          {
+            "text": "Dative",
+            "correct": false
+          },
+          {
+            "text": "Genitive",
+            "correct": true
+          },
+          {
+            "text": "Patientive",
+            "correct": false
+          },
+          {
+            "text": "Agentive",
+            "correct": false
+          }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which ending do we use for Dative ",
+        "options": [
+          { "text": "-ä and -yä", "correct": false },
+          { "text": "-l and -ìl", "correct": false },
+          { "text": "-r, -ru and -ur", "correct": true },
+          { "text": "No suffix", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which sentence usies the Agentive case ",
+        "options": [
+          { "text": "po kavuk si nantangur", "correct": false },
+          { "text": "Pol tìng pukit nantangur", "correct": false },
+          { "text": "nantangä puk", "correct": false },
+          { "text": "nantangìl tse'a", "correct": true }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "text",
+      "data": {
+        "text": "🎉 Great work! You now know the six case!."
+      }
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "id": 2,
+  "languageId": 1,
+  "title": "Na'vi Adjectives",
+  "objective": "Learn Na'vi words for describing things.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "Time to move on to adjectives! Let's start by learning some new words"
+      }
+    },
+    {
+    "id": 2,
+    "type": "word",
+    "data": {
+      "ref": "'a'aw",
+      "description": "This word means 'several' or 'a few'. "
+    }
+    },
+    {
+    "id": 3,
+    "type": "word",
+    "data": {
+    "ref": "ean",
+    "description": "This word means 'blue' or 'green'."
+    }
+    },
+    {
+    "id": 4,
+    "type": "word",
+    "data": {
+    "ref": "atxar",
+    "description": "This word is used to describe the smell of living animals, as found around a watering hole or animal nest."
+    }
+    },
+    {
+      "id": 5,
+      "type": "word",
+      "data": {
+        "ref": "fewtusok",
+        "description": "This word means 'on the opposite side'"
+      }
+    },
+    {
+      "id": 6,
+      "type": "word",
+      "data": {
+        "ref": "fpomronga'",
+        "description": "This word means meantally healthy."
+      }
+    },
+    {
+      "id": 7,
+      "type": "word",
+      "data": {
+        "ref": " fpomtokxnga'",
+        "description": "This world means physically healthy. Notice the similarities with fpomronga'."
+      }
+    },
+    {
+      "id": 8,
+      "type": "text",
+      "data": {
+        "text": "Adjectives in Na'vi are flexible, meaning they are able to come before or after the word they modify."
+      }
+    },
+     {
+          "id": 9,
+          "type": "text",
+          "data": {
+            "text": "Adjectives are linked to the noun they modify by affixing the syllable a to the adjective, on the side closest to the noun. Let's see it in action!"
+          }
+        },
+    {
+      "id": 10,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which is grammatically correct' Note that payoang means fish?",
+        "options": [
+          { "text": "payoang aean", "correct": true },
+          { "text": "eana payoang", "correct": true },
+          { "text": "eana apayoang",   "correct": false },
+          { "text": "payoang ean", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What is wrong with this sentence: payoanga fpomtokxnga",
+        "options": [
+          { "text": "the a is at the end of the noun.", "correct": true },
+          { "text": "there's no a at the start of the noun", "correct": false },
+          { "text": "the adjective should be before the noun",   "correct": false },
+          { "text": "nothing, it's perfect", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "text",
+      "data": {
+        "text": "🎉 Great work! You now know how use adjectives!"
+      }
+    }
+  ]
+}

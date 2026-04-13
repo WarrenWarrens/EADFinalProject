@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import '../../screens/content/page_types.dart';
 import '../../models/lessons.dart';
 import '../../services/dictionary_service.dart';
@@ -19,6 +18,7 @@ class LessonPage extends StatefulWidget {
 }
 
 class _LessonPageState extends State<LessonPage> {
+
   int currentContentIndex = 0;
   late final List<Content> content = widget.lesson.content;
   late final int lessonLength = widget.lesson.content.length;
@@ -35,81 +35,31 @@ class _LessonPageState extends State<LessonPage> {
     _preloadLessonAssets();
   }
 
-  // ── Reference collection ──────────────────────────────────────────────────
-  //
-  // Walk every content item and pull out every dictionary `ref` it touches —
-  // including refs nested inside exercises (audio_mimicry, listen_choose,
-  // matching with `refs`, fill_in_blank with `answer`). Returns a unique
-  // ordered set so the same word isn't fetched twice in one lesson.
-  Set<String> _collectRefs() {
-    final refs = <String>{};
-
-    void addIfString(dynamic v) {
-      if (v is String && v.trim().isNotEmpty) refs.add(v.trim());
-    }
-
-    for (final c in content) {
-      final d = c.data;
-      switch (c.type) {
-        case 'word':
-        case 'phrase':
-          addIfString(d['ref']);
-          // Phrase breakdown can also reference dictionary entries.
-          final breakdown = d['breakdown'] as List<dynamic>?;
-          if (breakdown != null) {
-            for (final item in breakdown) {
-              if (item is Map) addIfString(item['ref']);
-            }
-          }
-          break;
-        case 'exercise':
-          final ex = d['exerciseType'] as String?;
-          // Almost every exercise type carries `ref` (single) or `refs`
-          // (list); handle both unconditionally.
-          addIfString(d['ref']);
-          final list = d['refs'] as List<dynamic>?;
-          if (list != null) {
-            for (final r in list) addIfString(r);
-          }
-          // Matching exercises sometimes use `pairs` with embedded refs.
-          final pairs = d['pairs'] as List<dynamic>?;
-          if (pairs != null) {
-            for (final p in pairs) {
-              if (p is Map) addIfString(p['ref']);
-            }
-          }
-          // fill_in_blank stores its answer as a wordId.
-          if (ex == 'fill_in_blank') addIfString(d['answer']);
-          break;
-        default:
-          break;
-      }
-    }
-    return refs;
-  }
-
   /// Walk through the lesson's content and warm every cache we can before the
   /// user starts swiping through slides — so we don't hit a loading spinner
   /// between every step.
   ///
-  /// Now covers:
-  ///   • Dictionary lookups for every referenced word (word/phrase pages
-  ///     AND every exercise type that references vocabulary).
-  ///   • Audio download via DictionaryService (already triggered by the
-  ///     lookup) PLUS an explicit prefetch into the just_audio pipeline so
-  ///     the first tap on Listen plays without a cold-start delay.
-  ///   • TTS engine warm-up if the lesson has character or any non-ref
-  ///     audio that will fall back to TTS.
+  /// Covers all lesson types:
+  ///   • `word` / `phrase` — warms DictionaryService (dictionary lookup +
+  ///     Reykunyu audio file on disk). Later WordPage/PhrasePage lookups hit
+  ///     the warm cache and render effectively instantly.
+  ///   • `character`       — warms the on-device TTS engine (has a cold-start
+  ///     cost on first invocation).
+  ///   • `text` / `exercise` — nothing to load, but still counts toward the
+  ///     progress ring so every lesson gets a consistent intro.
   Future<void> _preloadLessonAssets() async {
+    // Build a task list — one entry per content item that needs work, plus
+    // one for the TTS engine warm-up if the lesson has any character slides.
     final tasks = <Future<void> Function()>[];
 
     final hasCharacters = content.any((c) => c.type == 'character');
     if (hasCharacters) {
       tasks.add(() async {
-        if (mounted) {
-          setState(() => _preloadStatus = 'Warming up speech engine…');
-        }
+        if (mounted) setState(() => _preloadStatus = 'Warming up speech engine…');
         try {
+          // Initialises FlutterTts (language/rate/pitch/volume) without
+          // actually speaking — an empty speak() can leave the engine
+          // stuck on some platforms.
           await TtsService.warmUp();
         } catch (e) {
           debugPrint('[LessonPreload] TTS warm-up failed: $e');
@@ -118,62 +68,26 @@ class _LessonPageState extends State<LessonPage> {
     }
 
     final dict = DictionaryService();
-    final refs = _collectRefs();
-
-    // Phase 1 — dictionary lookups (which also pull audio file to disk).
-    final lookupResults = <String, dynamic>{};
-    for (final ref in refs) {
-      tasks.add(() async {
-        if (mounted) {
-          setState(() => _preloadStatus = 'Loading "$ref"…');
-        }
-        try {
-          final r = await dict.lookupWord(ref, AppLanguage.navi);
-          lookupResults[ref] = r;
-        } catch (e) {
-          debugPrint('[LessonPreload] Lookup failed for "$ref": $e');
-        }
-      });
+    for (final c in content) {
+      if (c.type == 'word' || c.type == 'phrase') {
+        final ref = (c.data['ref'] as String?)?.trim();
+        if (ref == null || ref.isEmpty) continue;
+        tasks.add(() async {
+          if (mounted) {
+            setState(() => _preloadStatus = 'Loading "$ref"…');
+          }
+          try {
+            await dict.lookupWord(ref, AppLanguage.navi);
+          } catch (e) {
+            debugPrint('[LessonPreload] Failed for "$ref": $e');
+          }
+        });
+      }
     }
 
-    // Phase 2 — prime the audio pipeline for every word that has a
-    // local clip on disk. setFilePath() forces just_audio to decode and
-    // cache the file so the first real Listen tap is instant. We use a
-    // single throwaway player for all words sequentially (cheap and avoids
-    // the "too many open audio sessions" issue some Android builds hit).
-    tasks.add(() async {
-      if (refs.isEmpty) return;
-      if (mounted) {
-        setState(() => _preloadStatus = 'Caching audio…');
-      }
-      final player = AudioPlayer();
-      try {
-        for (final ref in refs) {
-          final r = lookupResults[ref];
-          if (r == null) continue;
-          // Be tolerant of the dictionary result shape — it has an
-          // `audio` list of objects with `localPath`.
-          try {
-            final audioList = (r as dynamic).audio as List?;
-            if (audioList == null || audioList.isEmpty) continue;
-            final localPath =
-            (audioList.first as dynamic).localPath as String?;
-            if (localPath == null || localPath.isEmpty) continue;
-            // setFilePath returns a Duration once decoded; we don't play.
-            await player.setFilePath(localPath);
-          } catch (e) {
-            // Single failure shouldn't block the rest.
-            debugPrint('[LessonPreload] Audio prime failed for "$ref": $e');
-          }
-        }
-      } finally {
-        await player.dispose();
-      }
-    });
-
     // Always run the ring through a full sweep — even a lesson with no
-    // network-dependent items gets a brief beat so the intro feels
-    // consistent across all lessons.
+    // network-dependent items gets a brief "Preparing lesson…" beat so the
+    // intro feels consistent across all lessons.
     if (tasks.isEmpty) {
       if (mounted) setState(() => _preloadTotal = 1);
       await Future.delayed(const Duration(milliseconds: 400));
@@ -203,8 +117,10 @@ class _LessonPageState extends State<LessonPage> {
     }
   }
 
+
+
   void nextSlide() {
-    if (currentContentIndex < lessonLength + 1) {
+    if (currentContentIndex < lessonLength+1) {
       setState(() {
         currentContentIndex++;
       });
@@ -212,48 +128,37 @@ class _LessonPageState extends State<LessonPage> {
   }
 
   Widget buildContentPage() {
-    final contentObject =
-    content.firstWhere((c) => c.id == currentContentIndex);
+    final contentObject = content.firstWhere((c) => c.id == currentContentIndex);
+
 
     Map<String, dynamic> dataAttrs = contentObject.data;
 
+
     switch (contentObject.type) {
       case 'text':
-        return TextPage(
-            key: ValueKey(contentObject.id),
-            data: dataAttrs,
-            onNext: nextSlide);
+        return TextPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       case 'character':
-        return CharacterPage(
-            key: ValueKey(contentObject.id),
-            data: dataAttrs,
-            onNext: nextSlide);
+        return CharacterPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       case 'word':
-        return WordPage(
-            key: ValueKey(contentObject.id),
-            data: dataAttrs,
-            onNext: nextSlide);
+        return WordPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       case 'phrase':
-        return PhrasePage(
-            key: ValueKey(contentObject.id),
-            data: dataAttrs,
-            onNext: nextSlide);
+        return PhrasePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       case 'exercise':
-        return ExercisePage(
-            key: ValueKey(contentObject.id),
-            data: dataAttrs,
-            onNext: nextSlide);
+        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+      case 'case':
+        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       default:
         return const Placeholder();
     }
   }
 
-  double get progress {
-    return currentContentIndex / (lessonLength + 1);
+  double get progress{
+    return currentContentIndex / (lessonLength+1);
   }
 
   @override
   Widget build(BuildContext context) {
+
     Widget body;
 
     if (_preloading) {
@@ -261,18 +166,28 @@ class _LessonPageState extends State<LessonPage> {
         progress: _preloadTotal == 0 ? 0.0 : _preloadedCount / _preloadTotal,
         status: _preloadStatus,
       );
-    } else if (currentContentIndex == 0) {
+    }
+
+    else if (currentContentIndex == 0) {
       body = LessonIntroPage(
         lesson: widget.lesson,
         onStart: nextSlide,
       );
-    } else if (currentContentIndex == lessonLength + 1) {
+    }
+
+    else if (currentContentIndex == lessonLength+1){
       body = LessonCompletePage(
           lessonTitle: widget.lesson.title,
-          onContinue: () {
-            Navigator.pop(context);
-          });
-    } else {
+          onContinue: (){
+            Navigator.pop(
+              context,
+            );
+          }
+      );
+    }
+
+    else{
+
       body = buildContentPage();
     }
 
@@ -292,7 +207,8 @@ class _LessonPageState extends State<LessonPage> {
                   valueColor: AlwaysStoppedAnimation(AppColors.primary),
                 ),
               ),
-            )),
+            )
+        ),
       ),
       body: body,
     );
@@ -317,7 +233,9 @@ class LessonIntroPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+
           const SizedBox(height: 20),
+
           Center(
             child: Container(
               width: 120,
@@ -333,7 +251,9 @@ class LessonIntroPage extends StatelessWidget {
               ),
             ),
           ),
+
           const SizedBox(height: 40),
+
           Text(
             lesson.title,
             textAlign: TextAlign.center,
@@ -341,17 +261,22 @@ class LessonIntroPage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 16),
+
           Text(
             lesson.objective,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
+
           const Spacer(),
+
           ElevatedButton(
             onPressed: onStart,
             child: const Text("Start Lesson"),
           ),
+
           const SizedBox(height: 12),
         ],
       ),
@@ -375,10 +300,12 @@ class LessonCompletePage extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
+
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
                 Container(
                   width: 120,
                   height: 120,
@@ -392,7 +319,9 @@ class LessonCompletePage extends StatelessWidget {
                     color: AppColors.primary,
                   ),
                 ),
+
                 const SizedBox(height: 32),
+
                 const Text(
                   "Lesson Complete!",
                   style: TextStyle(
@@ -401,7 +330,9 @@ class LessonCompletePage extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+
                 const SizedBox(height: 12),
+
                 Text(
                   lessonTitle,
                   style: const TextStyle(
@@ -410,7 +341,9 @@ class LessonCompletePage extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+
                 const SizedBox(height: 20),
+
                 const Text(
                   "Great job! You're one step closer to mastering the language.",
                   textAlign: TextAlign.center,
@@ -418,6 +351,7 @@ class LessonCompletePage extends StatelessWidget {
               ],
             ),
           ),
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -425,17 +359,21 @@ class LessonCompletePage extends StatelessWidget {
               child: const Text("Back to Home"),
             ),
           ),
+
           const SizedBox(height: 12),
         ],
       ),
     );
   }
 }
-
 // ── Lesson Loading View ─────────────────────────────────────────────────────
+//
+// Shown while _preloadLessonAssets() warms dictionary + audio caches. Uses
+// the rune-frame PNG as a progress ring — an arc sweeps around the circle
+// in gold as items finish loading, with the owl mascot in the center.
 
 class _LessonLoadingView extends StatelessWidget {
-  final double progress;
+  final double progress; // 0.0 → 1.0
   final String status;
 
   const _LessonLoadingView({required this.progress, required this.status});
@@ -444,9 +382,14 @@ class _LessonLoadingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // Scale the ring to the viewport so it looks right on a Pixel 2
+        // (~411 logical px wide) and up through larger phones / tablets.
+        // Never exceed 60% of the shorter axis so status text stays on-screen.
         final shortest = constraints.biggest.shortestSide;
         final ringSize = shortest * 0.65;
+        // Clamp to a sensible range.
         final size = ringSize.clamp(200.0, 360.0);
+        // Inset for the owl — keeps it clear of the rune ring at any size.
         final owlInset = size * 0.22;
 
         return Padding(
@@ -463,13 +406,18 @@ class _LessonLoadingView extends StatelessWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
+                      // No dim base layer — the filling arc is the only ring
+                      // visible, so progress reads unambiguously. The owl
+                      // and status text provide visual anchoring.
                       Positioned.fill(
                         child: TweenAnimationBuilder<double>(
-                          tween: Tween(
-                              begin: 0, end: progress.clamp(0.0, 1.0)),
+                          tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
                           duration: const Duration(milliseconds: 350),
                           curve: Curves.easeOut,
                           builder: (context, value, _) {
+                            // Clip the full runic image to a pie-wedge whose
+                            // angle matches current progress. Explicit geometry
+                            // via Path.arcTo — no gradient/tile mode quirks.
                             return ClipPath(
                               clipper: _ArcProgressClipper(value),
                               child: Image.asset(
@@ -480,6 +428,7 @@ class _LessonLoadingView extends StatelessWidget {
                           },
                         ),
                       ),
+                      // Owl mascot centered inside the ring.
                       Padding(
                         padding: EdgeInsets.all(owlInset),
                         child: Image.asset(
@@ -491,6 +440,8 @@ class _LessonLoadingView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
+                // Constrain text width so long Na'vi words wrap instead of
+                // pushing the layout off-screen on narrow devices.
                 ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth: constraints.maxWidth * 0.85,
@@ -524,6 +475,13 @@ class _LessonLoadingView extends StatelessWidget {
   }
 }
 
+/// Clips a rectangle to a pie-wedge starting at 12 o'clock and sweeping
+/// clockwise through [progress] * 2π radians. Used to progressively reveal
+/// the runic ring image as loading advances.
+///
+/// Built with explicit path geometry (moveTo center → arcTo with sweepAngle)
+/// instead of SweepGradient stops, which have subtle platform-specific tile
+/// behavior that can under-render the filled portion.
 class _ArcProgressClipper extends CustomClipper<Path> {
   final double progress;
   _ArcProgressClipper(this.progress);
@@ -532,17 +490,23 @@ class _ArcProgressClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final path = Path();
     final p = progress.clamp(0.0, 1.0);
-    if (p <= 0.0) return path;
+    if (p <= 0.0) return path; // fully clipped — show nothing
     if (p >= 1.0) {
+      // Full circle — just return the whole rect so nothing is clipped.
       path.addRect(Offset.zero & size);
       return path;
     }
     final center = Offset(size.width / 2, size.height / 2);
+    // Radius large enough to cover the entire rect from center, so the
+    // pie edge always extends past the image bounds and the clip is tight
+    // against the ring itself rather than a visible wedge line.
     final radius = math.sqrt(
         math.pow(size.width, 2) + math.pow(size.height, 2)) /
         2 +
         1;
     final rect = Rect.fromCircle(center: center, radius: radius);
+    // Flutter angles: 0 = 3 o'clock, +π/2 = 6 o'clock (clockwise on screen).
+    // Start at -π/2 (12 o'clock); sweep clockwise by progress * 2π.
     const startAngle = -math.pi / 2;
     final sweepAngle = p * 2 * math.pi;
     path.moveTo(center.dx, center.dy);
