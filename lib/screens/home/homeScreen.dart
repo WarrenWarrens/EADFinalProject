@@ -569,6 +569,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   return LessonCard(
                     lesson: entry,
                     accentColor: accent,
+                    // accentColor: AppLanguage.klingon.accentColor,
+                    // onBegin: entry.unlocked ? () => entry.onTap?.call(context) : null,
                     expanded: _expandedLessonIndex == i,
                     onExpansionChanged: () {
                       setState(() {
@@ -577,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     },
                     onBegin: entry.unlocked
-                        ? () => entry.onTap?.call(ctx)
+                        ? () => entry.onTap?.call(context)
                         : null,
                   );
                 },
