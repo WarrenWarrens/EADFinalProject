@@ -121,6 +121,17 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _goToLesso6(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson6_adjectives.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
   Future<void> _goToAudioMimicry(BuildContext ctx) async {
     await _enterLesson(() async {
       await Navigator.push(
@@ -228,6 +239,8 @@ class _HomeScreenState extends State<HomeScreen> {
             "Here's what you'll learn:\n- Question words\n- Intonation patterns",
             practiceInfo:
             "Here's how you'll practice:\n- Q&A exercises\n- Dialogue practice",
+            unlocked: true,
+            onTap: _goToLesson6,
           ),
           LessonEntry(
             id: 'nv_tense',
