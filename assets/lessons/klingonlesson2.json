@@ -1,0 +1,91 @@
+{
+  "id": 102,
+  "languageId": 2,
+  "title": "Combat & Honor",
+  "objective": "Learn the core verbs of conflict and the concept of honor.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "To speak Klingon is to understand battle. Many of their most common words revolve around conflict, strategy, and reputation."
+      }
+    },
+    {
+      "id": 2,
+      "type": "word",
+      "data": {
+        "ref": "HIv",
+        "description": "To attack. In Klingon syntax, the object being attacked usually comes before the verb."
+      }
+    },
+    {
+      "id": 3,
+      "type": "word",
+      "data": {
+        "ref": "Hub",
+        "description": "To defend. A true warrior knows when to strike and when to hold their ground."
+      }
+    },
+    {
+      "id": 4,
+      "type": "word",
+      "data": {
+        "ref": "betleH",
+        "description": "The bat'leth. The traditional curved, double-ended sword of the Klingon people. It literally translates to 'sword of honor'."
+      }
+    },
+    {
+      "id": 5,
+      "type": "word",
+      "data": {
+        "ref": "batlh",
+        "description": "Honor. This is the central pillar of Klingon society. To lose it is worse than death."
+      }
+    },
+    {
+      "id": 6,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which of these words means 'to attack'?",
+        "options": [
+          { "text": "Hub", "correct": false },
+          { "text": "HIv", "correct": true },
+          { "text": "batlh", "correct": false },
+          { "text": "betleH", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What is the literal translation of the weapon 'betleH'?",
+        "options": [
+          { "text": "Curved blade", "correct": false },
+          { "text": "Warrior's right hand", "correct": false },
+          { "text": "Sword of honor", "correct": true },
+          { "text": "Blood edge", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "instruction": "Match the combat terms.",
+        "refs": ["HIv", "Hub", "batlh", "betleH"]
+      }
+    },
+    {
+      "id": 9,
+      "type": "text",
+      "data": {
+        "text": "Excellent! You now have the vocabulary to describe a skirmish. Qapla'!"
+      }
+    }
+  ]
+}

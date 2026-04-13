@@ -57,6 +57,9 @@ class AppTheme {
     Color(0xFF80D8FF), // Na'vi
     Color(0xFF9B1C1C), // Klingon
     Color(0xFFB8860B), // High Valyrian
+    Color(0xFF1976D2),
+    Color(0xFFE53935),
+    Colors.amber
   ];
 
   /// Convenience accessor — identical to AppLanguage.accentColor.

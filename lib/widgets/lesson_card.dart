@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../../widgets/app_language.dart';
 
 
 class LessonEntry {
@@ -48,7 +49,7 @@ class LessonCard extends StatefulWidget {
   const LessonCard({
     super.key,
     required this.lesson,
-    this.accentColor = const Color(0xFF5B4FFF),
+    this.accentColor = const Color(0xFF80D8FF), // Na'vi
     this.onBegin,
     this.expanded,
     this.onExpansionChanged,

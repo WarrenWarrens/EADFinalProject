@@ -1,0 +1,82 @@
+{
+  "id": 103,
+  "languageId": 2,
+  "title": "Battle Vocabulary",
+  "objective": "Learn essential weapons and combat terms of the Klingon Empire.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "For a Klingon, peace is merely an illusion. To truly speak the language, you must know the vocabulary of war."
+      }
+    },
+    {
+      "id": 2,
+      "type": "word",
+      "data": {
+        "ref": "may'",
+        "description": "Battle. A single engagement or fight. Klingons seek this out to prove their honor."
+      }
+    },
+    {
+      "id": 3,
+      "type": "word",
+      "data": {
+        "ref": "veS",
+        "description": "War. The overarching state of conflict."
+      }
+    },
+    {
+      "id": 4,
+      "type": "word",
+      "data": {
+        "ref": "taj",
+        "description": "Dagger or knife. The most basic and intimate weapon a warrior carries, often used in close combat or ceremonies."
+      }
+    },
+    {
+      "id": 5,
+      "type": "word",
+      "data": {
+        "ref": "mang",
+        "description": "Soldier. One who fights for the Empire."
+      }
+    },
+    {
+      "id": 6,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which word refers to a single 'battle' rather than an entire 'war'?",
+        "options": [
+          { "text": "veS", "correct": false },
+          { "text": "mang", "correct": false },
+          { "text": "may'", "correct": true },
+          { "text": "taj", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "instruction": "Match the combat terms to their English meanings.",
+        "pairs": [
+          { "left": "may'", "right": "Battle" },
+          { "left": "veS", "right": "War" },
+          { "left": "taj", "right": "Dagger" },
+          { "left": "mang", "right": "Soldier" }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "text",
+      "data": {
+        "text": "MajQa'! You are now equipped with the words of a soldier. Next, we will learn how to give them orders."
+      }
+    }
+  ]
+}

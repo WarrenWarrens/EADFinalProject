@@ -127,6 +127,27 @@ class _LessonPageState extends State<LessonPage> {
     }
   }
 
+  void lastSlide() {
+    if (currentContentIndex > 0) {
+      setState(() {
+        currentContentIndex--;
+      });
+    }
+  }
+
+  AppLanguage _getLanguageFromId(int id) {
+    switch (id) {
+      case 1:
+        return AppLanguage.navi;
+      case 2:
+        return AppLanguage.klingon;
+      case 3:
+        return AppLanguage.highValyrian;
+      default:
+        return AppLanguage.navi; // Fallback
+    }
+  }
+
   Widget buildContentPage() {
     final contentObject = content.firstWhere((c) => c.id == currentContentIndex);
 
@@ -136,17 +157,19 @@ class _LessonPageState extends State<LessonPage> {
 
     switch (contentObject.type) {
       case 'text':
-        return TextPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+        return TextPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
+        // return TextPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
       case 'character':
-        return CharacterPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+        return CharacterPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
       case 'word':
-        return WordPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+        return WordPage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
       case 'phrase':
-        return PhrasePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+        return PhrasePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
       case 'exercise':
-        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
       case 'case':
-        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+        //return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide);
+        return ExercisePage(key: ValueKey(contentObject.id), data: dataAttrs, onNext: nextSlide, onLast: lastSlide);
       default:
         return const Placeholder();
     }
@@ -158,6 +181,15 @@ class _LessonPageState extends State<LessonPage> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
+
+    // 2. Convert the JSON languageId to the enum
+    // final currentLanguage = _getLanguageFromId(widget.lesson.languageId);
+    final currentLanguage = _getLanguageFromId(widget.lesson.languageId);
+    // 3. Grab the correct accent color (Blue for Na'vi, Red for Klingon)
+    // final accent = currentLanguage.accentColor;
+    final accentColor = currentLanguage.accentColor;
+    final accentLight = currentLanguage.accentLight;
 
     Widget body;
 
@@ -165,6 +197,7 @@ class _LessonPageState extends State<LessonPage> {
       body = _LessonLoadingView(
         progress: _preloadTotal == 0 ? 0.0 : _preloadedCount / _preloadTotal,
         status: _preloadStatus,
+        palette: palette,
       );
     }
 
@@ -172,17 +205,23 @@ class _LessonPageState extends State<LessonPage> {
       body = LessonIntroPage(
         lesson: widget.lesson,
         onStart: nextSlide,
+        palette: palette,
+        accentColor: accentColor,
+        accentLight: accentLight,
       );
     }
 
     else if (currentContentIndex == lessonLength+1){
       body = LessonCompletePage(
-          lessonTitle: widget.lesson.title,
-          onContinue: (){
-            Navigator.pop(
-              context,
-            );
-          }
+        lessonTitle: widget.lesson.title,
+        onContinue: (){
+          Navigator.pop(
+            context,
+          );
+        },
+        palette: palette,
+        accentColor: accentColor,
+        accentLight: accentLight,
       );
     }
 
@@ -191,38 +230,74 @@ class _LessonPageState extends State<LessonPage> {
       body = buildContentPage();
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Lesson ${widget.lesson.id} - ${widget.lesson.title}'),
-        bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(6),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: AppColors.primaryLight,
-                  valueColor: AlwaysStoppedAnimation(AppColors.primary),
-                ),
-              ),
-            )
+    return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+            primary: accentColor,
+            primaryContainer: accentLight,
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accentColor,
+              foregroundColor: Colors.white,
+            ),
+          ),
         ),
-      ),
-      body: body,
-    );
+        child: Scaffold(
+          // Switch the main background based on Dark/Light mode
+          backgroundColor: palette.background,
+
+          appBar: AppBar(
+            // Match the AppBar background to the Scaffold
+            backgroundColor: palette.background,
+            elevation: 0, // Removes the drop shadow
+
+            // Ensure the back button icon changes color in Dark/Light mode
+            iconTheme: IconThemeData(color: palette.textPrimary),
+
+            title: Text(
+              'Lesson ${widget.lesson.id} - ${widget.lesson.title}',
+              // Ensure the title text changes color in Dark/Light mode
+              style: TextStyle(color: palette.textPrimary),
+            ),
+
+            bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(6),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 6,
+                      // Use the soft background color (e.g., light red or light blue)
+                      backgroundColor: accentLight,
+                      // Use the strong accent color (e.g., solid red or solid blue)
+                      valueColor: AlwaysStoppedAnimation(accentColor),
+                    ),
+                  ),
+                )
+            ),
+          ),
+          body: body, // Your existing body goes here!
+        ));
   }
 }
 
 class LessonIntroPage extends StatelessWidget {
   final Lesson lesson;
   final VoidCallback onStart;
+  final AppTheme palette;
+  final Color accentColor;
+  final Color accentLight;
 
   const LessonIntroPage({
     super.key,
     required this.lesson,
     required this.onStart,
+    required this.palette,
+    required this.accentColor,
+    required this.accentLight,
   });
 
   @override
@@ -240,14 +315,14 @@ class LessonIntroPage extends StatelessWidget {
             child: Container(
               width: 120,
               height: 120,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryLight,
+              decoration: BoxDecoration(
+                color: accentLight,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.menu_book_rounded,
                 size: 60,
-                color: AppColors.primary,
+                color: accentColor,
               ),
             ),
           ),
@@ -259,6 +334,7 @@ class LessonIntroPage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              color: palette.textPrimary,
             ),
           ),
 
@@ -267,7 +343,9 @@ class LessonIntroPage extends StatelessWidget {
           Text(
             lesson.objective,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: palette.textSecondary,
+            ),
           ),
 
           const Spacer(),
@@ -287,15 +365,22 @@ class LessonIntroPage extends StatelessWidget {
 class LessonCompletePage extends StatelessWidget {
   final String lessonTitle;
   final VoidCallback onContinue;
+  final AppTheme palette;
+  final Color accentColor;
+  final Color accentLight;
 
   const LessonCompletePage({
     super.key,
     required this.lessonTitle,
     required this.onContinue,
+    required this.palette,
+    required this.accentColor,
+    required this.accentLight,
   });
 
   @override
   Widget build(BuildContext context) {
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -309,24 +394,25 @@ class LessonCompletePage extends StatelessWidget {
                 Container(
                   width: 120,
                   height: 120,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryLight,
+                  decoration: BoxDecoration(
+                    color: accentLight,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.emoji_events_rounded,
                     size: 60,
-                    color: AppColors.primary,
+                    color: accentColor,
                   ),
                 ),
 
                 const SizedBox(height: 32),
 
-                const Text(
+                Text(
                   "Lesson Complete!",
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
+                    color: palette.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -335,18 +421,19 @@ class LessonCompletePage extends StatelessWidget {
 
                 Text(
                   lessonTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 20),
 
-                const Text(
+                Text(
                   "Great job! You're one step closer to mastering the language.",
                   textAlign: TextAlign.center,
+                  style: TextStyle(color: palette.textSecondary),
                 ),
               ],
             ),
@@ -375,8 +462,9 @@ class LessonCompletePage extends StatelessWidget {
 class _LessonLoadingView extends StatelessWidget {
   final double progress; // 0.0 → 1.0
   final String status;
+  final AppTheme palette;
 
-  const _LessonLoadingView({required this.progress, required this.status});
+  const _LessonLoadingView({required this.progress, required this.status, required this.palette});
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +541,7 @@ class _LessonLoadingView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 15,
-                      color: AppColors.textSecondary,
+                      color: palette.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -463,7 +551,7 @@ class _LessonLoadingView extends StatelessWidget {
                   '${(progress * 100).round()}%',
                   style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   ),
                 ),
               ],
@@ -518,4 +606,17 @@ class _ArcProgressClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(covariant _ArcProgressClipper old) =>
       old.progress != progress;
+}
+
+AppLanguage _getLanguageFromId(int id) {
+  switch (id) {
+    case 1:
+      return AppLanguage.navi;
+    case 2:
+      return AppLanguage.klingon;
+    case 3: // If you add it later!
+      return AppLanguage.highValyrian;
+    default:
+      return AppLanguage.navi;
+  }
 }
