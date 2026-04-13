@@ -104,3 +104,28 @@ class ExerciseOption {
     );
   }
 }
+
+// ===================
+// QUIZ
+// ===================
+class Quiz {
+  final String date;
+  final int questionCount;
+  final List<Content> questions;
+
+  const Quiz({
+    required this.date,
+    required this.questionCount,
+    required this.questions,
+  });
+
+  factory Quiz.fromMap(Map<String, dynamic> map) {
+    return Quiz(
+      date: map['date'],
+      questionCount: map['questionCount'],
+      questions: (map['questions'] as List)
+          .map((q) => Content.fromMap(q))
+          .toList(),
+    );
+  }
+}

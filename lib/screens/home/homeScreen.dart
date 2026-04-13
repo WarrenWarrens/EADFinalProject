@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:testing/screens/home/daily_quiz.dart';
+import 'package:testing/services/daily_quiz_service.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/lessonService.dart';
@@ -52,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen>
   final _bar = PersistentBarController.instance;
   late TabController _tabController;
 
-  static const _tabLabels = ['Word Match', 'Audio Mimicry', 'Conversation'];
+  static const _tabLabels = ['Lessons', 'Audio Mimicry', 'Conversation'];
   static const _tabIcons = [
     Icons.menu_book_rounded,
     Icons.headphones_rounded,
@@ -227,6 +229,42 @@ class _HomeScreenState extends State<HomeScreen>
     ],
   ];
 
+  // Daily quiz method to only enable quiz button when user has not completed it yet
+  Future<void> makeQuizAvailable() async {
+    final streak = _profile?.streak;
+    final level = _profile?.learningGoal;
+    int? dailyQuizQuestions; // Stores number of questions for daily quiz
+    // Lesson quiz =
+
+    switch (level){
+      case 'beginner':
+        dailyQuizQuestions = 5;
+      case 'intermediate':
+        dailyQuizQuestions = 10;
+      case 'native':
+        dailyQuizQuestions = 15;
+    }
+    final quiz = await DailyQuizService().loadQuiz('blank');
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => DailyQuizPage(
+              streak: streak,
+              questionCount: dailyQuizQuestions,
+              quiz: quiz,
+            )
+        ));
+
+    // Once complete update streak
+    await DailyQuizService().updateStreak();
+    final updatedUser = await _storage.getCurrentUser();
+
+    setState(() {
+
+      _profile = updatedUser;
+    });
+  }
+
   // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
@@ -254,6 +292,13 @@ class _HomeScreenState extends State<HomeScreen>
                         height: 1.2,
                       ),
                     ),
+                  ),
+                  IconButton(
+                      onPressed: DailyQuizService().canTakeQuizToday() ? makeQuizAvailable : null,
+                      icon: const Icon(Icons.card_giftcard_rounded),
+                    color: AppColors.primary,
+                    tooltip: 'Daily quiz',
+                    iconSize: 28,
                   ),
                   IconButton(
                     onPressed: () => Navigator.push(
