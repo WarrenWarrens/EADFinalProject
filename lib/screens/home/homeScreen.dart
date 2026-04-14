@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:testing/screens/home/daily_quiz.dart';
-import 'package:testing/services/daily_quiz_service.dart';
+import '../../screens/home/daily_quiz.dart';
+import '../../services/daily_quiz_service.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/lessonService.dart';
@@ -17,7 +17,7 @@ import '../../widgets/lesson_card.dart';
 import '../../theme/app_theme.dart';
 import '../lessons/audio_mimicry_screen.dart';
 import '../lessons/simulation.dart';
-import 'lessonPage.dart';
+import '../lessons/lessonPage.dart';
 import 'profile_screen.dart';
 import 'study_page.dart';
 

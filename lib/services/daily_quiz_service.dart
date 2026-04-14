@@ -5,8 +5,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:testing/models/user_profile.dart';
-import 'package:testing/services/local_storage_service.dart';
+import '../models/user_profile.dart';
+import '../services/local_storage_service.dart';
 
 import '../models/lessons.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:testing/screens/page-types/page_types.dart';
+import '../../screens/page-types/page_types.dart';
 import '../../models/lessons.dart';
 import '../../theme/app_theme.dart';
 
