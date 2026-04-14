@@ -52,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen>
   final _storage = LocalStorageService();
   final _music = MusicService();
   final _bar = PersistentBarController.instance;
+  final _dailyquiz = DailyQuizService();
   late TabController _tabController;
 
   static const _tabLabels = ['Lessons', 'Audio Mimicry', 'Conversation'];
@@ -233,8 +234,8 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> makeQuizAvailable() async {
     final streak = _profile?.streak;
     final level = _profile?.learningGoal;
+
     int? dailyQuizQuestions; // Stores number of questions for daily quiz
-    // Lesson quiz =
 
     switch (level){
       case 'beginner':
@@ -244,8 +245,11 @@ class _HomeScreenState extends State<HomeScreen>
       case 'native':
         dailyQuizQuestions = 15;
     }
-    final quiz = await DailyQuizService().loadQuiz('blank');
-    Navigator.push(
+
+    final quiz = await _dailyquiz.loadQuiz('blank');
+
+    // Wait for response before proceeding
+    final result = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (_) => DailyQuizPage(
@@ -255,14 +259,15 @@ class _HomeScreenState extends State<HomeScreen>
             )
         ));
 
-    // Once complete update streak
-    await DailyQuizService().updateStreak();
-    final updatedUser = await _storage.getCurrentUser();
+    if (result == true){
+      // Once complete update streak
+      await _dailyquiz.updateStreak();
+      final updatedUser = await _storage.getCurrentUser();
 
-    setState(() {
-
-      _profile = updatedUser;
-    });
+      setState(() {
+        _profile = updatedUser;
+      });
+    }
   }
 
   // ── Build ──────────────────────────────────────────────────────────────────
@@ -294,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                   IconButton(
-                      onPressed: DailyQuizService().canTakeQuizToday() ? makeQuizAvailable : null,
+                      onPressed: _dailyquiz.canTakeQuizToday() ? makeQuizAvailable : null,
                       icon: const Icon(Icons.card_giftcard_rounded),
                     color: AppColors.primary,
                     tooltip: 'Daily quiz',

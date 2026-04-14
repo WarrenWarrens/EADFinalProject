@@ -54,7 +54,9 @@ class LocalStorageService {
 
   // ── Get user ──────────────────────────────────────────────────────────────
   Future<UserProfile?> getCurrentUser() async {
-    return await loadProfile();
+    final user = await loadProfile();
+    print("ui ${user?.uid}");
+    return user;
   }
 
   // ── Clear ─────────────────────────────────────────────────────────────────

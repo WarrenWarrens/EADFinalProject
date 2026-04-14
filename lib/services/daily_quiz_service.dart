@@ -19,7 +19,7 @@ import '../models/lessons.dart';
 //   return days % totalQuizzes;
 // }
 
-class DailyQuizService {
+class DailyQuizService{
 
   // Get current date
   final DateTime currentDate = DateTime.now();
@@ -30,8 +30,6 @@ class DailyQuizService {
   Future<void> loadUser() async {
     _user = await LocalStorageService().getCurrentUser();
   }
-
-  UserProfile? get user => _user;
 
   Future<Quiz> loadQuiz(String filename) async{
     final String jsonString = await rootBundle.loadString('assets/lessons/quiz.json');
@@ -45,7 +43,9 @@ class DailyQuizService {
   }
 
   // Check if quiz has already been taken
-  bool canTakeQuizToday(){
+  bool canTakeQuizToday()  {
+    // Load user
+    // await loadUser();
 
     // If there is no last completed date (ex. new user)
     if (_user?.lastCompletedQuizDate == null){
@@ -68,11 +68,15 @@ class DailyQuizService {
 
   // Update streak
   Future<UserProfile?> updateStreak() async {
+    await loadUser();
+    print(_user?.streak);
 
-    if (user == null) {
+    if (_user == null) {
       // handle new user
+      print('null');
       return null;
     }
+    print('good');
 
     final today = _toDateOnly(currentDate);
 
@@ -104,4 +108,5 @@ class DailyQuizService {
 
     return updated;
   }
+
 }

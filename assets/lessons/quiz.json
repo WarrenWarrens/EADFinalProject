@@ -15,65 +15,6 @@
           { "text": "ä", "correct": false }
         ]
       }
-    },
-    {
-      "id": 2,
-      "type": "exercise",
-      "data": {
-        "exerciseType": "fill_blank",
-        "question": "Complete the sentence",
-        "parts": [
-          { "type": "text", "value": "Kaltxì, ma " },
-          { "type": "blank", "answer": "tìrey" },
-          { "type": "text", "value": "!" }
-        ]
-      }
-    },
-    {
-      "id": 3,
-      "type": "exercise",
-      "data": {
-        "exerciseType": "matching",
-        "question": "Match the Na'vi words to English",
-        "leftItems": [
-          { "id": 1, "content": "Kaltxì" },
-          { "id": 2, "content": "Eywa" },
-          { "id": 3, "content": "Irayo" },
-          { "id": 4, "content": "Tìrey" }
-        ],
-        "rightItems": [
-          { "id": 1, "content": "Hello" },
-          { "id": 2, "content": "The Great Mother" },
-          { "id": 3, "content": "Thank you" },
-          { "id": 4, "content": "Dream" }
-        ]
-      }
-    },
-    {
-      "id": 4,
-      "type": "exercise",
-      "data": {
-        "exerciseType": "multiple_choice",
-        "question": "What does 'Eywa' represent?",
-        "options": [
-          { "text": "A weapon", "correct": false },
-          { "text": "A nature spirit", "correct": true },
-          { "text": "A language", "correct": false },
-          { "text": "A mountain", "correct": false }
-        ]
-      }
-    },
-    {
-      "id": 5,
-      "type": "exercise",
-      "data": {
-        "exerciseType": "fill_blank",
-        "question": "Translate to English",
-        "parts": [
-          { "type": "text", "value": "tìyora' means " },
-          { "type": "blank", "answer": "love" }
-        ]
-      }
     }
   ]
 }
