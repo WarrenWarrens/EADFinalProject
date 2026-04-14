@@ -52,6 +52,13 @@ class LocalStorageService {
     return prefs.getInt(_setupStepKey) ?? 0;
   }
 
+  // ── Get user ──────────────────────────────────────────────────────────────
+  Future<UserProfile?> getCurrentUser() async {
+    final user = await loadProfile();
+    print("ui ${user?.uid}");
+    return user;
+  }
+
   // ── Clear ─────────────────────────────────────────────────────────────────
 
   Future<void> clearAll() async {
@@ -72,4 +79,6 @@ class LocalStorageService {
     //       .set(profile.toJson(), SetOptions(merge: true));
     // }
   }
+
+
 }

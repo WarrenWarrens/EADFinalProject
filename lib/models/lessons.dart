@@ -45,7 +45,7 @@ class Lesson {
 class Content {
   final int id;
   final String type;
-  final Map<String, dynamic> data; // Depending on the content type, the data will have different attributes
+  final Map<String, dynamic> data; // Depending on the page-types type, the data will have different attributes
 
   const Content({
     required this.id,
@@ -53,7 +53,7 @@ class Content {
     required this.data,
   });
 
-  // Only a fromMap method since you cannot write to content data
+  // Only a fromMap method since you cannot write to page-type data
   factory Content.fromMap(Map<String, dynamic> map) {
     return Content(
       id: map['id'],
@@ -101,6 +101,31 @@ class ExerciseOption {
     return ExerciseOption(
       text: map['text'],
       correct: map['correct'],
+    );
+  }
+}
+
+// ===================
+// QUIZ
+// ===================
+class Quiz {
+  final String date;
+  final int questionCount;
+  final List<Content> questions;
+
+  const Quiz({
+    required this.date,
+    required this.questionCount,
+    required this.questions,
+  });
+
+  factory Quiz.fromMap(Map<String, dynamic> map) {
+    return Quiz(
+      date: map['date'],
+      questionCount: map['questionCount'],
+      questions: (map['questions'] as List)
+          .map((q) => Content.fromMap(q))
+          .toList(),
     );
   }
 }

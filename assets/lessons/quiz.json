@@ -1,0 +1,20 @@
+{
+  "date": "2026-04-11",
+  "questionCount": 5,
+  "questions": [
+    {
+      "id": 1,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which vowel appears in the Na'vi language?",
+        "options": [
+          { "text": "ë", "correct": false },
+          { "text": "ï", "correct": true },
+          { "text": "ö", "correct": false },
+          { "text": "ä", "correct": false }
+        ]
+      }
+    }
+  ]
+}
