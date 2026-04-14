@@ -699,6 +699,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: makeQuizAvailable,
+        backgroundColor: accent,
+        child: const Icon(Icons.quiz_rounded),
+      ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
       bottomNavigationBar: AppNavBar(
         selectedIndex: _selectedNav,
         selectedLanguage: _selectedLanguage,
