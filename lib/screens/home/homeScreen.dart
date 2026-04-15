@@ -600,7 +600,7 @@ class _HomeScreenState extends State<HomeScreen> {
         dailyQuizQuestions = 15;
     }
 
-    final quiz = await _dailyquiz.loadQuiz('blank');
+    final quiz = await _dailyquiz.loadQuiz('quiz$dailyQuizQuestions');
 
     // Wait for response before proceeding
     final result = await Navigator.push(

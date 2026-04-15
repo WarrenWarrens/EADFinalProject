@@ -109,19 +109,19 @@ class ExerciseOption {
 // QUIZ
 // ===================
 class Quiz {
-  final String date;
+  final String id;
   final int questionCount;
   final List<Content> questions;
 
   const Quiz({
-    required this.date,
+    required this.id,
     required this.questionCount,
     required this.questions,
   });
 
   factory Quiz.fromMap(Map<String, dynamic> map) {
     return Quiz(
-      date: map['date'],
+      id: map['id'],
       questionCount: map['questionCount'],
       questions: (map['questions'] as List)
           .map((q) => Content.fromMap(q))

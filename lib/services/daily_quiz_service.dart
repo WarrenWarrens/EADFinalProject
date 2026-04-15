@@ -32,7 +32,7 @@ class DailyQuizService{
   }
 
   Future<Quiz> loadQuiz(String filename) async{
-    final String jsonString = await rootBundle.loadString('assets/lessons/quiz.json');
+    final String jsonString = await rootBundle.loadString('assets/quizzes/$filename.json');
     final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
     return Quiz.fromMap(jsonMap);
   }
