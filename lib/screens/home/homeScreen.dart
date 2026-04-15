@@ -100,6 +100,38 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _goToLesson4(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson4_cases.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+  Future<void> _goToLesson5(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson5_adjectives.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
+  Future<void> _goToLesson6(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('lesson6_questions.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
   Future<void> _goToKlingonLesson1(BuildContext ctx) async {
     await _enterLesson(() async {
       final lesson = await loadLesson('klingonlesson1.json');
@@ -231,6 +263,8 @@ class _HomeScreenState extends State<HomeScreen> {
             "Here's what you'll learn:\n- Subject & object cases\n- Grammatical roles",
             practiceInfo:
             "Here's how you'll practice:\n- Sentence building\n- Grammar drills",
+            unlocked: true,
+            onTap: _goToLesson4,
           ),
           LessonEntry(
             id: 'nv_adj',
@@ -238,7 +272,9 @@ class _HomeScreenState extends State<HomeScreen> {
             description:
             "Here's what you'll learn:\n- Describing people & things\n- Adjective placement",
             practiceInfo:
-            "Here's how you'll practice:\n- Matching game\n- Sentence creation",
+            "Here's how you'll practice:\n- Error Identification",
+            unlocked: true,
+            onTap: _goToLesson5,
           ),
           LessonEntry(
             id: 'nv_questions',
@@ -247,6 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
             "Here's what you'll learn:\n- Question words\n- Intonation patterns",
             practiceInfo:
             "Here's how you'll practice:\n- Q&A exercises\n- Dialogue practice",
+            unlocked: true,
+            onTap: _goToLesson6,
           ),
           LessonEntry(
             id: 'nv_tense',
@@ -304,9 +342,9 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'kl_intro',
             title: 'Introduction',
             description:
-            "Here's what you'll learn:\n- Klingon writing (pIqaD)\n- Basic sounds",
+            "Here's what you'll learn:\n- Basic, aggressive greetings of the Klingon Empire\n- Pronunciation differences between the harsh, capital 'Q' and the softer, lowercase 'q'.",
             practiceInfo:
-            "Here's how you'll practice:\n- Script matching\n- Audio drills",
+            "Here's how you'll practice:\n- Multiple choice question\n- Matching exercise",
             unlocked: true,
             onTap: _goToKlingonLesson1,
 
@@ -315,9 +353,9 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'kl_greetings',
             title: 'Warrior Greetings',
             description:
-            "Here's what you'll learn:\n- nuqneH, Qapla'\n- Formal combat greetings",
+            "Here's what you'll learn:\n- Core verbs of conflict and the concept of honor\n- Essential vocabulary for battle, including HIv (to attack)",
             practiceInfo:
-            "Here's how you'll practice:\n- Dialogue cards\n- Memory game",
+            "Here's how you'll practice:\n- Multiple choice\n- Matching exercise",
             unlocked: true,
             onTap: _goToKlingonLesson2,
 
@@ -326,9 +364,9 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'kl_vocab',
             title: 'Battle Vocabulary',
             description:
-            "Here's what you'll learn:\n- Weapons & combat terms\n- Honor phrases",
+            "Here's what you'll learn:\n- Weapons & combat terms\n- Distinction between words like may' (a single battle)",
             practiceInfo:
-            "Here's how you'll practice:\n- Flashcards\n- Matching game",
+            "Here's how you'll practice:\n- Multiple choice\n- Matching game",
             unlocked: true,
             onTap: _goToKlingonLesson3,
           ),
@@ -336,9 +374,9 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'kl_commands',
             title: 'Commands',
             description:
-            "Here's what you'll learn:\n- Imperative verb forms\n- Orders & directives",
+            "Here's what you'll learn:\n- Use of the prefix 'yI-' to turn a verb into a command\n- Specific command phrases like yIqIm (Pay attention!),",
             practiceInfo:
-            "Here's how you'll practice:\n- Role play\n- Scenario drills",
+            "Here's how you'll practice:\n- Multiple choice\n- Fill in the blank",
             unlocked: true,
             onTap: _goToKlingonLesson4,
           ),
@@ -566,6 +604,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final lessons = _getLessons();
     final accent = _selectedLanguage.accentColor;
     final palette = AppTheme.of(context);
+
 
 
 

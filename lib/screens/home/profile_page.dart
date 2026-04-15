@@ -1,3 +1,4 @@
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_scatter/flutter_scatter.dart';
@@ -89,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showLanguagePicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppTheme.of(context).surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -105,7 +106,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -136,12 +136,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
                         color: !enabled
-                            ? AppColors.parchmentDark
+                            ? AppTheme.of(context).surfaceAlt
                             : isSelected
                             ? AppColors.primary
-                            : AppColors.parchmentLight,
+                            : AppTheme.of(context).surface,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.inputBorder),
+                        border: Border.all(color: AppTheme.of(context).border),
                       ),
                       child: Row(
                         children: [
@@ -157,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ? AppColors.textSecondary
                                   : isSelected
                                   ? Colors.white
-                                  : AppColors.textPrimary,
+                                  : AppTheme.of(context).textPrimary,
                             ),
                           ),
                           if (!enabled) ...[
@@ -189,7 +189,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showGoalPicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppTheme.of(context).surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -205,7 +205,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -226,9 +225,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.primary
-                            : AppColors.parchmentLight,
+                            : AppTheme.of(context).surface,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.inputBorder),
+                        border: Border.all(color: AppTheme.of(context).border),
                       ),
                       child: Row(
                         children: [
@@ -248,7 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               fontWeight: FontWeight.w500,
                               color: isSelected
                                   ? Colors.white
-                                  : AppColors.textPrimary,
+                                  : AppTheme.of(context).textPrimary,
                             ),
                           ),
                           if (isSelected) ...[
@@ -272,7 +271,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showAvatarPicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppTheme.of(context).surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -405,7 +404,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       controller: _nameController,
                       autofocus: true,
                       style: const TextStyle(
-                          fontSize: 15, color: AppColors.textPrimary),
+                          fontSize: 15),
                       decoration: const InputDecoration(
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(
@@ -439,8 +438,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         style: TextStyle(
                           fontSize: 15,
                           color: _profile?.username != null
-                              ? AppColors.textPrimary
-                              : AppColors.textSecondary,
+                              ? AppTheme.of(context).textPrimary
+                              : AppTheme.of(context).textSecondary,
                         ),
                       ),
                     ),
@@ -463,7 +462,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Text(
                         _languageLabel(),
                         style: const TextStyle(
-                            fontSize: 15, color: AppColors.textPrimary),
+                            fontSize: 15),
                       ),
                     ),
                     Icon(Icons.chevron_right_rounded,
@@ -485,7 +484,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Text(
                         _goalLabel(_profile?.learningGoal),
                         style: const TextStyle(
-                            fontSize: 15, color: AppColors.textPrimary),
+                            fontSize: 15),
                       ),
                     ),
                     Icon(Icons.chevron_right_rounded,
@@ -506,9 +505,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppTheme.of(context).surface,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.inputBorder),
+                  border: Border.all(color: AppTheme.of(context).border),
                 ),
                 child: Column(
                   children: [
@@ -522,7 +521,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
                           ),
                         ),
                         const Spacer(),
@@ -590,13 +588,14 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.inputBorder),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,7 +609,7 @@ class _SettingsCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: palette.textSecondary,
                   letterSpacing: 0.5,
                 ),
               ),

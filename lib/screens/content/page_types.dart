@@ -276,11 +276,11 @@ class ExercisePage extends StatelessWidget {
     switch (data['exerciseType']) {
       case 'multiple_choice':
         return MultipleChoice(
-          question: data['question'],
-          options: List<Map<String, dynamic>>.from(data['options']),
-          ref: data['ref'] as String?,
-          onNext: onNext,
-          onLast: onLast
+            question: data['question'],
+            options: List<Map<String, dynamic>>.from(data['options']),
+            ref: data['ref'] as String?,
+            onNext: onNext,
+            onLast: onLast
         );
       case 'audio_mimicry':
         return AudioMimicryExercise(data: data, onNext: onNext, onLast: onLast);
@@ -414,7 +414,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                     widget.question,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       height: 1.5,
                       fontSize: 18,
                     ),
@@ -446,7 +446,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               fontSize: 18,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -583,7 +583,7 @@ class _LessonAudioChipState extends State<_LessonAudioChip> {
             Text(
               widget.label,
               style: TextStyle(
-                color: _playing ? Colors.white : AppColors.textPrimary,
+                color: _playing ? Colors.white : Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1393,7 +1393,7 @@ class _IpaComparisonCard extends StatelessWidget {
             const SizedBox(height: 8),
           ],
           _row('You said', heard.isEmpty ? '(nothing detected)' : heard,
-              AppColors.textPrimary),
+              Theme.of(context).colorScheme.onSurface),
         ],
       ),
     );
