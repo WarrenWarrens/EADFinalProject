@@ -16,4 +16,5 @@ LinguaLore is an app that teaches fanstasy languages in a real world manner. The
 **Alt Images Link** https://drive.google.com/drive/folders/1V2cnhfWkzbS4lLMZXmznJ_Gr_G2ksaSc?usp=sharing
 
 ## Final
-**Final Video Link:** https://youtu.be/FWfsojsrVl0 
+**Final Video Link:** https://youtu.be/FWfsojsrVl0  <br>
+**Android APK:** https://drive.google.com/file/d/1O8jHRtKZ6eQjRngTmp4ElJDIPPnFQIY3/view?usp=sharing
