@@ -1,3 +1,5 @@
+
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_scatter/flutter_scatter.dart';
@@ -295,7 +297,7 @@ class _ProfileTab extends StatelessWidget {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: AppTheme.dark.surfaceAlt,
+                    color: AppTheme.of(context).surfaceAlt,
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
                         color: accentColor.withOpacity(0.35), width: 2),
@@ -308,7 +310,7 @@ class _ProfileTab extends StatelessWidget {
                       child: Icon(
                         Icons.person_rounded,
                         size: 60,
-                        color: const Color(0xFF555555),
+                        color: AppTheme.of(context).textMuted,
                       ),
                     ),
                   ),
@@ -323,7 +325,7 @@ class _ProfileTab extends StatelessWidget {
                       color: accentColor,
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: AppTheme.dark.background, width: 2.5),
+                          color: AppTheme.of(context).background, width: 2.5),
                     ),
                     child: const Icon(
                       Icons.camera_alt_rounded,
@@ -427,17 +429,17 @@ class _ProfileTab extends StatelessWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocalState) => AlertDialog(
-          backgroundColor: AppTheme.dark.surface,
+          backgroundColor: AppTheme.of(context).surface,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20)),
           title: Text(title,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w700)),
+              style: TextStyle(
+                  color: AppTheme.of(context).textPrimary, fontWeight: FontWeight.w700)),
           content: TextField(
             controller: controller,
             autofocus: true,
             keyboardType: keyboardType,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: AppTheme.of(context).textPrimary),
             onChanged: (_) {
               if (errorText != null) {
                 setLocalState(() => errorText = null);
@@ -448,7 +450,7 @@ class _ProfileTab extends StatelessWidget {
               hintStyle: const TextStyle(color: Color(0xFF666666)),
               errorText: errorText,
               filled: true,
-              fillColor: AppTheme.dark.surfaceAlt,
+              fillColor: AppTheme.of(context).surfaceAlt,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: const Color(0xFF333333)),
@@ -462,8 +464,8 @@ class _ProfileTab extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel',
-                  style: TextStyle(color: Color(0xFF999999))),
+              child: Text('Cancel',
+                  style: TextStyle(color: AppTheme.of(context).textSecondary)),
             ),
             TextButton(
               onPressed: () {
@@ -493,12 +495,12 @@ class _ProfileTab extends StatelessWidget {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.dark.surface,
+        backgroundColor: AppTheme.of(context).surface,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20)),
-        title: const Text('Learning Goal',
+        title: Text('Learning Goal',
             style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w700)),
+                color: AppTheme.of(context).textPrimary, fontWeight: FontWeight.w700)),
         contentPadding: const EdgeInsets.symmetric(vertical: 8),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -509,7 +511,7 @@ class _ProfileTab extends StatelessWidget {
                 groupValue: current,
                 activeColor: accentColor,
                 title: Text(label,
-                    style: const TextStyle(color: Colors.white)),
+                    style: TextStyle(color: AppTheme.of(context).textPrimary)),
                 onChanged: (v) => Navigator.pop(ctx, v),
               ),
           ],
@@ -517,8 +519,8 @@ class _ProfileTab extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF999999))),
+            child: Text('Cancel',
+                style: TextStyle(color: AppTheme.of(context).textSecondary)),
           ),
         ],
       ),
@@ -546,8 +548,9 @@ class _ProfileInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Material(
-      color: Colors.white,
+      color: palette.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -572,9 +575,9 @@ class _ProfileInfoTile extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFF999999),
+                        color: palette.textSecondary,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.4,
                       ),
@@ -582,9 +585,9 @@ class _ProfileInfoTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       value,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
-                        color: Color(0xFF111111),
+                        color: palette.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -592,10 +595,10 @@ class _ProfileInfoTile extends StatelessWidget {
                 ),
               ),
               if (onTap != null)
-                const Icon(
+                Icon(
                   Icons.edit_outlined,
                   size: 18,
-                  color: const Color(0xFFBBBBBB),
+                  color: palette.textMuted,
                 ),
             ],
           ),
@@ -727,11 +730,12 @@ class _ExpandableStatCardState extends State<_ExpandableStatCard>
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return GestureDetector(
       onTap: _toggle,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: palette.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -758,10 +762,10 @@ class _ExpandableStatCardState extends State<_ExpandableStatCard>
                   Expanded(
                     child: Text(
                       widget.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF111111),
+                        color: palette.textPrimary,
                       ),
                     ),
                   ),
@@ -782,7 +786,7 @@ class _ExpandableStatCardState extends State<_ExpandableStatCard>
                       Icons.keyboard_arrow_down_rounded,
                       color: _expanded
                           ? widget.accentColor
-                          : const Color(0xFF888888),
+                          : palette.textMuted,
                       size: 22,
                     ),
                   ),
@@ -799,7 +803,7 @@ class _ExpandableStatCardState extends State<_ExpandableStatCard>
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: AppTheme.dark.surfaceAlt,
+                        color: AppTheme.of(context).surfaceAlt,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: widget.child,
@@ -868,9 +872,9 @@ class _WordCloudContent extends StatelessWidget {
                   ? 'Complete lessons to fill\nyour word cloud!'
                   : 'No ${language.label} words tracked yet.\nComplete a lesson to get started!',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF888888),
+                color: AppTheme.of(context).textSecondary,
                 height: 1.5,
               ),
             ),
@@ -930,12 +934,12 @@ class _DictionaryContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (records.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(20),
+      return Padding(
+        padding: const EdgeInsets.all(20),
         child: Text(
           'Practice some words and they\'ll appear here.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+          style: TextStyle(color: AppTheme.of(context).textSecondary, fontSize: 13),
         ),
       );
     }
@@ -961,8 +965,8 @@ class _DictionaryContent extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: Text(r.displayText,
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
+                      style: TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.of(context).textPrimary)),
                 ),
                 _MiniRing(label: '🎤', value: vocal, accent: accentColor),
                 const SizedBox(width: 8),
@@ -1050,11 +1054,11 @@ class _LessonsContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'lessons completed',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF888888),
+                  color: AppTheme.of(context).textSecondary,
                 ),
               ),
             ],
@@ -1071,7 +1075,7 @@ class _LessonsContent extends StatelessWidget {
                     done
                         ? Icons.check_circle_rounded
                         : Icons.radio_button_unchecked_rounded,
-                    color: done ? accentColor : const Color(0xFF444444),
+                    color: done ? accentColor : AppTheme.of(context).textMuted,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -1081,7 +1085,7 @@ class _LessonsContent extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: done ? Colors.white : const Color(0xFF555555),
+                        color: done ? AppTheme.of(context).textPrimary : AppTheme.of(context).textMuted,
                       ),
                     ),
                   ),
@@ -1158,12 +1162,12 @@ class _SettingsTabState extends State<_SettingsTab> {
     final result = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.dark.surface,
+        backgroundColor: AppTheme.of(context).surface,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20)),
-        title: const Text('Theme',
+        title: Text('Theme',
             style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w700)),
+                color: AppTheme.of(context).textPrimary, fontWeight: FontWeight.w700)),
         contentPadding: const EdgeInsets.symmetric(vertical: 8),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1174,7 +1178,7 @@ class _SettingsTabState extends State<_SettingsTab> {
                 groupValue: current,
                 activeColor: accent,
                 title: Text(_themeLabel(i),
-                    style: const TextStyle(color: Colors.white)),
+                    style: TextStyle(color: AppTheme.of(context).textPrimary)),
                 onChanged: (v) => Navigator.pop(ctx, v),
               ),
           ],
@@ -1182,8 +1186,8 @@ class _SettingsTabState extends State<_SettingsTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF999999))),
+            child: Text('Cancel',
+                style: TextStyle(color: AppTheme.of(context).textSecondary)),
           ),
         ],
       ),
@@ -1224,22 +1228,22 @@ class _SettingsTabState extends State<_SettingsTab> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: AppTheme.dark.surface,
+        backgroundColor: AppTheme.of(context).surface,
         shape:
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Reset all data?',
+        title: Text('Reset all data?',
             style: TextStyle(
-                fontWeight: FontWeight.w700, color: Colors.white)),
-        content: const Text(
+                fontWeight: FontWeight.w700, color: AppTheme.of(context).textPrimary)),
+        content: Text(
           'This will clear your profile, progress, and all lesson data. '
               'This cannot be undone.',
-          style: TextStyle(color: Color(0xFF888888)),
+          style: TextStyle(color: AppTheme.of(context).textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel',
-                style: TextStyle(color: Color(0xFF888888))),
+            child: Text('Cancel',
+                style: TextStyle(color: AppTheme.of(context).textSecondary)),
           ),
           TextButton(
             onPressed: () async {
@@ -1379,14 +1383,15 @@ class _SettingsSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF888888),
+          color: palette.textMuted,
           letterSpacing: 0.5,
         ),
       ),
@@ -1414,10 +1419,11 @@ class _ToggleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -1437,13 +1443,13 @@ class _ToggleTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF111111))),
+                        color: palette.textPrimary)),
                 Text(subtitle,
-                    style: const TextStyle(
-                        fontSize: 11, color: Color(0xFF999999))),
+                    style: TextStyle(
+                        fontSize: 11, color: palette.textSecondary)),
               ],
             ),
           ),
@@ -1478,10 +1484,11 @@ class _SliderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -1505,20 +1512,20 @@ class _SliderTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(label,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF111111))),
+                            color: palette.textPrimary)),
                     Text('${(value * 100).round()}%',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF666666))),
+                            color: palette.textSecondary)),
                   ],
                 ),
                 Text(subtitle,
-                    style: const TextStyle(
-                        fontSize: 11, color: Color(0xFF999999))),
+                    style: TextStyle(
+                        fontSize: 11, color: palette.textSecondary)),
                 SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 3,
@@ -1527,7 +1534,7 @@ class _SliderTile extends StatelessWidget {
                     overlayShape: const RoundSliderOverlayShape(
                         overlayRadius: 14),
                     activeTrackColor: accentColor,
-                    inactiveTrackColor: const Color(0xFFE0E0E0),
+                    inactiveTrackColor: palette.border,
                     thumbColor: accentColor,
                     overlayColor: accentColor.withOpacity(0.15),
                   ),
@@ -1567,13 +1574,14 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding:
         const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: palette.surface,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -1599,18 +1607,18 @@ class _ActionTile extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: isDanger
                           ? AppColors.error
-                          : const Color(0xFF111111),
+                          : palette.textPrimary,
                     ),
                   ),
                   Text(subtitle,
-                      style: const TextStyle(
-                          fontSize: 11, color: Color(0xFF999999))),
+                      style: TextStyle(
+                          fontSize: 11, color: palette.textSecondary)),
                 ],
               ),
             ),
             if (onTap != null)
               Icon(Icons.chevron_right_rounded,
-                  size: 18, color: const Color(0xFFBBBBBB)),
+                  size: 18, color: palette.textMuted),
           ],
         ),
       ),
@@ -1638,7 +1646,7 @@ class _MiniRing extends StatelessWidget {
                 value: v ?? 0,
                 strokeWidth: 2.5,
                 backgroundColor: const Color(0xFF333333),
-                color: v == null ? const Color(0xFF555555) : accent,
+                color: v == null ? AppTheme.of(context).textMuted : accent,
               ),
               Text(label, style: const TextStyle(fontSize: 9)),
             ]),
