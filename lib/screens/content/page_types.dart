@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -32,48 +33,6 @@ class TextPage extends StatelessWidget {
 
   });
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.all(24),
-//       child: Column(
-//         children: [
-//           Expanded(
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 Text(
-//                   data['text'],
-//                   textAlign: TextAlign.center,
-//                   style: TextStyle(
-//                       fontSize: 20
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//
-//           SizedBox(
-//             width: double.infinity,
-//             child: ElevatedButton(
-//               onPressed: onLast,
-//               child: const Text("Continue"),
-//             ),
-//           ),
-//           SizedBox(
-//             width: double.infinity,
-//             child: ElevatedButton(
-//               onPressed: onNext,
-//               child: const Text("Continue"),
-//             ),
-//           ),
-//
-//           const SizedBox(height: 12),
-//         ],
-//       ),
-//     );
-//   }
-// }
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -276,11 +235,11 @@ class ExercisePage extends StatelessWidget {
     switch (data['exerciseType']) {
       case 'multiple_choice':
         return MultipleChoice(
-          question: data['question'],
-          options: List<Map<String, dynamic>>.from(data['options']),
-          ref: data['ref'] as String?,
-          onNext: onNext,
-          onLast: onLast
+            question: data['question'],
+            options: List<Map<String, dynamic>>.from(data['options']),
+            ref: data['ref'] as String?,
+            onNext: onNext,
+            onLast: onLast
         );
       case 'audio_mimicry':
         return AudioMimicryExercise(data: data, onNext: onNext, onLast: onLast);
@@ -414,7 +373,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                     widget.question,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       height: 1.5,
                       fontSize: 18,
                     ),
@@ -446,7 +405,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               fontSize: 18,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -479,15 +438,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
             ),
           ),
 
-          // const SizedBox(height: 16),
-          // SizedBox(
-          //   width: double.infinity,
-          //   child: ElevatedButton(
-          //     onPressed: hasSelected ? _onCheck : null,
-          //     child: Text(hasSubmitted ? 'Continue' : 'Check'),
-          //   ),
-          // ),
-          // const SizedBox(height: 12),
+
           const SizedBox(height: 16),
           Row(
             children: [
@@ -583,7 +534,7 @@ class _LessonAudioChipState extends State<_LessonAudioChip> {
             Text(
               widget.label,
               style: TextStyle(
-                color: _playing ? Colors.white : AppColors.textPrimary,
+                color: _playing ? Colors.white : Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1393,7 +1344,7 @@ class _IpaComparisonCard extends StatelessWidget {
             const SizedBox(height: 8),
           ],
           _row('You said', heard.isEmpty ? '(nothing detected)' : heard,
-              AppColors.textPrimary),
+              Theme.of(context).colorScheme.onSurface),
         ],
       ),
     );

@@ -342,9 +342,9 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'kl_intro',
             title: 'Introduction',
             description:
-            "Here's what you'll learn:\n- Klingon writing (pIqaD)\n- Basic sounds",
+            "Here's what you'll learn:\n- Basic, aggressive greetings of the Klingon Empire\n- Pronunciation differences between the harsh, capital 'Q' and the softer, lowercase 'q'.",
             practiceInfo:
-            "Here's how you'll practice:\n- Script matching\n- Audio drills",
+            "Here's how you'll practice:\n- Multiple choice question\n- Matching exercise",
             unlocked: true,
             onTap: _goToKlingonLesson1,
 
@@ -353,9 +353,9 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'kl_greetings',
             title: 'Warrior Greetings',
             description:
-            "Here's what you'll learn:\n- nuqneH, Qapla'\n- Formal combat greetings",
+            "Here's what you'll learn:\n- Core verbs of conflict and the concept of honor\n- Essential vocabulary for battle, including HIv (to attack)",
             practiceInfo:
-            "Here's how you'll practice:\n- Dialogue cards\n- Memory game",
+            "Here's how you'll practice:\n- Multiple choice\n- Matching exercise",
             unlocked: true,
             onTap: _goToKlingonLesson2,
 
@@ -364,9 +364,9 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'kl_vocab',
             title: 'Battle Vocabulary',
             description:
-            "Here's what you'll learn:\n- Weapons & combat terms\n- Honor phrases",
+            "Here's what you'll learn:\n- Weapons & combat terms\n- Distinction between words like may' (a single battle)",
             practiceInfo:
-            "Here's how you'll practice:\n- Flashcards\n- Matching game",
+            "Here's how you'll practice:\n- Multiple choice\n- Matching game",
             unlocked: true,
             onTap: _goToKlingonLesson3,
           ),
@@ -374,9 +374,9 @@ class _HomeScreenState extends State<HomeScreen> {
             id: 'kl_commands',
             title: 'Commands',
             description:
-            "Here's what you'll learn:\n- Imperative verb forms\n- Orders & directives",
+            "Here's what you'll learn:\n- Use of the prefix 'yI-' to turn a verb into a command\n- Specific command phrases like yIqIm (Pay attention!),",
             practiceInfo:
-            "Here's how you'll practice:\n- Role play\n- Scenario drills",
+            "Here's how you'll practice:\n- Multiple choice\n- Fill in the blank",
             unlocked: true,
             onTap: _goToKlingonLesson4,
           ),
@@ -604,6 +604,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final lessons = _getLessons();
     final accent = _selectedLanguage.accentColor;
     final palette = AppTheme.of(context);
+
 
 
 
