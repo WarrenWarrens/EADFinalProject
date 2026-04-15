@@ -73,6 +73,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _goToNaviIntro(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('navi_intro.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
+  }
+
   Future<void> _goToLesson1(BuildContext ctx) async {
     await _enterLesson(() async {
       final lesson = await loadLesson('lesson1.json');
@@ -227,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
             practiceInfo:
             "Here's how you'll practice:\n- Matching game\n- Memory game",
             unlocked: true,
-            onTap: _goToLesson1,
+            onTap: _goToNaviIntro,
           ),
           LessonEntry(
             id: 'nv_vowels',

@@ -50,7 +50,7 @@ class TextPage extends StatelessWidget {
   }
 }
 
-class CharacterPage extends StatelessWidget{
+class CharacterPage extends StatelessWidget {
   final Map<String, dynamic> data;
   final VoidCallback onNext;
 
@@ -60,8 +60,18 @@ class CharacterPage extends StatelessWidget{
     required this.onNext,
   });
 
+  double _getFontSize(String text) {
+    if (text.length <= 2) return 64;
+    if (text.length <= 6) return 48;
+    if (text.length <= 10) return 36;
+    return 28;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String text = data['letter'] ?? '';
+    final String description = data['description'] ?? '';
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -70,68 +80,71 @@ class CharacterPage extends StatelessWidget{
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
-                // Box with major content
                 GestureDetector(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Audio feature will be implemented later!"),
-                          showCloseIcon: true,
-                        )
+                      const SnackBar(
+                        content: Text("Audio feature coming soon 🎧"),
+                        showCloseIcon: true,
+                      ),
                     );
                   },
                   child: Container(
-                    width: 120,
-                    height: 120,
+                    constraints: const BoxConstraints(
+                      minHeight: 100,
+                      maxWidth: 260,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: AppColors.primary,
-                        width: 2,
+                        width: 1.5,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.15),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ],
                     ),
                     child: Stack(
                       children: [
                         Center(
                           child: Text(
-                            data['letter'],
-                            style: const TextStyle(
-                              fontSize: 60,
+                            text,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: _getFontSize(text),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
 
-                        // Audio icon - Audio functionality will be implemented later!
-                        Positioned(
-                          top: 10,
-                          right: 10,
-                          child: Icon(
-                            Icons.volume_up_rounded,
-                            color: AppColors.primary,
-                          ),
-                        ),
                       ],
                     ),
-                  ),
+                  )
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 30),
 
                 Text(
-                  data['description'],
+                  description,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 20
+                  style: const TextStyle(
+                    fontSize: 18,
+                    height: 1.4,
                   ),
                 ),
               ],
             ),
           ),
 
-          // Bottom button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -145,7 +158,6 @@ class CharacterPage extends StatelessWidget{
       ),
     );
   }
-
 }
 
 // This page will reroute to the correct widget depending on the exerciseType
