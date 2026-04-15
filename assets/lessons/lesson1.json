@@ -24,7 +24,7 @@
       "data": {
         "letter": "a",
         "ttsHint": "ah",
-        "description": "Pronounced like the 'a' in the English word 'father' or 'car'. Press the vowel to hear its pronunciation."
+        "description": "Pronounced like the 'a' in the English word 'father' or 'car'."
       }
     },
     {
@@ -33,7 +33,7 @@
       "data": {
         "letter": "ä",
         "ttsHint": "aa",
-        "description": "Pronounced like the 'a' in the English word 'cat' or 'pack'. Press the vowel to hear its pronunciation."
+        "description": "Pronounced like the 'a' in the English word 'cat' or 'pack'. "
       }
     },
     {
@@ -42,7 +42,7 @@
       "data": {
         "letter": "e",
         "ttsHint": "eh",
-        "description": "Pronounced like the 'e' in the English word 'then' or 'set'. Press the vowel to hear its pronunciation."
+        "description": "Pronounced like the 'e' in the English word 'then' or 'set'. "
       }
     },
     {
@@ -51,7 +51,7 @@
       "data": {
         "letter": "i",
         "ttsHint": "ee",
-        "description": "Pronounced like the 'i' in the English word 'machine'. It sounds similar to the English letter 'e'. Press the vowel to hear its pronunciation."
+        "description": "Pronounced like the 'i' in the English word 'machine'. It sounds similar to the English letter 'e'."
       }
     },
     {
@@ -60,7 +60,7 @@
       "data": {
         "letter": "ì",
         "ttsHint": "ih",
-        "description": "Pronounced like the 'i' in the English word 'bit' or 'thin'. Press the vowel to hear its pronunciation."
+        "description": "Pronounced like the 'i' in the English word 'bit' or 'thin'."
       }
     },
     {
@@ -69,7 +69,7 @@
       "data": {
         "letter": "o",
         "ttsHint": "oh",
-        "description": "Pronounced like the 'o' in the English word 'own' or 'more'. Press the vowel to hear its pronunciation."
+        "description": "Pronounced like the 'o' in the English word 'own' or 'more'."
       }
     },
     {
@@ -78,7 +78,7 @@
       "data": {
         "letter": "u",
         "ttsHint": "oo",
-        "description": "Pronounced like the 'u' in the English word 'dude'. Press the vowel to hear its pronunciation."
+        "description": "Pronounced like the 'u' in the English word 'dude'."
       }
     },
     {
@@ -106,6 +106,40 @@
           { "text": "i", "correct": true },
           { "text": "o", "correct": false },
           { "text": "u", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "exercise",
+      "data":{
+        "exerciseType": "matching",
+        "question": "Match the Na'vi words to English",
+        "leftItems": [
+          { "id": 1, "content": "Kaltxì" },
+          { "id": 2, "content": "Uniltìrantokx" },
+          { "id": 3, "content": "Eywa" },
+          { "id": 4, "content": "match" }
+        ],
+        "rightItems": [
+          { "id": 1, "content": "Hello" },
+          { "id": 2, "content": "Dreamwalker" },
+          { "id": 3, "content": "The Great Mother" },
+          { "id": 4, "content": "match2" }
+        ]
+      }
+    },
+
+    {
+      "id": 13,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "fill_blank",
+        "question": "Complete the sentence",
+        "parts": [
+          { "type": "text", "value": "Kaltxì, ma " },
+          { "type": "blank", "answer": "tìrey" },
+          { "type": "text", "value": "!" }
         ]
       }
     }

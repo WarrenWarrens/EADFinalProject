@@ -1,0 +1,112 @@
+{
+  "id": 1,
+  "languageId": 1,
+  "title": "Welcome to Na'vi",
+  "objective": "Learn what Na'vi is and say your first words.",
+  "content": [
+    {
+      "id": 1,
+      "type": "text",
+      "data": {
+        "text": "Welcome! In this lesson, you'll learn the basics of the Na'vi language — the language spoken by the people of Pandora."
+      }
+    },
+    {
+      "id": 2,
+      "type": "text",
+      "data": {
+        "text": "Na'vi was created for the movie Avatar, but it has grown into a real language with grammar, vocabulary, and even a community of learners."
+      }
+    },
+    {
+      "id": 3,
+      "type": "text",
+      "data": {
+        "text": "Let’s start with your first word 👇"
+      }
+    },
+
+    {
+      "id": 4,
+      "type": "character",
+      "data": {
+        "letter": "Kaltxì",
+        "description": "This means 'Hello'. It’s the most common way to greet someone in Na'vi."
+      }
+    },
+
+    {
+      "id": 5,
+      "type": "character",
+      "data": {
+        "letter": "Irayo",
+        "description": "This means 'Thank you'. You’ll use this a lot!"
+      }
+    },
+
+    {
+      "id": 6,
+      "type": "character",
+      "data": {
+        "letter": "Eywa",
+        "description": "Eywa is the spiritual force of nature in Na'vi culture — very important to their world."
+      }
+    },
+
+    {
+      "id": 7,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'Kaltxì' mean?",
+        "options": [
+          { "text": "Goodbye", "correct": false },
+          { "text": "Hello", "correct": true },
+          { "text": "Thank you", "correct": false },
+          { "text": "Friend", "correct": false }
+        ]
+      }
+    },
+
+    {
+      "id": 8,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "question": "Match the Na'vi words to their meanings",
+        "leftItems": [
+          { "id": 1, "content": "Kaltxì" },
+          { "id": 2, "content": "Irayo" },
+          { "id": 3, "content": "Eywa" }
+        ],
+        "rightItems": [
+          { "id": 1, "content": "Hello" },
+          { "id": 2, "content": "Thank you" },
+          { "id": 3, "content": "Nature spirit" }
+        ]
+      }
+    },
+
+    {
+      "id": 9,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "fill_blank",
+        "question": "Complete the greeting",
+        "parts": [
+          { "type": "text", "value": "" },
+          { "type": "blank", "answer": "Kaltxì" },
+          { "type": "text", "value": "! Nice to meet you." }
+        ]
+      }
+    },
+
+    {
+      "id": 10,
+      "type": "text",
+      "data": {
+        "text": "🎉 Great job! You just learned your first Na'vi words. In the next lesson, you'll start building real sentences."
+      }
+    }
+  ]
+}

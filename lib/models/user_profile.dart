@@ -8,6 +8,8 @@ class UserProfile {
   final String? avatarPath;
   final List<String> selectedLanguages;
   final String? learningGoal; // 'native' | 'intermediate' | 'beginner'
+  final int? streak;
+  final DateTime? lastCompletedQuizDate;
   final bool isGuest;
   final bool emailVerified;
   final bool shareData;
@@ -24,6 +26,8 @@ class UserProfile {
     this.avatarPath,
     this.selectedLanguages = const [],
     this.learningGoal,
+    this.streak = 0,
+    this.lastCompletedQuizDate,
     this.isGuest = false,
     this.emailVerified = false,
     this.shareData = false,
@@ -41,6 +45,8 @@ class UserProfile {
     String? avatarPath,
     List<String>? selectedLanguages,
     String? learningGoal,
+    int? streak,
+    DateTime? lastCompletedQuizDate,
     bool? isGuest,
     bool? emailVerified,
     bool? shareData,
@@ -57,6 +63,8 @@ class UserProfile {
       avatarPath: avatarPath ?? this.avatarPath,
       selectedLanguages: selectedLanguages ?? this.selectedLanguages,
       learningGoal: learningGoal ?? this.learningGoal,
+      streak: streak ?? this.streak,
+      lastCompletedQuizDate: lastCompletedQuizDate ?? this.lastCompletedQuizDate,
       isGuest: isGuest ?? this.isGuest,
       emailVerified: emailVerified ?? this.emailVerified,
       shareData: shareData ?? this.shareData,
@@ -75,6 +83,8 @@ class UserProfile {
         'avatarPath': avatarPath,
         'selectedLanguages': selectedLanguages,
         'learningGoal': learningGoal,
+        'streak': streak,
+        'lastCompletedQuizDate': lastCompletedQuizDate?.toIso8601String(),
         'isGuest': isGuest,
         'emailVerified': emailVerified,
         'shareData': shareData,
@@ -92,6 +102,10 @@ class UserProfile {
         avatarPath: json['avatarPath'],
         selectedLanguages: List<String>.from(json['selectedLanguages'] ?? []),
         learningGoal: json['learningGoal'],
+        streak: json['streak'] ?? 0,
+        lastCompletedQuizDate: json['lastCompletedQuizDate'] != null
+        ? DateTime.parse(json['lastCompletedQuizDate'])
+        : null,
         isGuest: json['isGuest'] ?? false,
         emailVerified: json['emailVerified'] ?? false,
         shareData: json['shareData'] ?? false,

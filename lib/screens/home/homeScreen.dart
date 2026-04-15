@@ -1,10 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import '../../screens/home/daily_quiz.dart';
+import '../../services/daily_quiz_service.dart';
 import '../../models/user_profile.dart';
 import '../../services/local_storage_service.dart';
 import '../../services/lessonService.dart';
 import '../../services/music_service.dart';
+import '../../theme/app_theme.dart';
+import '../../data/navi_lesson_audio.dart';
 import '../../persistent_bar.dart';
 import '../../data/navi_lesson_audio.dart';
 import '../../widgets/app_nav_bar.dart';
@@ -13,7 +17,7 @@ import '../../widgets/lesson_card.dart';
 import '../../theme/app_theme.dart';
 import '../lessons/audio_mimicry_screen.dart';
 import '../lessons/simulation.dart';
-import 'lessonPage.dart';
+import '../lessons/lessonPage.dart';
 import 'profile_screen.dart';
 import 'study_page.dart';
 
@@ -29,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final _storage = LocalStorageService();
   final _music = MusicService();
   final _bar = PersistentBarController.instance;
+  final _dailyquiz = DailyQuizService();
+  late TabController _tabController;
 
   int _selectedDifficulty = 0;
   int _selectedNav = 2;
@@ -65,6 +71,17 @@ class _HomeScreenState extends State<HomeScreen> {
       _bar.exitLesson();
       _music.fadeBack();
     }
+  }
+
+  Future<void> _goToNaviIntro(BuildContext ctx) async {
+    await _enterLesson(() async {
+      final lesson = await loadLesson('navi_intro.json');
+      if (!mounted) return;
+      await Navigator.push(
+        ctx,
+        MaterialPageRoute(builder: (_) => LessonPage(lesson: lesson)),
+      );
+    });
   }
 
   Future<void> _goToLesson1(BuildContext ctx) async {
@@ -120,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
   }
-  
+
   Future<void> _goToLesson6(BuildContext ctx) async {
     await _enterLesson(() async {
       final lesson = await loadLesson('lesson6_questions.json');
@@ -221,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
             practiceInfo:
             "Here's how you'll practice:\n- Matching game\n- Memory game",
             unlocked: true,
-            onTap: _goToLesson1,
+            onTap: _goToNaviIntro,
           ),
           LessonEntry(
             id: 'nv_vowels',
@@ -567,6 +584,47 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // Daily quiz method to only enable quiz button when user has not completed it yet
+  Future<void> makeQuizAvailable() async {
+    final streak = _profile?.streak;
+    final level = _profile?.learningGoal;
+
+    int? dailyQuizQuestions; // Stores number of questions for daily quiz
+
+    switch (level){
+      case 'beginner':
+        dailyQuizQuestions = 5;
+      case 'intermediate':
+        dailyQuizQuestions = 10;
+      case 'native':
+        dailyQuizQuestions = 15;
+    }
+
+    final quiz = await _dailyquiz.loadQuiz('quiz$dailyQuizQuestions');
+
+    // Wait for response before proceeding
+    final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => DailyQuizPage(
+              streak: streak,
+              questionCount: dailyQuizQuestions,
+              quiz: quiz,
+            )
+        ));
+
+    if (result == true){
+      // Once complete update streak
+      await _dailyquiz.updateStreak();
+      final updatedUser = await _storage.getCurrentUser();
+
+      setState(() {
+        _profile = updatedUser;
+      });
+    }
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   void _onNavTap(int index) {
     if (index == 2) {
@@ -653,6 +711,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: makeQuizAvailable,
+        backgroundColor: accent,
+        child: const Icon(Icons.quiz_rounded),
+      ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
       bottomNavigationBar: AppNavBar(
         selectedIndex: _selectedNav,
         selectedLanguage: _selectedLanguage,

@@ -1,0 +1,249 @@
+{
+  "id": "quiz15",
+  "questionCount":  15,
+  "questions": [
+    {
+      "id": 1,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'Kaltxì' mean in Na'vi?",
+        "options": [
+          { "text": "Goodbye", "correct": false },
+          { "text": "Hello", "correct": true },
+          { "text": "Thank you", "correct": false },
+          { "text": "Friend", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'Irayo' mean in Na'vi?",
+        "options": [
+          { "text": "Hello", "correct": false },
+          { "text": "Goodbye", "correct": false },
+          { "text": "Thank you", "correct": true },
+          { "text": "Nature spirit", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What is Eywa in Na'vi culture?",
+        "options": [
+          { "text": "A greeting word", "correct": false },
+          { "text": "The spiritual force of nature", "correct": true },
+          { "text": "The name for their home planet", "correct": false },
+          { "text": "A type of tree", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "question": "Match the Na'vi family words to their English meanings",
+        "leftItems": [
+          { "id": 1, "content": "sa'nok" },
+          { "id": 2, "content": "sempul" },
+          { "id": 3, "content": "'eveng" },
+          { "id": 4, "content": "tsmukan" },
+          { "id": 5, "content": "tsmuke" }
+        ],
+        "rightItems": [
+          { "id": 1, "content": "Mother" },
+          { "id": 2, "content": "Father" },
+          { "id": 3, "content": "Child" },
+          { "id": 4, "content": "Brother" },
+          { "id": 5, "content": "Sister" }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'Qapla'' mean in Klingon?",
+        "options": [
+          { "text": "What do you want?", "correct": false },
+          { "text": "Goodbye forever", "correct": false },
+          { "text": "Success!", "correct": true },
+          { "text": "Done!", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "Which Na'vi word means 'mother'?",
+        "options": [
+          { "text": "sempul", "correct": false },
+          { "text": "sa'nok", "correct": true },
+          { "text": "tute", "correct": false },
+          { "text": "'eveng", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does the Na'vi word 'sempul' mean?",
+        "options": [
+          { "text": "Mother", "correct": false },
+          { "text": "Child", "correct": false },
+          { "text": "Father", "correct": true },
+          { "text": "Brother", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "question": "Match the Klingon words to their English meanings",
+        "leftItems": [
+          { "id": 1, "content": "nuqneH" },
+          { "id": 2, "content": "Qapla'" },
+          { "id": 3, "content": "pItlh" }
+        ],
+        "rightItems": [
+          { "id": 1, "content": "What do you want?" },
+          { "id": 2, "content": "Success!" },
+          { "id": 3, "content": "Done! / Finished!" }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What is 'ikran' in Na'vi?",
+        "options": [
+          { "text": "A pack-hunting predator", "correct": false },
+          { "text": "A sacred tree", "correct": false },
+          { "text": "A mountain banshee", "correct": true },
+          { "text": "Fire", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'txep' mean in Na'vi?",
+        "options": [
+          { "text": "Tree", "correct": false },
+          { "text": "Fire", "correct": true },
+          { "text": "Child", "correct": false },
+          { "text": "Father", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does the Klingon word 'pItlh' mean?",
+        "options": [
+          { "text": "Success!", "correct": false },
+          { "text": "What do you want?", "correct": false },
+          { "text": "Well done!", "correct": false },
+          { "text": "Done! / Finished!", "correct": true }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does the Na'vi word 'nantang' refer to?",
+        "options": [
+          { "text": "A flying banshee", "correct": false },
+          { "text": "A sacred tree", "correct": false },
+          { "text": "A pack-hunting predator", "correct": true },
+          { "text": "A Na'vi child", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does the Na'vi word 'tsmukan' mean?",
+        "options": [
+          { "text": "Sister", "correct": false },
+          { "text": "Brother", "correct": true },
+          { "text": "Father", "correct": false },
+          { "text": "Child", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 14,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "In Klingon, the capital letter 'Q' represents what kind of sound?",
+        "options": [
+          { "text": "A soft sound similar to a standard English 'k'", "correct": false },
+          { "text": "A silent letter", "correct": false },
+          { "text": "A harsh, scraping sound at the back of the throat", "correct": true },
+          { "text": "A sound identical to the English letter 'Q'", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'utral' mean in Na'vi?",
+        "options": [
+          { "text": "Fire", "correct": false },
+          { "text": "Banshee", "correct": false },
+          { "text": "Child", "correct": false },
+          { "text": "Tree", "correct": true }
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "question": "Match the Na'vi greetings to their English meanings",
+        "leftItems": [
+          { "id": 1, "content": "Kaltxì" },
+          { "id": 2, "content": "Irayo" },
+          { "id": 3, "content": "Eywa" },
+          { "id": 4, "content": "tute" }
+        ],
+        "rightItems": [
+          { "id": 1, "content": "Hello" },
+          { "id": 2, "content": "Thank you" },
+          { "id": 3, "content": "Nature spirit" },
+          { "id": 4, "content": "Person" }
+        ]
+      }
+    }
+
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "id": "quiz5",
+  "questionCount":  5,
+  "questions": [
+    {
+      "id": 1,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'Kaltxì' mean in Na'vi?",
+        "options": [
+          { "text": "Goodbye", "correct": false },
+          { "text": "Hello", "correct": true },
+          { "text": "Thank you", "correct": false },
+          { "text": "Friend", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does 'Qapla'' mean in Klingon?",
+        "options": [
+          { "text": "What do you want?", "correct": false },
+          { "text": "Goodbye forever", "correct": false },
+          { "text": "Success!", "correct": true },
+          { "text": "Done!", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "matching",
+        "question": "Match the Na'vi words to their English meanings",
+        "leftItems": [
+          { "id": 1, "content": "Kaltxì" },
+          { "id": 2, "content": "Irayo" },
+          { "id": 3, "content": "sa'nok" },
+          { "id": 4, "content": "ikran" }
+        ],
+        "rightItems": [
+          { "id": 1, "content": "Hello" },
+          { "id": 2, "content": "Thank you" },
+          { "id": 3, "content": "Mother" },
+          { "id": 4, "content": "Mountain banshee" }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What is 'ikran' in Na'vi?",
+        "options": [
+          { "text": "A pack-hunting predator", "correct": false },
+          { "text": "A sacred tree", "correct": false },
+          { "text": "A mountain banshee", "correct": true },
+          { "text": "Fire", "correct": false }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "type": "exercise",
+      "data": {
+        "exerciseType": "multiple_choice",
+        "question": "What does the Klingon word 'nuqneH' literally mean?",
+        "options": [
+          { "text": "Hello, friend", "correct": false },
+          { "text": "What do you want?", "correct": true },
+          { "text": "Good luck in battle", "correct": false },
+          { "text": "I am done", "correct": false }
+        ]
+      }
+    }
+  ]
+}
